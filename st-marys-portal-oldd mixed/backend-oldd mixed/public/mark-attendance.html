@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance - Teacher Dashboard</title>
+    <link rel="stylesheet" href="css/mark-attendance.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Return to Dashboard
+                </a>
+            </div>
+            <div class="header-title">
+                <h1><i class="fas fa-user-check"></i> Mark Attendance</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Selection Controls -->
+        <section class="selection-controls card">
+            <div class="control-grid">
+                <div class="control-group">
+                    <label for="classSelect">Class:</label>
+                    <select id="classSelect" required>
+                        <option value="">Select Class</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="sectionSelect">Section:</label>
+                    <select id="sectionSelect" required>
+                        <option value="">Select Section</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="subjectSelect">Subject:</label>
+                    <select id="subjectSelect" required>
+                        <option value="">Select Subject</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="periodSelect">Period:</label>
+                    <select id="periodSelect" required>
+                        <option value="">Select Period</option>
+                        <option value="1">Period 1</option>
+                        <option value="2">Period 2</option>
+                        <option value="3">Period 3</option>
+                        <option value="4">Period 4</option>
+                        <option value="5">Period 5</option>
+                        <option value="6">Period 6</option>
+                        <option value="7">Period 7</option>
+                        <option value="8">Period 8</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="datePicker">Date:</label>
+                    <input type="date" id="datePicker" required>
+                </div>
+            </div>
+            <div class="bulk-actions">
+                <button id="markAllPresent" class="btn btn-success">
+                    <i class="fas fa-check-circle"></i> Mark All Present
+                </button>
+                <button id="markAllAbsent" class="btn btn-danger">
+                    <i class="fas fa-times-circle"></i> Mark All Absent
+                </button>
+                <button id="markNoSession" class="btn btn-secondary">
+                    <i class="fas fa-minus-circle"></i> Mark No Session
+                </button>
+            </div>
+        </section>
+
+        <!-- Student List -->
+        <section class="student-list card">
+            <div class="table-header">
+                <h2><i class="fas fa-users"></i> Student Attendance</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchStudent" placeholder="Search student...">
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <!-- Student rows will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Submit Section -->
+        <section class="submit-section card">
+            <button id="submitAttendance" class="btn btn-primary">
+                <i class="fas fa-save"></i> Submit Attendance
+            </button>
+        </section>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <!-- Error/Success Message Toast -->
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <i class="toast-icon"></i>
+            <span class="toast-message"></span>
+        </div>
+    </div>
+
+    <script src="js/mark-attendance.js"></script>
+</body>
+</html> 

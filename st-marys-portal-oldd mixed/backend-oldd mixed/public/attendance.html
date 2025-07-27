@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Dashboard</title>
+  <link rel="stylesheet" href="css/attendance.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <a href="dashboard.html" class="back-button">
+          <i class="fas fa-arrow-left"></i>
+          Return to Dashboard
+        </a>
+      </div>
+      <div class="header-title">
+        <h1><i class="fas fa-chart-bar"></i> Attendance Dashboard</h1>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Overall Attendance -->
+    <section class="overall-attendance card">
+      <h2><i class="fas fa-percentage"></i> Overall Attendance</h2>
+      <div class="progress-container">
+        <div class="progress-bar" id="overallProgress"></div>
+      </div>
+      <div class="attendance-summary">
+        <span id="presentCount" class="status-present">
+          <i class="fas fa-check-circle"></i> Present: 0
+        </span>
+        <span id="absentCount" class="status-absent">
+          <i class="fas fa-times-circle"></i> Absent: 0
+        </span>
+        <span id="noSessionCount" class="status-no-session">
+          <i class="fas fa-minus-circle"></i> No Session: 0
+        </span>
+      </div>
+      <div class="overall-percent">
+        <i class="fas fa-chart-pie"></i>
+        Total Attendance: <span id="overallPercent">--%</span>
+      </div>
+    </section>
+
+    <!-- Subject Wise Attendance -->
+    <section class="subject-attendance card">
+      <h2><i class="fas fa-book"></i> Subject-wise Attendance</h2>
+      <div class="subject-cards" id="subjectCards">
+        <!-- Subject cards will be dynamically inserted here -->
+      </div>
+    </section>
+
+    <!-- Daily Period-wise View -->
+    <section class="daily-attendance card">
+      <h2><i class="fas fa-calendar-alt"></i> Daily Attendance</h2>
+      <div class="table-container">
+        <div id="dailyCards" class="daily-cards">
+          <!-- Daily attendance records will be dynamically inserted here -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="js/attendance.js"></script>
+</body>
+</html>

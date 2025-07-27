@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Results - St. Mary's Portal</title>
+    <link rel="stylesheet" href="css/attendance.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .dashboard-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .academic-year-filter {
+            width: 200px;
+        }
+
+        .academic-year-filter select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+
+        .result-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .result-header {
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+
+        .result-header h4 {
+            color: #007bff;
+            margin: 0;
+        }
+
+        .result-meta {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .subject-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .subject-name {
+            font-weight: 500;
+        }
+
+        .subject-marks {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .grade-badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .grade-a-plus { background-color: #28a745; }
+        .grade-a { background-color: #5cb85c; }
+        .grade-b { background-color: #17a2b8; }
+        .grade-c { background-color: #ffc107; color: black; }
+        .grade-d { background-color: #fd7e14; }
+        .grade-f { background-color: #dc3545; }
+
+        .total-row {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #eee;
+            font-weight: bold;
+        }
+
+        .remarks {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .no-results i {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Return to Dashboard
+                </a>
+                        </div>
+            <div class="header-title">
+                <h1><i class="fas fa-clipboard-list"></i> Grade Exams</h1>
+                </div>
+            </div>
+        </header>
+    <div class="dashboard-wrapper">
+        <!-- Alert Container -->
+        <div class="alert-container"></div>
+        <div class="results-header">
+            <h3>My Results</h3>
+            <div class="academic-year-filter">
+                <select id="academic-year">
+                    <option value="">All Academic Years</option>
+                </select>
+            </div>
+        </div>
+        <!-- Results Container -->
+        <div id="results-container">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+    <script src="js/view-results.js"></script>
+</body>
+</html> 

@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Complaints - St. Mary's Portal</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/complaints.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Teacher complaint button */
+    .header-right {
+      margin-left: auto;
+    }
+    
+    /* Admin and teacher specific containers */
+    .admin-only, .teacher-only {
+      display: none; /* Hidden by default, shown via JavaScript */
+    }
+    
+    /* Add some visual separation to filter sections */
+    .filter-section-divider {
+      width: 100%;
+      height: 1px;
+      background-color: #e0e0e0;
+      margin: 10px 0;
+    }
+    
+    /* Filter group adjustments */
+    @media (max-width: 768px) {
+      .filter-group {
+        min-width: 100%; /* On small screens, make filters full width */
+      }
+      
+      .filter-button {
+        width: 100%;
+        margin-top: 10px;
+        justify-content: center;
+      }
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto;
+      padding: 0;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 700px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      animation: modalFadeIn 0.3s;
+    }
+    
+    @keyframes modalFadeIn {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    
+    .modal-header {
+      background-color: #3a7bd5;
+      color: white;
+      padding: 15px 20px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    
+    .close-modal {
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close-modal:hover {
+      color: #f0f0f0;
+    }
+    
+    .modal-body {
+      padding: 20px;
+    }
+    
+    /* Form elements within modal */
+    .modal-body .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .modal-body .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .modal-body .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+    
+    .modal-body .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      background-color: white;
+      font-size: 1rem;
+    }
+    
+    .modal-body .form-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .modal-body .form-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+    
+    .modal-body textarea.form-control {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    .modal-body .submit-btn {
+      background-color: #3a7bd5;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .modal-body .submit-btn:hover {
+      background-color: #2d62b3;
+    }
+    
+    /* Teacher complaint badge */
+    .teacher-complaint-badge {
+      background-color: #9c27b0;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      display: inline-block;
+      margin-left: 8px;
+    }
+    
+    /* Response form improvements */
+    .response-form {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      border: 1px solid #dee2e6;
+    }
+    
+    .response-form h4 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    
+    .response-form .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 1rem;
+      margin-bottom: 15px;
+    }
+    
+    .response-form textarea.form-control {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .response-form .submit-response {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .response-form .submit-response:hover {
+      background-color: #218838;
+    }
+    
+    /* Status-specific badge colors */
+    .status-badge.pending {
+      background-color: #f0ad4e;
+    }
+    
+    .status-badge.in_progress {
+      background-color: #5bc0de;
+    }
+    
+    .status-badge.resolved {
+      background-color: #5cb85c;
+    }
+    
+    .status-badge.rejected {
+      background-color: #d9534f;
+    }
+    
+    /* Filter section improvements */
+    .filters {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .filter-header {
+      margin-bottom: 15px;
+      border-bottom: 1px solid #dee2e6;
+      padding-bottom: 10px;
+    }
+    
+    .filter-header h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .filter-header h3 i {
+      color: #3a7bd5;
+    }
+    
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: flex-end;
+    }
+    
+    .filter-group {
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: 10px;
+    }
+    
+    .filter-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .filter-select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      background-color: white;
+      font-size: 0.9rem;
+      height: 38px; /* Ensure consistent height */
+    }
+    
+    .filter-button {
+      background-color: #3a7bd5;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 38px; /* Match height of select dropdowns */
+    }
+    
+    .filter-button:hover {
+      background-color: #2d62b3;
+    }
+    
+    /* Ensure Apply Filters button is properly aligned */
+    .filter-action {
+      display: flex;
+      align-items: flex-end;
+      margin-left: auto;
+    }
+    
+    @media (max-width: 768px) {
+      .filter-action {
+        width: 100%;
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <a href="dashboard.html" class="back-button">
+          <i class="fas fa-arrow-left"></i>
+          Return to Dashboard
+        </a>
+      </div>
+      <div class="header-title">
+        <h1><i class="fas fa-comments"></i> Manage Complaints</h1>
+      </div>
+      <!-- Add teacher complaint to admin button -->
+      <div class="header-right teacher-only" id="teacher-complaint-button-container">
+        <button id="submit-teacher-complaint-btn" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Submit Complaint to Admin
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Teacher complaint form modal -->
+    <div id="teacher-complaint-modal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2><i class="fas fa-paper-plane"></i> Submit Complaint to Administration</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="teacher-complaint-form">
+            <div class="form-group">
+              <label for="teacher-complaint-subject" class="form-label">Subject</label>
+              <input type="text" id="teacher-complaint-subject" class="form-control" placeholder="Enter a brief subject for your complaint" required>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="teacher-complaint-category" class="form-label">Category</label>
+                <select id="teacher-complaint-category" class="form-select" required>
+                  <option value="">Select a category</option>
+                  <option value="academic">Academic</option>
+                  <option value="infrastructure">Infrastructure</option>
+                  <option value="staff">Staff</option>
+                  <option value="administration">Administration</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="teacher-complaint-priority" class="form-label">Priority</label>
+                <select id="teacher-complaint-priority" class="form-select" required>
+                  <option value="">Select priority</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="teacher-complaint-description" class="form-label">Description</label>
+              <textarea id="teacher-complaint-description" class="form-control" placeholder="Please provide details about your complaint" rows="5" required></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+              <i class="fas fa-paper-plane"></i>
+              Submit Complaint
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filters">
+      <div class="filter-header">
+        <h3><i class="fas fa-filter"></i> Filter Complaints</h3>
+      </div>
+      
+      <div class="filter-row">
+        <div class="filter-group">
+          <label class="filter-label">Status</label>
+          <select id="status-filter" class="filter-select">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">Category</label>
+          <select id="category-filter" class="filter-select">
+            <option value="">All Categories</option>
+            <option value="academic">Academic</option>
+            <option value="infrastructure">Infrastructure</option>
+            <option value="staff">Staff</option>
+            <option value="administration">Administration</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">Priority</label>
+          <select id="priority-filter" class="filter-select">
+            <option value="">All Priorities</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        
+        <!-- Admin-only visibility filter -->
+        <div id="visibility-filter-container" class="filter-group admin-only" style="display: none;">
+          <label class="filter-label">Complaint Type</label>
+          <select id="audience-filter" class="filter-select">
+            <option value="">All Types</option>
+            <option value="from-students">From Students</option>
+            <option value="from-teachers">From Teachers</option>
+          </select>
+        </div>
+        
+        <!-- Admin-only student complaint filter -->
+        <div id="student-complaint-filter-container" class="filter-group admin-only" style="display: none;">
+          <label class="filter-label">Student Complaints</label>
+          <select id="student-visibility-filter" class="filter-select">
+            <option value="">All Student Complaints</option>
+            <option value="admin-only">Admin Only</option>
+            <option value="teacher">Teacher Visible</option>
+          </select>
+        </div>
+        
+        <!-- Teacher-only filter -->
+        <div id="teacher-visibility-filter-container" class="filter-group teacher-only" style="display: none;">
+          <label class="filter-label">Show</label>
+          <select id="teacher-filter" class="filter-select">
+            <option value="all">All Assigned Complaints</option>
+            <option value="my-complaints">My Complaints to Admin</option>
+            <option value="student-complaints">Student Complaints</option>
+          </select>
+        </div>
+        
+        <div class="filter-action">
+          <button id="apply-filters" class="filter-button">
+            <i class="fas fa-filter"></i> Apply Filters
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bulk Actions -->
+    <div id="bulk-actions" class="bulk-actions">
+      <div class="actions-container">
+        <div class="selection-info">
+          <input type="checkbox" id="select-all-complaints" class="bulk-checkbox">
+          <label for="select-all-complaints">Select All</label>
+          <span id="selected-count">(0 selected)</span>
+        </div>
+        <div class="bulk-buttons">
+          <button id="bulk-delete" class="btn btn-danger" disabled>
+            <i class="fas fa-trash"></i> Delete Selected
+          </button>
+          <button id="bulk-resolve" class="btn btn-success" disabled>
+            <i class="fas fa-check"></i> Mark Selected as Resolved
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Complaints List -->
+    <div class="loading-spinner" id="loading-spinner"></div>
+    <div class="complaint-list" id="complaint-list"></div>
+  </div>
+
+  <script>
+    // Function to show response form for a complaint
+    function showRespondForm(complaintId) {
+      const card = document.getElementById(`complaint-${complaintId}`);
+      if (!card) return;
+      
+      // Make sure the responses and form are visible
+      const responseForm = card.querySelector('.response-form');
+      if (responseForm) {
+        responseForm.style.display = 'block';
+      }
+      
+      // Get the textarea and focus it
+      const textarea = card.querySelector('.response-message');
+      if (textarea) {
+        // Scroll to it
+        textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Focus after scrolling is complete
+        setTimeout(() => {
+          textarea.focus();
+        }, 300);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('auth_token');
+      const userRole = localStorage.getItem('user_role');
+      const userId = localStorage.getItem('user_id');
+      
+      // Check if user is logged in
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Check if user is admin or teacher
+      if (userRole !== 'admin' && userRole !== 'teacher') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
+      // Show/hide elements based on role
+      if (userRole === 'admin') {
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+        document.querySelectorAll('.teacher-only').forEach(el => el.style.display = 'none');
+      } else if (userRole === 'teacher') {
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.teacher-only').forEach(el => el.style.display = 'block');
+      }
+      
+      // Teacher complaint modal elements
+      const teacherComplaintBtn = document.getElementById('submit-teacher-complaint-btn');
+      const teacherComplaintModal = document.getElementById('teacher-complaint-modal');
+      const closeModal = document.querySelector('.close-modal');
+      const teacherComplaintForm = document.getElementById('teacher-complaint-form');
+      
+      // Show the modal when the button is clicked
+      if (teacherComplaintBtn) {
+        teacherComplaintBtn.addEventListener('click', function() {
+          teacherComplaintModal.style.display = 'block';
+        });
+      }
+      
+      // Close the modal when the close button is clicked
+      if (closeModal) {
+        closeModal.addEventListener('click', function() {
+          teacherComplaintModal.style.display = 'none';
+        });
+      }
+      
+      // Close the modal when clicking outside of it
+      window.addEventListener('click', function(event) {
+        if (event.target === teacherComplaintModal) {
+          teacherComplaintModal.style.display = 'none';
+        }
+      });
+      
+      // Handle teacher complaint form submission
+      if (teacherComplaintForm) {
+        teacherComplaintForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const subject = document.getElementById('teacher-complaint-subject').value;
+          const category = document.getElementById('teacher-complaint-category').value;
+          const priority = document.getElementById('teacher-complaint-priority').value;
+          const description = document.getElementById('teacher-complaint-description').value;
+          
+          const submitBtn = teacherComplaintForm.querySelector('.submit-btn');
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+          
+          // Send the complaint to the server
+          fetch('/api/complaints/teacher', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              subject,
+              category,
+              priority,
+              description,
+              isTeacherComplaint: true // Flag to indicate this is a teacher's complaint
+            })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to submit complaint');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Reset form
+            teacherComplaintForm.reset();
+            
+            // Close modal
+            teacherComplaintModal.style.display = 'none';
+            
+            // Show success message
+            alert('Your complaint has been submitted to the administration successfully.');
+            
+            // Refresh complaints list
+            loadComplaints();
+          })
+          .catch(error => {
+            alert(`Error: ${error.message}`);
+            console.error('Error submitting teacher complaint:', error);
+          })
+          .finally(() => {
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Complaint';
+          });
+        });
+      }
+      
+      // DOM elements
+      const loadingSpinner = document.getElementById('loading-spinner');
+      const complaintList = document.getElementById('complaint-list');
+      const statusFilter = document.getElementById('status-filter');
+      const categoryFilter = document.getElementById('category-filter');
+      const priorityFilter = document.getElementById('priority-filter');
+      const audienceFilter = document.getElementById('audience-filter');
+      const studentVisibilityFilter = document.getElementById('student-visibility-filter');
+      const teacherFilter = document.getElementById('teacher-filter');
+      const applyFiltersBtn = document.getElementById('apply-filters');
+      
+      // Initialize filter dependencies
+      if (userRole === 'admin') {
+        // For admins, add change event to show/hide student visibility filter based on audience filter
+        audienceFilter.addEventListener('change', function() {
+          const studentFilterContainer = document.getElementById('student-complaint-filter-container');
+          
+          if (this.value === 'from-students' || this.value === '') {
+            studentFilterContainer.style.display = 'block';
+          } else {
+            studentFilterContainer.style.display = 'none';
+            // Reset student visibility filter when not applicable
+            studentVisibilityFilter.value = '';
+          }
+        });
+        
+        // Trigger initial state
+        audienceFilter.dispatchEvent(new Event('change'));
+      }
+      
+      // Custom function to debug current filter selections
+      function logCurrentFilters() {
+        const filters = {
+          status: statusFilter?.value || 'none',
+          category: categoryFilter?.value || 'none',
+          priority: priorityFilter?.value || 'none'
+        };
+        
+        if (userRole === 'admin') {
+          filters.audience = audienceFilter?.value || 'none';
+          filters.studentVisibility = studentVisibilityFilter?.value || 'none';
+        } else if (userRole === 'teacher') {
+          filters.teacherFilter = teacherFilter?.value || 'none';
+        }
+        
+        console.log("Current filter selections:", filters);
+      }
+      
+      // Add debug logging to click handler
+      applyFiltersBtn.addEventListener('click', logCurrentFilters);
+      
+      // Load complaints on page load
+      loadComplaints();
+      
+      // Filter button click event
+      applyFiltersBtn.addEventListener('click', loadComplaints);
+      
+      // Reset selection counters when filters are applied
+      applyFiltersBtn.addEventListener('click', function() {
+        // Reset any selected items when filters change
+        const selectAllCheckbox = document.getElementById('select-all-complaints');
+        if (selectAllCheckbox) {
+          selectAllCheckbox.checked = false;
+        }
+        updateBulkActionButtons();
+      });
+      
+      function loadComplaints() {
+        // Show loading spinner
+        loadingSpinner.style.display = 'flex';
+        complaintList.innerHTML = '';
+        
+        // Reset selected complaints counter
+        const selectedCount = document.getElementById('selected-count');
+        if (selectedCount) {
+          selectedCount.textContent = '(0 selected)';
+        }
+        
+        // Get filter values
+        const status = statusFilter.value;
+        const category = categoryFilter.value;
+        const priority = priorityFilter.value;
+        
+        // Different filter handling for admin vs teacher
+        let queryParams = new URLSearchParams();
+        
+        if (status) queryParams.append('status', status);
+        if (category) queryParams.append('category', category);
+        if (priority) queryParams.append('priority', priority);
+        
+        if (userRole === 'admin') {
+          // Handle admin-specific filters
+          const audienceType = document.getElementById('audience-filter').value;
+          const studentVisibility = document.getElementById('student-visibility-filter').value;
+          
+          console.log("Admin filters:", { audienceType, studentVisibility });
+          
+          // Always send audience filter value, even if empty
+          queryParams.append('audience', audienceType);
+          
+          // Add student visibility filter if applicable
+          if (audienceType === 'from-students' || audienceType === '') {
+            queryParams.append('studentVisibility', studentVisibility);
+          }
+        } else if (userRole === 'teacher') {
+          // Handle teacher-specific filters
+          const teacherFilter = document.getElementById('teacher-filter').value;
+          
+          console.log("Teacher filter:", teacherFilter);
+          
+          // Always send teacher view value, even if it's 'all'
+          queryParams.append('teacherView', teacherFilter);
+        }
+        
+        const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+        
+        // Log the request URL for debugging
+        console.log("Fetching complaints from:", `/api/complaints${queryString}`);
+        
+        // Fetch complaints from API
+        fetch(`/api/complaints${queryString}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            console.error("Response not OK:", response.status, response.statusText);
+            throw new Error(`Failed to fetch complaints: ${response.status} ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(complaints => {
+          console.log("Received complaints:", complaints.length);
+          
+          // Filter debug: log number of teacher vs student complaints 
+          const teacherComplaints = complaints.filter(c => c.isTeacherComplaint);
+          const studentComplaints = complaints.filter(c => !c.isTeacherComplaint);
+          console.log(`Received ${teacherComplaints.length} teacher complaints and ${studentComplaints.length} student complaints`);
+          
+          loadingSpinner.style.display = 'none';
+          
+          if (!complaints || complaints.length === 0) {
+            complaintList.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No complaints found</h3>
+                <p>There are no complaints matching your filters.</p>
+              </div>
+            `;
+            return;
+          }
+          
+          // Sort by priority (high first) and then by date (newest first)
+          complaints.sort((a, b) => {
+            const priorityOrder = { high: 0, medium: 1, low: 2 };
+            const aPriority = priorityOrder[a.priority] || 1;
+            const bPriority = priorityOrder[b.priority] || 1;
+            
+            if (aPriority !== bPriority) {
+              return aPriority - bPriority;
+            }
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
+          
+          // Create complaint cards
+          complaints.forEach(complaint => {
+            complaintList.appendChild(createComplaintCard(complaint));
+          });
+          
+          // Update select all checkbox state after loading
+          updateSelectAllCheckboxState();
+        })
+        .catch(error => {
+          console.error('Error loading complaints:', error);
+          loadingSpinner.style.display = 'none';
+          complaintList.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-exclamation-triangle"></i>
+              <h3>Error</h3>
+              <p>${error.message}</p>
+              <button onclick="loadComplaints()" class="btn btn-primary mt-3">
+                <i class="fas fa-sync"></i> Try Again
+              </button>
+            </div>
+          `;
+        });
+      }
+      
+      // Helper function to check if the current user is the teacher who submitted the complaint
+      function isCurrentUserTeacherOwner(complaint) {
+        if (!complaint || !complaint.teacher || userRole !== 'teacher') {
+          return false;
+        }
+        
+        if (typeof complaint.teacher === 'string') {
+          return complaint.teacher === userId;
+        } else if (complaint.teacher._id) {
+          return complaint.teacher._id === userId;
+        }
+        
+        return false;
+      }
+      
+      function createComplaintCard(complaint) {
+        console.log("Creating complaint card:", complaint); // Debug complaint data
+        
+        const card = document.createElement('div');
+        card.className = 'complaint-card';
+        card.id = `complaint-${complaint._id}`;
+        
+        // Format dates
+        const createdDate = new Date(complaint.createdAt).toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        // Format status for display
+        const statusDisplay = {
+          'pending': 'Pending',
+          'in_progress': 'In Progress',
+          'resolved': 'Resolved',
+          'rejected': 'Rejected'
+        };
+        
+        // Format category for display
+        const categoryDisplay = {
+          'academic': 'Academic',
+          'infrastructure': 'Infrastructure',
+          'staff': 'Staff',
+          'administration': 'Administration',
+          'other': 'Other'
+        };
+        
+        // Format priority for display
+        const priorityDisplay = {
+          'low': 'Low',
+          'medium': 'Medium',
+          'high': 'High'
+        };
+        
+        // Get sender info (either student or teacher)
+        let senderName = 'Unknown';
+        let senderClass = '';
+        let senderSection = '';
+        let senderRole = '';
+        let isTeacherComplaint = complaint.isTeacherComplaint;
+        let isOwnTeacherComplaint = isTeacherComplaint && isCurrentUserTeacherOwner(complaint);
+        
+        if (isTeacherComplaint && complaint.teacher) {
+          // It's a complaint from a teacher
+          if (typeof complaint.teacher === 'string') {
+            senderName = 'Teacher #' + complaint.teacher.substring(0, 6);
+          } else {
+            senderName = complaint.teacher.name || 'Unknown Teacher';
+            senderRole = 'Teacher';
+          }
+        } else if (complaint.student) {
+          // It's a complaint from a student
+          if (typeof complaint.student === 'string') {
+            senderName = 'Student #' + complaint.student.substring(0, 6);
+          } else {
+            senderName = complaint.student.name || (complaint.student.email || 'Unknown Student');
+            senderRole = 'Student';
+
+            // First check if there's enhanced student data from our controller
+            if (complaint.student.studentDetails) {
+              senderClass = complaint.student.studentDetails.class || '';
+              senderSection = complaint.student.studentDetails.section || '';
+            } 
+            // Then try studentInfo property from User model
+            else if (complaint.student.studentInfo) {
+              senderClass = complaint.student.studentInfo.class || '';
+              senderSection = complaint.student.studentInfo.section || '';
+            } 
+            // Direct properties on student object (if it was a Student model)
+            else {
+              senderClass = complaint.student.class || '';
+              senderSection = complaint.student.section || '';
+            }
+          }
+        }
+        
+        // Format sender display
+        let senderDisplay = senderName;
+        if (!isTeacherComplaint) {
+          // For students, show class and section
+          senderDisplay += (senderClass ? ` (Class: ${senderClass}` : '') + 
+            (senderSection ? `, Section: ${senderSection})` : (senderClass ? ')' : ''));
+        }
+        
+        // Debug info
+        console.log("Sender data:", {
+          name: senderName,
+          class: senderClass,
+          section: senderSection,
+          role: senderRole,
+          isTeacherComplaint: isTeacherComplaint
+        });
+        
+        // Visibility badge HTML - only for admins
+        const visibilityBadge = userRole === 'admin' ? (
+          isTeacherComplaint ? 
+            `<div class="meta-item">
+               <span class="teacher-complaint-badge"><i class="fas fa-user-tie"></i> From Teacher</span>
+             </div>` : 
+            (complaint.sendToTeacher ? 
+              `<div class="meta-item">
+                 <span class="visibility-badge teacher"><i class="fas fa-user-tie"></i> Teacher Visible</span>
+               </div>` : 
+              `<div class="meta-item">
+                 <span class="visibility-badge admin"><i class="fas fa-user-shield"></i> Admin Only</span>
+               </div>`)
+        ) : '';
+        
+        // Build card HTML
+        card.innerHTML = `
+          <div class="complaint-checkbox-wrapper">
+            <input type="checkbox" class="complaint-checkbox" data-id="${complaint._id}">
+            <div class="complaint-buttons">
+              ${isOwnTeacherComplaint ? 
+                // If it's a teacher's own complaint to admin, don't show respond button
+                `<button type="button" class="btn btn-sm btn-danger delete-btn" data-id="${complaint._id}">
+                  <i class="fas fa-trash"></i> Delete
+                </button>`
+                :
+                // Otherwise show both buttons
+                `<button type="button" class="btn btn-sm btn-primary respond-btn" data-id="${complaint._id}">
+                  <i class="fas fa-reply"></i> Respond
+                </button>
+                <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="${complaint._id}">
+                  <i class="fas fa-trash"></i> Delete
+                </button>`
+              }
+            </div>
+          </div>
+          
+          <div class="complaint-header">
+            <h3 class="complaint-title">${complaint.subject}${isTeacherComplaint ? ' <span class="teacher-complaint-badge">Teacher</span>' : ''}</h3>
+          </div>
+          
+          <div class="complaint-meta">
+            <div class="meta-item">
+              <span class="meta-label">From:</span>
+              <span class="meta-value">${senderDisplay}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Date:</span>
+              <span class="meta-value">${createdDate}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Category:</span>
+              <span class="meta-value">${categoryDisplay[complaint.category] || 'Other'}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Priority:</span>
+              <span class="priority-badge ${complaint.priority}">${priorityDisplay[complaint.priority] || 'Medium'}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Status:</span>
+              <span class="status-badge ${complaint.status}">${statusDisplay[complaint.status] || 'Pending'}</span>
+            </div>
+            ${visibilityBadge}
+          </div>
+          
+          <div class="complaint-body">
+            <div class="complaint-description">
+              ${complaint.description}
+            </div>
+            
+            <div class="complaint-responses">
+              <h4 class="response-title">Responses</h4>
+              <div class="responses-container">
+                ${complaint.responses && complaint.responses.length > 0 
+                  ? complaint.responses.map(response => {
+                      const responseDate = new Date(response.responseDate).toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      });
+                      
+                      let responderName = 'Staff';
+                      if (response.responder) {
+                        responderName = response.responder.name || 'Staff Member';
+                        if (response.responder.role) {
+                          if (response.responder.role === 'admin') {
+                            responderName = `Principal`;
+                          } else if (response.responder.role === 'teacher') {
+                            responderName = `Teacher: ${responderName}`;
+                          }
+                        }
+                      }
+                      
+                      return `
+                        <div class="response">
+                          <div class="response-header">
+                            <span class="responder">${responderName}</span>
+                            <span class="response-date">${responseDate}</span>
+                          </div>
+                          <div class="response-content">${response.message}</div>
+                        </div>
+                      `;
+                    }).join('') 
+                  : '<p class="no-responses">No responses yet.</p>'
+                }
+              </div>
+            </div>
+            
+            <!-- Response form - hide for teacher's own complaints to admin -->
+            ${isOwnTeacherComplaint ? 
+              `<div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle"></i> 
+                Only administrators can respond to teacher complaints.
+              </div>` : 
+              `<div class="response-form">
+                <h4>Add Response</h4>
+                <form class="respond-form" data-id="${complaint._id}">
+                  <textarea class="response-message form-control" placeholder="Type your response here..." required></textarea>
+                  
+                  ${userRole === 'admin' ? `
+                  <div class="form-row status-update">
+                    <label for="status-${complaint._id}">Update Status:</label>
+                    <select id="status-${complaint._id}" class="status-select form-select">
+                      <option value="">Don't change status</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>` : ''}
+                  
+                  <button type="submit" class="submit-response btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Send Response
+                  </button>
+                </form>
+              </div>`
+            }
+          </div>
+        `;
+        
+        // Add event listeners after the card is added to the DOM
+        setTimeout(() => {
+          // Respond button
+          const respondBtn = card.querySelector('.respond-btn');
+          if (respondBtn) {
+            respondBtn.addEventListener('click', function() {
+              showRespondForm(complaint._id);
+            });
+          }
+          
+          // Delete button
+          const deleteBtn = card.querySelector('.delete-btn');
+          if (deleteBtn) {
+            deleteBtn.addEventListener('click', function() {
+              if (confirm('Are you sure you want to delete this complaint? This action cannot be undone.')) {
+                deleteComplaint(complaint._id);
+              }
+            });
+          }
+          
+          // Response form submission
+          const responseForm = card.querySelector('.respond-form');
+          if (responseForm) {
+            responseForm.addEventListener('submit', function(e) {
+              e.preventDefault();
+              
+              const complaintId = this.getAttribute('data-id');
+              const message = this.querySelector('.response-message').value;
+              let status = '';
+              
+              // Get status update if available
+              const statusSelect = this.querySelector('.status-select');
+              if (statusSelect) {
+                status = statusSelect.value;
+              }
+              
+              submitResponse(complaintId, message, status);
+            });
+          }
+          
+          // Checkbox for bulk actions
+          const checkbox = card.querySelector('.complaint-checkbox');
+          if (checkbox) {
+            checkbox.addEventListener('change', updateBulkActionButtons);
+          }
+        }, 0);
+        
+        return card;
+      }
+      
+      function submitResponse(complaintId, message, status) {
+        if (!message.trim()) {
+          alert('Please enter a response message');
+          return;
+        }
+        
+        const submitBtn = document.querySelector('.submit-response');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        
+        const data = { message };
+        if (status) data.status = status;
+        
+        fetch(`/api/complaints/${complaintId}/respond`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(data)
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to send response');
+          }
+          return response.json();
+        })
+        .then(updatedComplaint => {
+          // Reset form
+          const responseForm = document.querySelector('.respond-form');
+          responseForm.reset();
+          
+          // Refresh the complaint card
+          const card = document.getElementById(`complaint-${complaintId}`);
+          const newCard = createComplaintCard(updatedComplaint);
+          card.parentNode.replaceChild(newCard, card);
+          
+          // Show success message
+          alert('Response sent successfully!');
+        })
+        .catch(error => {
+          alert(`Error: ${error.message}`);
+          console.error('Error sending response:', error);
+        })
+        .finally(() => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Response';
+        });
+      }
+      
+      function updateComplaintStatus(complaintId, status) {
+        fetch(`/api/complaints/${complaintId}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ status })
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to update status');
+          }
+          return response.json();
+        })
+        .then(updatedComplaint => {
+          // Refresh the complaint card
+          const card = document.getElementById(`complaint-${complaintId}`);
+          const newCard = createComplaintCard(updatedComplaint);
+          card.parentNode.replaceChild(newCard, card);
+          
+          // Show success message
+          alert(`Complaint marked as ${status}!`);
+        })
+        .catch(error => {
+          alert(`Error: ${error.message}`);
+          console.error('Error updating status:', error);
+        });
+      }
+      
+      function populateStaffDropdown(selectElement) {
+        if (!selectElement) return;
+        
+        // Fetch staff users (admin and teachers)
+        fetch('/api/teacher/all', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch staff');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.users && Array.isArray(data.users)) {
+            // Sort users by name
+            data.users.sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Clear existing options except the first one
+            while (selectElement.options.length > 1) {
+              selectElement.remove(1);
+            }
+            
+            // Add staff options
+            data.users.forEach(user => {
+              if (user.role === 'admin' || user.role === 'teacher') {
+                const option = document.createElement('option');
+                option.value = user._id;
+                option.textContent = `${user.name} (${user.role})`;
+                selectElement.appendChild(option);
+              }
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching staff:', error);
+        });
+      }
+      
+      // Add event listener to assign complaint to staff
+      document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('assign-to') && e.target.value) {
+          const complaintId = e.target.closest('.respond-form').getAttribute('data-complaint-id');
+          const assignedTo = e.target.value;
+          
+          fetch(`/api/complaints/${complaintId}/assign`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ assignedTo })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to assign complaint');
+            }
+            return response.json();
+          })
+          .then(updatedComplaint => {
+            // Refresh the complaint card
+            const card = document.getElementById(`complaint-${complaintId}`);
+            const newCard = createComplaintCard(updatedComplaint);
+            card.parentNode.replaceChild(newCard, card);
+            
+            // Show success message
+            alert('Complaint assigned successfully!');
+          })
+          .catch(error => {
+            alert(`Error: ${error.message}`);
+            console.error('Error assigning complaint:', error);
+            // Reset select element
+            e.target.value = '';
+          });
+        }
+      });
+      
+      // Global click handler for respond buttons
+      document.addEventListener('click', function(e) {
+        // Handle standalone Respond buttons (outside of complaint cards)
+        if (e.target.matches('button.respond-btn, button.respond-btn *')) {
+          let button = e.target;
+          // If clicked on an icon inside the button, get the button
+          if (!button.classList.contains('respond-btn')) {
+            button = button.closest('.respond-btn');
+          }
+          
+          if (button) {
+            const complaintId = button.getAttribute('data-id');
+            if (complaintId) {
+              showRespondForm(complaintId);
+            }
+          }
+        }
+      });
+      
+      function deleteComplaint(complaintId) {
+        fetch(`/api/complaints/${complaintId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to delete complaint');
+          }
+          return response.json();
+        })
+        .then(() => {
+          // Remove the card from the DOM
+          const card = document.getElementById(`complaint-${complaintId}`);
+          card.remove();
+          
+          // Show success message
+          alert('Complaint deleted successfully!');
+        })
+        .catch(error => {
+          alert(`Error: ${error.message}`);
+          console.error('Error deleting complaint:', error);
+        });
+      }
+      
+      // Function to update the state of the select all checkbox based on the current selection
+      function updateSelectAllCheckboxState() {
+        const selectAllCheckbox = document.getElementById('select-all-complaints');
+        if (!selectAllCheckbox) return;
+        
+        const allCheckboxes = document.querySelectorAll('.complaint-checkbox');
+        const checkedBoxes = document.querySelectorAll('.complaint-checkbox:checked');
+        
+        if (allCheckboxes.length === 0) {
+          // No checkboxes available
+          selectAllCheckbox.checked = false;
+          selectAllCheckbox.indeterminate = false;
+        } else if (checkedBoxes.length === 0) {
+          // None checked
+          selectAllCheckbox.checked = false;
+          selectAllCheckbox.indeterminate = false;
+        } else if (checkedBoxes.length === allCheckboxes.length) {
+          // All checked
+          selectAllCheckbox.checked = true;
+          selectAllCheckbox.indeterminate = false;
+        } else {
+          // Some checked
+          selectAllCheckbox.checked = false;
+          selectAllCheckbox.indeterminate = true;
+        }
+        
+        // Update counters and button states
+        updateBulkActionButtons();
+      }
+      
+      // Add event listener for select all checkbox
+      const selectAllCheckbox = document.getElementById('select-all-complaints');
+      if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+          const isChecked = this.checked;
+          const checkboxes = document.querySelectorAll('.complaint-checkbox');
+          
+          checkboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+          });
+          
+          updateBulkActionButtons();
+        });
+      }
+      
+      // Function to update the number of selected complaints and enable/disable buttons
+      function updateBulkActionButtons() {
+        const selectedBoxes = document.querySelectorAll('.complaint-checkbox:checked');
+        const selectedCount = document.getElementById('selected-count');
+        const bulkDeleteBtn = document.getElementById('bulk-delete');
+        const bulkResolveBtn = document.getElementById('bulk-resolve');
+        
+        if (selectedCount) {
+          selectedCount.textContent = `(${selectedBoxes.length} selected)`;
+        }
+        
+        if (bulkDeleteBtn) {
+          bulkDeleteBtn.disabled = selectedBoxes.length === 0;
+        }
+        
+        if (bulkResolveBtn) {
+          bulkResolveBtn.disabled = selectedBoxes.length === 0;
+        }
+      }
+      
+      // Setup delegation for complaint checkboxes
+      document.addEventListener('change', function(event) {
+        if (event.target && event.target.classList.contains('complaint-checkbox')) {
+          updateSelectAllCheckboxState();
+        }
+      });
+      
+      // Add event listeners for bulk action buttons
+      const bulkDeleteBtn = document.getElementById('bulk-delete');
+      const bulkResolveBtn = document.getElementById('bulk-resolve');
+      
+      if (bulkDeleteBtn) {
+        bulkDeleteBtn.addEventListener('click', function() {
+          handleBulkDelete();
+        });
+      }
+      
+      if (bulkResolveBtn) {
+        bulkResolveBtn.addEventListener('click', function() {
+          handleBulkResolve();
+        });
+      }
+      
+      // Handle bulk delete action
+      function handleBulkDelete() {
+        const selectedCheckboxes = document.querySelectorAll('.complaint-checkbox:checked');
+        if (selectedCheckboxes.length === 0) return;
+        
+        if (confirm(`Are you sure you want to delete ${selectedCheckboxes.length} selected complaint(s)? This action cannot be undone.`)) {
+          // Show loading state
+          bulkDeleteBtn.disabled = true;
+          bulkDeleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+          
+          // Create an array of promises for all delete operations
+          const deletePromises = [];
+          const complaintIds = []; // Track which complaint IDs we're deleting
+          
+          selectedCheckboxes.forEach(checkbox => {
+            const complaintId = checkbox.getAttribute('data-id');
+            
+            if (complaintId) {
+              complaintIds.push(complaintId); // Store ID for DOM manipulation later
+              
+              const deletePromise = fetch(`/api/complaints/${complaintId}`, {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                }
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`Failed to delete complaint ${complaintId}`);
+                }
+                return response.json();
+              });
+              
+              deletePromises.push(deletePromise);
+            }
+          });
+          
+          // Process all delete operations
+          Promise.all(deletePromises)
+            .then(results => {
+              console.log(`Successfully deleted ${results.length} complaints`);
+              
+              // Remove deleted complaint cards from the DOM
+              complaintIds.forEach(id => {
+                const complaintCard = document.getElementById(`complaint-${id}`);
+                if (complaintCard) {
+                  complaintCard.remove();
+                }
+              });
+              
+              // Reset select all checkbox
+              const selectAllCheckbox = document.getElementById('select-all-complaints');
+              if (selectAllCheckbox) {
+                selectAllCheckbox.checked = false;
+              }
+              
+              // Update action buttons
+              updateBulkActionButtons();
+              
+              // Show success message
+              alert(`Successfully deleted ${results.length} complaints`);
+            })
+            .catch(error => {
+              console.error('Error during bulk delete:', error);
+              alert(`Error: ${error.message}. Please try again.`);
+            })
+            .finally(() => {
+              // Reset button state
+              bulkDeleteBtn.disabled = false;
+              bulkDeleteBtn.innerHTML = '<i class="fas fa-trash"></i> Delete Selected';
+            });
+        }
+      }
+      
+      // Handle bulk resolve action
+      function handleBulkResolve() {
+        const selectedCheckboxes = document.querySelectorAll('.complaint-checkbox:checked');
+        if (selectedCheckboxes.length === 0) return;
+        
+        if (confirm(`Are you sure you want to mark ${selectedCheckboxes.length} selected complaint(s) as resolved?`)) {
+          // Show loading state
+          bulkResolveBtn.disabled = true;
+          bulkResolveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resolving...';
+          
+          // Create an array of promises for all update operations
+          const updatePromises = [];
+          
+          selectedCheckboxes.forEach(checkbox => {
+            const complaintId = checkbox.getAttribute('data-id');
+            
+            if (complaintId) {
+              const updatePromise = fetch(`/api/complaints/${complaintId}/status`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status: 'resolved' })
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`Failed to update complaint ${complaintId}`);
+                }
+                return response.json();
+              });
+              
+              updatePromises.push(updatePromise);
+            }
+          });
+          
+          // Process all update operations
+          Promise.all(updatePromises)
+            .then(updatedComplaints => {
+              console.log(`Successfully resolved ${updatedComplaints.length} complaints`);
+              
+              // After updating all complaints, simply reload the page to show the updated statuses
+              // This is simpler than trying to update each card individually
+              loadComplaints();
+              
+              // Reset select all checkbox
+              const selectAllCheckbox = document.getElementById('select-all-complaints');
+              if (selectAllCheckbox) {
+                selectAllCheckbox.checked = false;
+              }
+              
+              // Show success message
+              alert(`Successfully resolved ${updatedComplaints.length} complaints`);
+            })
+            .catch(error => {
+              console.error('Error during bulk resolve:', error);
+              alert(`Error: ${error.message}. Please try again.`);
+            })
+            .finally(() => {
+              // Reset button state
+              bulkResolveBtn.disabled = false;
+              bulkResolveBtn.innerHTML = '<i class="fas fa-check"></i> Mark Selected as Resolved';
+            });
+        }
+      }
+    });
+  </script>
+  
+  <style>
+    /* Bulk actions styling */
+    .bulk-actions {
+      background-color: white;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .actions-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .selection-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .bulk-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    #selected-count {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .bulk-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    /* Card header with checkbox and delete button */
+    .complaint-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    
+    .selection-checkbox {
+      margin-right: 0.5rem;
+    }
+    
+    .complaint-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .complaint-title {
+      flex-grow: 1;
+      margin: 0;
+    }
+    
+    .complaint-actions {
+      margin-left: 1rem;
+    }
+    
+    .delete-complaint-btn {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+    }
+    
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    /* Response form styling */
+    .response-form {
+      background-color: #f5f9ff;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      border: 1px solid #e0e8f5;
+    }
+    
+    .response-message {
+      min-height: 100px;
+      border: 1px solid #c0d0e8;
+      border-radius: 4px;
+    }
+    
+    .respond-complaint-btn {
+      margin-right: 0.5rem;
+    }
+    
+    .btn-respond {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+    }
+    
+    .btn-respond:hover {
+      background-color: #0b5ed7;
+      border-color: #0a58ca;
+    }
+    
+    .response-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e0e8f5;
+      color: #0d6efd;
+    }
+    
+    /* Make complaint actions more spaced */
+    .complaint-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    /* Style the responses container */
+    .responses-container {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+    }
+    
+    /* Response message styling */
+    .response {
+      padding: 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 0.75rem;
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    /* Actions container */
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    
+    /* New complaint top actions area */
+    .complaint-checkbox-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e0e8f5;
+    }
+    
+    .complaint-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .respond-btn, .delete-btn {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    /* Improve spacing in the complaint card */
+    .complaint-card {
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    /* Fix button styling for consistency */
+    .btn-sm {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.9rem;
+    }
+    
+    /* Make checkboxes more visible */
+    .complaint-checkbox {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+  </style>
+</body>
+</html> 

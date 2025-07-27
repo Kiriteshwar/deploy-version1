@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notice Board - St. Mary's Portal</title>
+    <link rel="stylesheet" href="css/noticeboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Return to Dashboard
+                </a>
+            </div>
+            <div class="header-title">
+                <h1><i class="fas fa-bullhorn"></i> Notice Board</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Category Filters -->
+        <section class="filter-section card">
+            <div class="filter-header">
+                <h2><i class="fas fa-filter"></i> Filters</h2>
+            </div>
+            <div class="filter-options">
+                <button class="filter-btn active" data-filter="all">All Notices</button>
+                <button class="filter-btn" data-filter="general">General</button>
+                <button class="filter-btn" data-filter="exam">Examination</button>
+                <button class="filter-btn" data-filter="event">Events</button>
+                <button class="filter-btn" data-filter="holiday">Holidays</button>
+                <button class="filter-btn" data-filter="sports">Sports</button>
+            </div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchNotice" placeholder="Search notices...">
+            </div>
+        </section>
+
+        <!-- Add Notice Section (visible only to admin/teachers) -->
+        <section class="add-notice-section card admin-only">
+            <div class="section-header">
+                <h2><i class="fas fa-plus-circle"></i> Add New Notice</h2>
+            </div>
+            <form id="addNoticeForm">
+                <div class="form-group">
+                    <label for="noticeTitle">Title:</label>
+                    <input type="text" id="noticeTitle" class="form-control" required placeholder="Enter notice title">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="noticeCategory">Category:</label>
+                        <select id="noticeCategory" class="form-control" required>
+                            <option value="">Select Category</option>
+                            <option value="general">General</option>
+                            <option value="exam">Examination</option>
+                            <option value="event">Events</option>
+                            <option value="holiday">Holidays</option>
+                            <option value="sports">Sports</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="noticeDate">Date:</label>
+                        <input type="date" id="noticeDate" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="targetClass">Target Class:</label>
+                        <select id="targetClass" class="form-control">
+                            <option value="all">All Classes</option>
+                            <!-- Class options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="targetSection">Target Section:</label>
+                        <select id="targetSection" class="form-control">
+                            <option value="all">All Sections</option>
+                            <!-- Section options will be populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="noticeContent">Content:</label>
+                    <textarea id="noticeContent" class="form-control" rows="4" required placeholder="Enter notice content"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="noticeAttachment">Attachment (optional):</label>
+                    <input type="file" id="noticeAttachment" class="form-control-file">
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" id="noticeImportant" class="form-check-input">
+                    <label for="noticeImportant" class="form-check-label">Mark as Important</label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Publish Notice
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Notice List -->
+        <section class="notices-section">
+            <div class="section-header">
+                <h2><i class="fas fa-clipboard-list"></i> Notices</h2>
+            </div>
+            
+            <div class="notice-list" id="noticeList">
+                <!-- Notice items will be dynamically added here -->
+                
+                <!-- Sample Notices for UI Preview -->
+                <div class="notice-item notice-important" data-category="general">
+                    <div class="notice-header">
+                        <h3>School Annual Day Celebration</h3>
+                        <span class="notice-badge general">General</span>
+                    </div>
+                    <div class="notice-meta">
+                        <span class="notice-date"><i class="fas fa-calendar-alt"></i> May 15, 2023</span>
+                        <span class="notice-author"><i class="fas fa-user"></i> Principal</span>
+                    </div>
+                    <div class="notice-content">
+                        <p>The Annual Day celebration will be held on May 30th at the school auditorium. All parents are cordially invited to attend the event. Students are requested to come in proper uniform.</p>
+                    </div>
+                    <div class="notice-footer">
+                        <a href="#" class="notice-attachment"><i class="fas fa-paperclip"></i> Annual_Day_Schedule.pdf</a>
+                        <span class="notice-actions admin-only">
+                            <button class="btn-icon btn-edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon btn-delete"><i class="fas fa-trash"></i></button>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="notice-item" data-category="exam">
+                    <div class="notice-header">
+                        <h3>Term Examination Schedule</h3>
+                        <span class="notice-badge exam">Examination</span>
+                    </div>
+                    <div class="notice-meta">
+                        <span class="notice-date"><i class="fas fa-calendar-alt"></i> May 10, 2023</span>
+                        <span class="notice-author"><i class="fas fa-user"></i> Examination Cell</span>
+                    </div>
+                    <div class="notice-content">
+                        <p>The Term examinations will begin from June 1st, 2023. Students should prepare accordingly. The detailed schedule is attached below.</p>
+                    </div>
+                    <div class="notice-footer">
+                        <a href="#" class="notice-attachment"><i class="fas fa-paperclip"></i> Exam_Schedule.pdf</a>
+                        <span class="notice-actions admin-only">
+                            <button class="btn-icon btn-edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon btn-delete"><i class="fas fa-trash"></i></button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="notice-item" data-category="holiday">
+                    <div class="notice-header">
+                        <h3>Summer Vacation Notice</h3>
+                        <span class="notice-badge holiday">Holiday</span>
+                    </div>
+                    <div class="notice-meta">
+                        <span class="notice-date"><i class="fas fa-calendar-alt"></i> May 5, 2023</span>
+                        <span class="notice-author"><i class="fas fa-user"></i> Administration</span>
+                    </div>
+                    <div class="notice-content">
+                        <p>Summer vacation will commence from June 15th and the school will reopen on July 10th. Students are advised to complete their holiday assignments during this period.</p>
+                    </div>
+                    <div class="notice-footer">
+                        <span class="notice-actions admin-only">
+                            <button class="btn-icon btn-edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon btn-delete"><i class="fas fa-trash"></i></button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="notice-item" data-category="sports">
+                    <div class="notice-header">
+                        <h3>Inter-School Sports Competition</h3>
+                        <span class="notice-badge sports">Sports</span>
+                    </div>
+                    <div class="notice-meta">
+                        <span class="notice-date"><i class="fas fa-calendar-alt"></i> May 1, 2023</span>
+                        <span class="notice-author"><i class="fas fa-user"></i> Sports Department</span>
+                    </div>
+                    <div class="notice-content">
+                        <p>The Inter-School Sports competition will be held on May 20th at the School Ground. Interested students should register with their respective Physical Education teachers by May 10th.</p>
+                    </div>
+                    <div class="notice-footer">
+                        <a href="#" class="notice-attachment"><i class="fas fa-paperclip"></i> Sports_Registration_Form.pdf</a>
+                        <span class="notice-actions admin-only">
+                            <button class="btn-icon btn-edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon btn-delete"><i class="fas fa-trash"></i></button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Viewing Notice Details -->
+    <div class="modal-overlay" id="noticeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Notice Title</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-meta">
+                    <span id="modalCategory" class="notice-badge">Category</span>
+                    <span id="modalDate"><i class="fas fa-calendar-alt"></i> Date</span>
+                    <span id="modalAuthor"><i class="fas fa-user"></i> Author</span>
+                </div>
+                <div class="modal-content-text" id="modalContent">
+                    <p>Notice content will appear here...</p>
+                </div>
+                <div class="modal-attachment" id="modalAttachment">
+                    <a href="#"><i class="fas fa-paperclip"></i> Attachment.pdf</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <i class="toast-icon"></i>
+            <span class="toast-message"></span>
+        </div>
+    </div>
+
+    <script src="js/noticeboard.js"></script>
+</body>
+</html> 

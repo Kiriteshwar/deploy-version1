@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Exams - St. Mary's Portal</title>
+    <link rel="stylesheet" href="css/attendance.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+        .back-button {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            margin-right: 24px;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .back-button:hover {
+            color: #bbdefb;
+        }
+        .container {
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 32px 0;
+        }
+        .card {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            padding: 32px 32px 24px 32px;
+        }
+        .grading-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 24px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 18px 12px 10px 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .grading-filters select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 1em;
+        }
+        .student-list {
+            background: white;
+            border: none;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: none;
+        }
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .student-table th, .student-table td {
+            padding: 10px 14px;
+            text-align: left;
+        }
+        .student-table th {
+            background: #f5f7fa;
+            font-weight: 600;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .student-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .student-table tr:hover {
+            background: #eaf4ff;
+        }
+        .student-table td {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .marks-input {
+            width: 80px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .marks-input:focus {
+            border-color: #1976d2;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(25,118,210,0.15);
+        }
+        .save-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .save-btn:hover {
+            background-color: #218838;
+        }
+        .save-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+        }
+        .error-text {
+            color: #dc3545;
+            font-size: 0.95em;
+            margin-top: 4px;
+        }
+        .success-text {
+            color: #28a745;
+            font-size: 0.95em;
+            margin-top: 4px;
+        }
+        .dropbtn {
+            background: #2196f3;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 18px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.2s;
+        }
+        .dropbtn:hover {
+            background: #1565c0;
+        }
+        .grading-filters-row select {
+            border: 1px solid #ccc !important;
+            border-radius: 6px !important;
+            padding: 8px 12px !important;
+            font-size: 1rem !important;
+            background: #fff !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            min-width: 180px;
+            transition: border-color 0.2s;
+            display: inline-block !important;
+            width: auto !important;
+            height: auto !important;
+        }
+        .grading-filters-row select:focus {
+            border-color: #1976d2 !important;
+            outline: none !important;
+        }
+        .grading-filters-row {
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+            margin-bottom: 24px;
+            background: none;
+            box-shadow: none;
+            padding: 0;
+        }
+        .grading-filters-row > select {
+            display: inline-block !important;
+            width: 200px !important;
+            min-width: 0 !important;
+            max-width: 220px !important;
+            height: 40px !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            background: #fff !important;
+            border: 1px solid #ccc !important;
+            border-radius: 6px !important;
+            font-size: 1rem !important;
+            padding: 8px 12px !important;
+            vertical-align: middle !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+      <div class="header-content">
+        <div class="header-left">
+          <a href="dashboard.html" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Return to Dashboard
+          </a>
+                        </div>
+        <div class="header-title">
+          <h1><i class="fas fa-clipboard-check"></i> Grade Exams</h1>
+                </div>
+            </div>
+        </header>
+    <main class="container">
+        <div class="alert-container"></div>
+        <div class="grading-filters-row" style="display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-bottom: 24px;">
+            <select id="exam-select">
+                <option value="">Select Exam</option>
+            </select>
+            <select id="class-select">
+                <option value="">Select Class</option>
+            </select>
+            <select id="section-select">
+                <option value="">Select Section</option>
+            </select>
+            <select id="subject-select">
+                <option value="">Select Subject</option>
+            </select>
+        </div>
+        <button id="save-all-btn" class="btn btn-primary" style="margin: 16px auto 0 0; display: block; max-width: 200px;">
+    Save All
+</button>
+        <div class="student-list" style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); padding: 0 0 24px 0;">
+            <div id="loading-spinner" class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+            <div id="no-data" class="no-data" style="display: none;">
+                <p>Select an exam and class to start grading</p>
+            </div>
+            <table id="student-table" class="student-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Roll No</th>
+                        <th>Student Name</th>
+                        <th>Marks Obtained</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="student-list-body">
+                    <!-- Students will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <script src="js/grade-exams.js"></script>
+</body>
+</html> 

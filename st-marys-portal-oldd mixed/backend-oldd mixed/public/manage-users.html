@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - St. Mary's Portal</title>
+    <link rel="stylesheet" href="css/attendance.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .user-management-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .user-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .user-tabs {
+            display: flex;
+            gap: 1rem;
+        }
+        .user-tab {
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            background: #f0f2f5;
+            color: #1a73e8;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+        .user-tab.active {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: #fff;
+        }
+        .add-user-btn {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s;
+        }
+        .add-user-btn:hover {
+            background: #218838;
+        }
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .user-table th, .user-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .user-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        .user-table tr:last-child td {
+            border-bottom: none;
+        }
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .user-action-btn {
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #007bff;
+            font-size: 1.1rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .user-action-btn.delete {
+            color: #dc3545;
+        }
+        .user-action-btn:hover {
+            background: #f0f2f5;
+        }
+        .no-users {
+            text-align: center;
+            padding: 2rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Return to Dashboard
+                </a>
+            </div>
+            <div class="header-title">
+                <h1><i class="fas fa-users-cog"></i> Manage Users</h1>
+            </div>
+        </div>
+    </header>
+    <main class="user-management-container">
+        <div class="user-header-row">
+            <div class="user-tabs">
+                <button class="user-tab active" id="tab-students">Students</button>
+                <button class="user-tab" id="tab-teachers">Teachers</button>
+                <button class="user-tab" id="tab-admins">Admins</button>
+            </div>
+            <button class="add-user-btn" id="addUserBtn">
+                <i class="fas fa-user-plus"></i> Add User
+            </button>
+        </div>
+        <div class="alert-container"></div>
+        <div id="user-table-container">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Class/Section</th>
+                        <th>Subjects</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table-body">
+                    <tr class="no-users">
+                        <td colspan="6">No users to display.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <!-- Add User Modal (to be implemented in JS) -->
+    <div id="addUserModal" style="display:none;"></div>
+    <script src="js/manage-users.js"></script>
+</body>
+</html> 

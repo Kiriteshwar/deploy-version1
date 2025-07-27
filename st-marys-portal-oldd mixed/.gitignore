@@ -1,0 +1,33 @@
+# Node modules
+backend-oldd mixed/node_modules/
+
+# Environment files
+*.env
+
+# Uploads and generated files
+backend-oldd mixed/public/uploads/
+backend-oldd mixed/uploads/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# npm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log* 
+
+# Editor folders
+.vscode/
+.idea/
+
+# Build artifacts
+dist/
+build/
+
+# Database dumps (if you ever create them)
+*.dump
+*.bak 

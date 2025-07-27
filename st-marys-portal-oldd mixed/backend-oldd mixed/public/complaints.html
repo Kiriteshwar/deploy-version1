@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complaints & Remarks - St. Mary's Portal</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/complaints.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Teacher selection dropdown styling */
+    #teacherSelectContainer {
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+      margin-top: 12px;
+      border-left: 3px solid #007bff;
+    }
+    
+    .spinner-small {
+      border: 2px solid rgba(0, 123, 255, 0.1);
+      border-top: 2px solid #007bff;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <a href="dashboard.html" class="back-button">
+          <i class="fas fa-arrow-left"></i>
+          Return to Dashboard
+        </a>
+      </div>
+      <div class="header-title">
+        <h1><i class="fas fa-comment-alt"></i> Complaints & Remarks</h1>
+      </div>
+    </div>
+  </header>
+
+  <div class="complaint-container">
+    <div class="tabs">
+      <div class="tab active" data-tab="my-complaints">My Complaints</div>
+      <div class="tab" data-tab="new-complaint">Submit New Complaint</div>
+    </div>
+    
+    <!-- My Complaints Tab -->
+    <div class="tab-content" id="my-complaints-content">
+      <div class="loading-spinner" id="complaint-loading"></div>
+      <div class="complaint-list" id="complaint-list"></div>
+    </div>
+    
+    <!-- New Complaint Tab -->
+    <div class="tab-content" id="new-complaint-content" style="display: none;">
+      <div class="form-container">
+        <h2 class="form-title">Submit a New Complaint or Remark</h2>
+        <form id="complaint-form">
+          <div class="form-group">
+            <label for="subject" class="form-label">Subject</label>
+            <input type="text" id="subject" class="form-control" placeholder="Enter a brief subject for your complaint" required>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="category" class="form-label">Category</label>
+              <select id="category" class="form-select" required>
+                <option value="">Select a category</option>
+                <option value="academic">Academic</option>
+                <option value="infrastructure">Infrastructure</option>
+                <option value="staff">Staff</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="priority" class="form-label">Priority</label>
+              <select id="priority" class="form-select" required>
+                <option value="">Select priority</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" class="form-control" placeholder="Please provide details about your complaint" required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <div class="checkbox-container">
+              <input type="checkbox" id="sendToTeacher" class="checkbox">
+              <label for="sendToTeacher" class="checkbox-label">Send to my class teacher</label>
+            </div>
+            <small class="form-text text-muted">Check this to make your complaint visible to a specific teacher.</small>
+            
+            <!-- Teacher selection dropdown -->
+            <div id="teacherSelectContainer" style="display: none;">
+              <label for="teacherSelect">Select Teacher:</label>
+              <select class="form-control" id="teacherSelect">
+                <option value="">Loading teachers...</option>
+              </select>
+            </div>
+          </div>
+          
+          <button type="submit" class="submit-btn">
+            <i class="fas fa-paper-plane"></i>
+            Submit Complaint
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('auth_token');
+      const userRole = localStorage.getItem('user_role');
+      
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Tab switching
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabId = tab.getAttribute('data-tab');
+          
+          // Update active tab
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          
+          // Show tab content
+          tabContents.forEach(content => {
+            content.style.display = 'none';
+          });
+          document.getElementById(`${tabId}-content`).style.display = 'block';
+        });
+      });
+      
+      // Toggle teacher selection dropdown based on checkbox
+      const sendToTeacherCheckbox = document.getElementById('sendToTeacher');
+      const teacherSelectContainer = document.getElementById('teacherSelectContainer');
+      
+      sendToTeacherCheckbox.addEventListener('change', function() {
+        teacherSelectContainer.style.display = this.checked ? 'block' : 'none';
+        
+        // Load teachers when checkbox is checked for the first time
+        if (this.checked) {
+          populateTeacherDropdown();
+        }
+      });
+      
+      // Function to fetch teachers list
+      async function fetchTeachers() {
+        try {
+          const response = await fetch('/api/teacher', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch teachers');
+          }
+          
+          return await response.json();
+        } catch (error) {
+          console.error('Error fetching teachers:', error);
+          return [];
+        }
+      }
+      
+      // Function to populate teacher dropdown
+      async function populateTeacherDropdown() {
+        const teacherSelect = document.getElementById('teacherSelect');
+        const loadingSpinner = document.createElement('span');
+        loadingSpinner.className = 'spinner-small';
+        teacherSelect.parentElement.appendChild(loadingSpinner);
+        
+        try {
+          const teachers = await fetchTeachers();
+          
+          teacherSelect.innerHTML = '<option value="">Select a teacher</option>';
+          
+          if (Array.isArray(teachers)) {
+            teachers.forEach(teacher => {
+              const option = document.createElement('option');
+              option.value = teacher._id;
+              option.textContent = teacher.name;
+              teacherSelect.appendChild(option);
+            });
+          }
+        } catch (error) {
+          teacherSelect.innerHTML = '<option value="">Error loading teachers</option>';
+          console.error('Error populating teachers:', error);
+        } finally {
+          loadingSpinner.remove();
+        }
+      }
+      
+      // Load complaints
+      loadComplaints();
+      
+      // Form submission
+      const complaintForm = document.getElementById('complaint-form');
+      complaintForm.addEventListener('submit', submitComplaint);
+      
+      function loadComplaints() {
+        const loadingSpinner = document.getElementById('complaint-loading');
+        const complaintList = document.getElementById('complaint-list');
+        
+        loadingSpinner.style.display = 'flex';
+        complaintList.innerHTML = '';
+        
+        fetch('/api/complaints/student', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch complaints');
+          }
+          return response.json();
+        })
+        .then(complaints => {
+          loadingSpinner.style.display = 'none';
+          
+          if (!complaints || complaints.length === 0) {
+            complaintList.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No complaints found</h3>
+                <p>You haven't submitted any complaints yet.</p>
+              </div>
+            `;
+            return;
+          }
+          
+          // Sort by creation date (newest first)
+          complaints.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          
+          // Render each complaint
+          complaints.forEach(complaint => {
+            const card = createComplaintCard(complaint);
+            complaintList.appendChild(card);
+          });
+        })
+        .catch(error => {
+          loadingSpinner.style.display = 'none';
+          complaintList.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-exclamation-triangle"></i>
+              <h3>Error</h3>
+              <p>${error.message}</p>
+            </div>
+          `;
+          console.error('Error loading complaints:', error);
+        });
+      }
+      
+      function createComplaintCard(complaint) {
+        const card = document.createElement('div');
+        card.className = `complaint-card ${complaint.status}`;
+        
+        // Format date
+        const createdDate = new Date(complaint.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+        
+        // Format status for display
+        const statusDisplay = {
+          'pending': 'Pending',
+          'in_progress': 'In Progress',
+          'resolved': 'Resolved',
+          'rejected': 'Rejected'
+        };
+        
+        // Format category for display
+        const categoryDisplay = {
+          'academic': 'Academic',
+          'infrastructure': 'Infrastructure',
+          'staff': 'Staff',
+          'other': 'Other'
+        };
+        
+        // Format priority for display
+        const priorityDisplay = {
+          'low': 'Low',
+          'medium': 'Medium',
+          'high': 'High'
+        };
+        
+        // Get assigned teacher info if available
+        let assignedTeacherDisplay = '';
+        if (complaint.assignedTeacher && complaint.assignedTeacher.name) {
+          assignedTeacherDisplay = `
+            <div class="meta-item">
+              <span class="meta-label">Assigned To:</span>
+              <span class="meta-value">${complaint.assignedTeacher.name}</span>
+            </div>`;
+        } else if (complaint.sendToTeacher) {
+          assignedTeacherDisplay = `
+            <div class="meta-item">
+              <span class="meta-label">Visible To:</span>
+              <span class="meta-value">All Class Teachers</span>
+            </div>`;
+        }
+        
+        card.innerHTML = `
+          <div class="complaint-header">
+            <h3 class="complaint-title">${complaint.subject}</h3>
+            <span class="complaint-date">${createdDate}</span>
+          </div>
+          
+          <div class="complaint-meta">
+            <div class="complaint-category">
+              <i class="fas fa-folder"></i>
+              ${categoryDisplay[complaint.category] || 'Other'}
+            </div>
+            
+            <div class="complaint-priority">
+              <i class="fas fa-flag"></i>
+              ${priorityDisplay[complaint.priority] || 'Medium'}
+            </div>
+            
+            <div class="complaint-status">
+              <span class="status-badge ${complaint.status}">
+                ${statusDisplay[complaint.status] || 'Pending'}
+              </span>
+            </div>
+            ${assignedTeacherDisplay}
+          </div>
+          
+          <div class="complaint-description">
+            ${complaint.description}
+          </div>
+        `;
+        
+        // Add responses if any
+        if (complaint.responses && complaint.responses.length > 0) {
+          const responsesDiv = document.createElement('div');
+          responsesDiv.className = 'complaint-responses';
+          
+          const responsesTitle = document.createElement('h4');
+          responsesTitle.textContent = 'Responses';
+          responsesDiv.appendChild(responsesTitle);
+          
+          complaint.responses.forEach(response => {
+            const responseDate = new Date(response.responseDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            
+            // Determine responder display name based on role
+            let responderName = 'Staff';
+            if (response.responder) {
+              if (response.responder.role === 'admin') {
+                responderName = 'Principal';
+              } else if (response.responder.role === 'teacher') {
+                responderName = `Teacher: ${response.responder.name || 'Teacher'}`;
+              } else {
+                responderName = response.responder.name || 'Staff';
+              }
+            }
+            
+            const responseDiv = document.createElement('div');
+            responseDiv.className = 'response';
+            responseDiv.innerHTML = `
+              <div class="response-header">
+                <span class="response-from">${responderName}</span>
+                <span class="response-date">${responseDate}</span>
+              </div>
+              <div class="response-message">${response.message}</div>
+            `;
+            
+            responsesDiv.appendChild(responseDiv);
+          });
+          
+          card.appendChild(responsesDiv);
+        }
+        
+        return card;
+      }
+      
+      function submitComplaint(e) {
+        e.preventDefault();
+        
+        const subject = document.getElementById('subject').value;
+        const category = document.getElementById('category').value;
+        const priority = document.getElementById('priority').value;
+        const description = document.getElementById('description').value;
+        const sendToTeacher = document.getElementById('sendToTeacher').checked;
+        const teacherId = sendToTeacher ? document.getElementById('teacherSelect').value : null;
+        
+        // Validate teacher selection if sendToTeacher is checked
+        if (sendToTeacher && !teacherId) {
+          alert('Please select a teacher for your complaint');
+          return;
+        }
+        
+        const submitBtn = document.querySelector('.submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        
+        fetch('/api/complaints', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            subject,
+            category,
+            priority,
+            description,
+            sendToTeacher,
+            teacherId
+          })
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to submit complaint');
+          }
+          return response.json();
+        })
+        .then(complaint => {
+          // Reset form
+          complaintForm.reset();
+          
+          // Show success message
+          alert('Complaint submitted successfully!');
+          
+          // Switch to My Complaints tab and refresh list
+          document.querySelector('[data-tab="my-complaints"]').click();
+          loadComplaints();
+        })
+        .catch(error => {
+          alert(`Error: ${error.message}`);
+          console.error('Error submitting complaint:', error);
+        })
+        .finally(() => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Complaint';
+        });
+      }
+    });
+  </script>
+</body>
+</html> 

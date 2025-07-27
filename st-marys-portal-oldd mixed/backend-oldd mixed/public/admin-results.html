@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Results Management - St. Mary's Portal</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/results.css">
+  <link rel="stylesheet" href="css/attendance.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <a href="dashboard.html" class="back-button">
+          <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+      </div>
+      <div class="header-title">
+        <h1><i class="fas fa-graduation-cap"></i> Manage Results</h1>
+      </div>
+    </div>
+  </header>
+  
+  <div class="container">
+
+    <!-- Alert Container -->
+    <div class="alert-container"></div>
+
+    <div class="card">
+      <div class="results-header">
+        <h2><i class="fas fa-chart-line"></i> Results Management</h2>
+        
+        <div class="admin-actions">
+          <button id="declare-all-btn" class="action-btn"><i class="fas fa-check-circle"></i> Declare All Results</button>
+          <button id="export-results-btn" class="action-btn"><i class="fas fa-file-export"></i> Export Results</button>
+        </div>
+
+        <div class="grading-filters">
+          <div class="filter-group">
+            <label for="exam-select">Exam:</label>
+            <select id="exam-select">
+              <option value="">All Exams</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="class-select">Class:</label>
+            <select id="class-select">
+              <option value="">All Classes</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="academic-year-select">Academic Year:</label>
+            <select id="academic-year-select">
+              <option value="">Current Year</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="status-select">Status:</label>
+            <select id="status-select">
+              <option value="">All Status</option>
+              <option value="declared">Declared</option>
+              <option value="undeclared">Undeclared</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="school-statistics">
+        <h3>School Statistics</h3>
+        <div class="stats-container">
+          <div class="stat-item">
+            <span class="stat-label">Total Exams:</span>
+            <span class="stat-value" id="total-exams">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Declared Results:</span>
+            <span class="stat-value" id="declared-results">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">School Average:</span>
+            <span class="stat-value" id="school-average">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Top Class:</span>
+            <span class="stat-value" id="top-class">-</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <h3>Class Performance</h3>
+        <canvas id="class-performance-chart"></canvas>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div id="loading-spinner" class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+
+      <div class="student-list">
+        <table id="results-table" class="student-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Exam</th>
+              <th>Students</th>
+              <th>Average</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="results-table-body">
+            <!-- Results will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="no-data" class="no-results">
+        <p>No results found. Please adjust your filters.</p>
+      </div>
+    </div>
+    </div>
+
+    <script src="js/admin-results.js"></script>
+</body>
+</html>

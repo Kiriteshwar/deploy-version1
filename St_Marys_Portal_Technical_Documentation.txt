@@ -1,0 +1,541 @@
+ST. MARY'S PORTAL - COMPREHENSIVE TECHNICAL DOCUMENTATION
+=========================================================
+
+PROJECT OVERVIEW
+================
+The St. Mary's Portal is a comprehensive school management system built for St. Mary's High School. It's a full-stack web application that facilitates educational management for students, teachers, and administrators.
+
+PROJECT STRUCTURE
+==================
+Root Directory: C:\Users\PKitt\OneDrive\Desktop\cu\
+Main Application: st-marys-portal-oldd mixed\backend-oldd mixed\
+
+TECHNOLOGY STACK
+================
+
+Backend Technologies:
+---------------------
+- Node.js (JavaScript Runtime)
+- Express.js (Web Framework)
+- MongoDB (Database - NoSQL)
+- Mongoose (MongoDB Object Modeling)
+- JWT (JSON Web Tokens for Authentication)
+- Bcrypt.js (Password Hashing)
+
+Dependencies:
+- bcryptjs: ^2.4.3 (Password encryption)
+- colors: ^1.4.0 (Console logging with colors)
+- cors: ^2.8.5 (Cross-Origin Resource Sharing)
+- dotenv: ^16.3.1 (Environment variables)
+- express: ^4.18.2 (Web framework)
+- express-async-handler: ^1.2.0 (Async error handling)
+- jsonwebtoken: ^9.0.2 (JWT authentication)
+- mongoose: ^7.8.7 (MongoDB ODM)
+- morgan: ^1.10.0 (HTTP request logger)
+- multer: ^1.4.5-lts.1 (File upload handling)
+- xlsx: ^0.18.5 (Excel file processing)
+
+Development Dependencies:
+- nodemon: ^3.0.3 (Development server auto-restart)
+
+Frontend Technologies:
+----------------------
+- HTML5 (Structure)
+- CSS3 (Styling with modern features like gradients, animations)
+- Vanilla JavaScript (Client-side functionality)
+- No frontend framework (Pure HTML/CSS/JS)
+
+DATABASE ARCHITECTURE
+======================
+
+Database Type: MongoDB (NoSQL Document Database)
+Connection: MongoDB Atlas or Local MongoDB
+Database Name: st-marys-portal
+
+Core Models/Collections:
+-------------------------
+
+1. User Model (userModel.js) - Central user management
+   Fields:
+   - name: String (required)
+   - email: String (required, unique, lowercase)
+   - password: String (required, encrypted)
+   - phone: String (required)
+   - role: Enum ['admin', 'teacher', 'student']
+   - profilePhoto: String (default: 'default-avatar.jpg')
+   - isActive: Boolean (default: true)
+   - lastLogin: Date
+   - studentInfo: Object (for students)
+     - class: String
+     - section: String
+     - rollNumber: String (unique)
+     - guardianName: String
+     - guardianPhone: String
+     - address: String
+   - teacherInfo: Object (for teachers)
+     - subjects: Array of Strings
+     - qualifications: Array of Objects
+     - classTeacher: Object
+     - noticeSections: Array
+   - adminInfo: Object (for admins)
+     - designation: String
+     - permissions: Array of Strings
+   - discount: Number (for students only)
+   - dateOfBirth: Date
+   - gender: String
+   - joinDate: Date
+   - notificationPreferences: Object
+
+2. Student Model (studentModel.js) - Extended student information
+   Fields:
+   - user: ObjectId (ref: 'User')
+   - name: String
+   - class: String
+   - section: String
+   - rollNumber: String (unique)
+   - dateOfBirth: Date
+   - gender: String
+   - address: String
+   - guardianName: String
+   - guardianPhone: String
+   - bloodGroup: String
+   - academicYear: String
+   - admissionDate: Date
+
+3. Teacher Model (teacherModel.js) - Teacher-specific data
+   Fields:
+   - name: String
+   - email: String (unique)
+   - password: String (encrypted)
+   - phone: String
+   - subject: String
+   - qualifications: Array of Objects
+   - classes: Array of Objects
+   - isActive: Boolean
+
+4. Attendance Model (attendanceModel.js)
+   Fields:
+   - student: ObjectId (ref: 'User')
+   - date: Date
+   - subject: String
+   - status: Enum ['Present', 'Absent', 'No Session']
+   - period: Number (1-8)
+   - markedBy: ObjectId (ref: 'User')
+   - remarks: String
+   - class: String
+   - section: String
+   Indexes: Compound unique index on (student, date, period)
+
+5. Homework Model (homeworkModel.js)
+   Fields:
+   - title: String
+   - description: String
+   - class: String
+   - section: String
+   - teacher: ObjectId (ref: 'User')
+   - fileUrl: String
+   - fileType: Enum (various file types)
+   - expiryDate: Date
+   - allowSubmission: Boolean
+   - isActive: Boolean
+
+6. Submission Model - Student homework submissions
+   Fields:
+   - homework: ObjectId (ref: 'Homework')
+   - student: ObjectId (ref: 'User')
+   - status: Enum ['pending', 'submitted', 'late', 'graded']
+   - submissionDate: Date
+   - notes: String
+   - attachments: Array of Objects
+   - grade: Object (score, feedback, gradedBy, gradedAt)
+
+Additional Models:
+- complaintModel.js
+- disciplineModel.js
+- examModel.js
+- feesModel.js
+- inquiryModel.js
+- noticeboardModel.js
+- resultsModel.js
+- subjectModel.js
+- teacherAttendanceModel.js
+- teacherAvailabilityModel.js
+- timetableModel.js
+
+API STRUCTURE & ROUTES
+======================
+
+Base URL: http://localhost:3000/api
+
+Authentication Routes (/api/auth):
+----------------------------------
+POST /login - User login
+GET /profile - Get user profile (protected)
+PUT /profile - Update user profile (protected)
+POST /forgot-password - Request password reset
+POST /reset-password/:token - Reset password
+GET /users - Get users by role (admin only)
+
+Student Routes (/api/student):
+------------------------------
+POST /register - Register new student
+GET /profile - Get student profile (protected)
+
+Teacher Routes (/api/teacher):
+------------------------------
+Similar structure for teacher-specific operations
+
+Attendance Routes (/api/attendance):
+------------------------------------
+GET /check - Check existing attendance
+POST /mark - Mark attendance (teachers only)
+GET /history - Get attendance history
+GET /student/:id - Get student attendance
+
+Homework Routes (/api/homework):
+--------------------------------
+GET / - Get homework assignments
+POST / - Create homework (teachers)
+PUT /:id - Update homework
+DELETE /:id - Delete homework
+POST /submit - Submit homework (students)
+
+Fees Routes (/api/fees):
+------------------------
+GET / - Get fee information
+POST /pay - Pay fees
+POST /receipt-log - Log receipt actions
+GET /admin/students - Search students (admin)
+GET /admin/student/:id - Get student fees (admin)
+POST /admin/pay/:id - Make payment (admin)
+
+Results Routes (/api/results):
+------------------------------
+GET /student - Get student results
+GET /exam/:id - Get results by exam
+POST /create - Create/update results
+POST /declare/:id - Declare results (admin)
+
+Complaints Routes (/api/complaints):
+------------------------------------
+GET / - Get complaints
+POST / - Submit complaint
+PUT /:id - Update complaint status
+
+Notice Board Routes (/api/notice):
+----------------------------------
+GET / - Get notices
+POST / - Create notice (teachers/admin)
+PUT /:id - Update notice
+DELETE /:id - Delete notice
+
+Timetable Routes (/api/timetable):
+----------------------------------
+GET /:class/:section - Get class timetable
+GET /student - Get student timetable
+GET /teacher - Get teacher timetable
+POST / - Create timetable entry (admin)
+PUT /:id - Update timetable entry (admin)
+DELETE /:id - Delete timetable entry (admin)
+POST /upload - Upload timetable via Excel (admin)
+
+Exam Routes (/api/exams):
+-------------------------
+GET / - Get exams
+POST / - Create exam (admin/teacher)
+PUT /:id - Update exam
+DELETE /:id - Delete exam
+
+Admin Routes (/api/admin):
+--------------------------
+GET /dashboard - Admin dashboard data
+GET /users - Manage users
+POST /users - Create users
+PUT /users/:id - Update users
+DELETE /users/:id - Delete users
+
+Inquiry Routes (/api/inquiries):
+--------------------------------
+POST / - Submit inquiry from homepage
+GET / - Get inquiries (admin)
+
+MIDDLEWARE & SECURITY
+=====================
+
+Authentication Middleware (authMiddleware.js):
+----------------------------------------------
+- protect: Validates JWT tokens
+- authorize: Role-based access control
+- adminOnly: Admin-only access
+- teacherOnly: Teacher and admin access
+- studentOnly: Student-only access
+
+Security Features:
+- JWT-based authentication
+- Password hashing with bcrypt
+- Role-based authorization
+- Input validation
+- CORS configuration
+- Request logging with Morgan
+
+Password Security:
+- Bcrypt with salt rounds (10)
+- Account lockout after failed attempts
+- Password reset tokens
+- Secure password comparison
+
+FRONTEND ARCHITECTURE
+=====================
+
+Structure:
+----------
+- public/ - Static files directory
+  - css/ - Stylesheets
+  - js/ - JavaScript files
+  - images/ - Static images
+  - HTML pages for different functionalities
+
+Key Frontend Pages:
+-------------------
+1. index.html - Landing page with carousel and school information
+2. login.html - User authentication page
+3. dashboard.html - Main dashboard after login
+4. attendance.html - Attendance management
+5. homework.html - Homework assignments
+6. complaints.html - Complaint submission
+7. fee-details.html - Fee management
+8. results.html - Academic results
+9. timetable.html - Class timetables
+10. noticeboard.html - School notices
+
+Frontend Features:
+------------------
+- Responsive design
+- Modern CSS with gradients and animations
+- Interactive carousel on homepage
+- Form validation
+- AJAX requests to backend APIs
+- Role-based UI rendering
+- Real-time updates
+
+JavaScript Functionality:
+-------------------------
+- login.js - Authentication handling
+- dashboard.js - Dashboard interactions
+- attendance.js - Attendance marking
+- homework.js - Homework management
+- And specialized JS files for each module
+
+CONFIGURATION FILES
+===================
+
+1. package.json - Project dependencies and scripts
+2. config/db.js - Database connection configuration
+3. config/auth.js - JWT secret configuration
+4. .env file - Environment variables (not present in codebase)
+
+Database Connection:
+- MongoDB URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/st-marys-portal'
+- Uses Mongoose for connection management
+- Automatic reconnection handling
+
+FEATURES & FUNCTIONALITY
+=========================
+
+Student Features:
+-----------------
+- View personal dashboard
+- Check attendance records
+- View and submit homework
+- Access exam results
+- View timetable
+- Submit complaints
+- Check fee status
+- Receive notifications
+
+Teacher Features:
+-----------------
+- Mark student attendance
+- Assign homework
+- Grade submissions
+- Manage class timetables
+- Create notices
+- View student reports
+- Handle complaints
+- Access teacher dashboard
+
+Admin Features:
+---------------
+- User management (create, update, delete users)
+- System-wide reporting
+- Fee management
+- Exam scheduling
+- Timetable management
+- Notice board administration
+- Complaint resolution
+- Data analytics
+
+Core Modules:
+-------------
+1. Authentication & Authorization
+2. User Management
+3. Attendance Tracking
+4. Homework Management
+5. Academic Results
+6. Fee Management
+7. Timetable Scheduling
+8. Notice Board
+9. Complaint System
+10. Inquiry Management
+11. Dashboard & Analytics
+
+FILE UPLOAD HANDLING
+=====================
+- Multer middleware for file uploads
+- Support for Excel files (timetable uploads)
+- File size limits (5MB)
+- File type validation
+- Secure file storage
+
+DEVELOPMENT SETUP
+=================
+
+Installation:
+1. Navigate to backend directory
+2. Run `npm install`
+3. Configure environment variables
+4. Start MongoDB service
+5. Run `npm start` or `npm run dev`
+
+Scripts:
+- start: node index.js
+- dev: nodemon index.js
+- test: echo "Error: no test specified" && exit 1
+
+SERVER CONFIGURATION
+====================
+
+Port: process.env.PORT || 3000
+Environment: development/production
+Static Files: Served from public directory
+Error Handling: Custom error middleware
+CORS: Enabled for all origins
+Request Logging: Morgan in development mode
+
+DEPLOYMENT CONSIDERATIONS
+=========================
+
+Environment Variables Needed:
+- MONGODB_URI
+- JWT_SECRET
+- NODE_ENV
+- PORT
+
+Production Setup:
+- MongoDB Atlas for database
+- Environment-specific configurations
+- SSL/HTTPS setup
+- Process management (PM2)
+- Load balancing considerations
+
+SCALABILITY FEATURES
+=====================
+
+Database Indexes:
+- Compound indexes on frequently queried fields
+- Unique constraints for data integrity
+- Performance optimization for large datasets
+
+Caching Strategy:
+- Potential for Redis implementation
+- Session management
+- Static file caching
+
+TESTING & MAINTENANCE
+=====================
+
+Current State:
+- No automated tests implemented
+- Manual testing required
+- Development-focused error handling
+
+Maintenance Scripts:
+- Database cleanup scripts in scripts/ directory
+- User creation utilities
+- Test data generation
+- Database connection testing
+
+SECURITY CONSIDERATIONS
+=======================
+
+Authentication:
+- JWT tokens with expiration
+- Secure password storage
+- Role-based access control
+- Session management
+
+Data Protection:
+- Input sanitization
+- SQL injection prevention (NoSQL)
+- XSS protection considerations
+- CORS configuration
+
+API Security:
+- Rate limiting (not implemented)
+- Request validation
+- Error message sanitization
+- Audit logging
+
+FUTURE ENHANCEMENTS
+===================
+
+Potential Improvements:
+- Real-time notifications (WebSocket)
+- Mobile application
+- Advanced reporting
+- Integration with external systems
+- Automated backup system
+- Performance monitoring
+- Email notification system
+- SMS integration
+- Parent portal
+- Online exam system
+
+TROUBLESHOOTING
+===============
+
+Common Issues:
+1. Database connection failures
+2. Authentication token expiration
+3. File upload limitations
+4. CORS issues in development
+5. Environment variable configuration
+
+Debug Information:
+- Console logging implemented
+- Error stack traces in development
+- Request/response logging with Morgan
+
+CONTACT & SUPPORT
+=================
+
+School Contact:
+- Email: info@stmaryshighschool.edu
+- Phone: +91-12345-67890
+
+Technical Support:
+- Check console logs for errors
+- Verify database connectivity
+- Ensure proper environment configuration
+- Review authentication setup
+
+PROJECT STATUS
+==============
+
+Current Version: 1.0.0
+Status: Development/Production Ready
+Last Updated: 2025
+License: ISC
+Author: Not specified
+
+The project appears to be a fully functional school management system with comprehensive features for educational institution management. It follows modern web development practices and provides a solid foundation for school administration, student management, and academic tracking.

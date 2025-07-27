@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Details - St. Mary's School</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f5f7fa;
+        }
+        header {
+            background: #007bff;
+            color: white;
+            padding: 1.2rem 0 1.2rem 0;
+            box-shadow: none;
+            border: none;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            margin: 0;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        .header-left {
+            flex: 1;
+        }
+        .header-title {
+            flex: 2;
+            text-align: center;
+        }
+        .header-title h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin: 0;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            letter-spacing: 1px;
+        }
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+        }
+        .back-button i {
+            margin-right: 0.5rem;
+        }
+        .fee-container {
+            max-width: 900px;
+            margin: 40px auto 0 auto;
+            padding: 0 0 30px 0;
+            border-radius: 12px;
+            background: none;
+            box-shadow: none;
+        }
+        .dashboard-section {
+            margin-bottom: 28px;
+        }
+        .dashboard-section h3 {
+            color: #007BFF;
+            margin-bottom: 15px;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+        .dashboard-info {
+            background-color: #fff;
+            padding: 22px 28px;
+            margin: 0 0 0 0;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+        }
+        .dashboard-info p {
+            margin: 8px 0;
+            font-size: 1.08rem;
+        }
+        .dashboard-info strong {
+            color: #222;
+            font-weight: 600;
+            min-width: 110px;
+            display: inline-block;
+        }
+        .dashboard-info em {
+            color: #888;
+        }
+        /* Improved fee structure table */
+        #fee-structure-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+        #fee-structure-table th, #fee-structure-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 1.08rem;
+        }
+        #fee-structure-table th {
+            background: #f8f9fa;
+            color: #007BFF;
+            font-weight: 700;
+            text-align: left;
+        }
+        #fee-structure-table td.label {
+            color: #222;
+            font-weight: 600;
+        }
+        #fee-structure-table td.value {
+            color: #333;
+        }
+        #fee-structure-table tr:last-child td {
+            font-weight: 700;
+            color: #007BFF;
+        }
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .payment-table th,
+        .payment-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .payment-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .payment-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .status-paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-overdue {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .dashboard-btn {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+        .dashboard-btn:hover {
+            background-color: #0056b3;
+        }
+        .receipt-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.4);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .receipt-modal-content {
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px 30px 20px 30px;
+            max-width: 480px;
+            width: 95vw;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+            position: relative;
+        }
+        .close-receipt-modal {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 1.5rem;
+            color: #888;
+            cursor: pointer;
+        }
+        .receipt-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .view-receipt-link {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 14px;
+            font-size: 0.98em;
+            margin: 0;
+            cursor: pointer;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .download-btn {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 14px;
+            font-size: 0.98em;
+            margin: 0;
+            cursor: pointer;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .download-btn:hover {
+            background: #0056b3;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+            transform: translateY(-1px) scale(1.03);
+        }
+
+        .view-receipt-link:hover {
+            background: #0056b3;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+            transform: translateY(-1px) scale(1.03);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Return to Dashboard
+                </a>
+            </div>
+            <div class="header-title">
+                <h1><i class="fa-solid fa-indian-rupee-sign"></i> Fee Details</h1>
+            </div>
+        </div>
+    </header>
+    <div class="fee-container">
+        <h2>Fee Details</h2>
+        <div id="error-message" class="error-message" style="display:none;"></div>
+        <div class="dashboard-section">
+            <h3>Student Information</h3>
+            <div class="dashboard-info" id="student-info">
+                <!-- Student info will be populated here -->
+            </div>
+        </div>
+        <div id="fee-summary" class="dashboard-info" style="margin-bottom: 28px; margin-top: -10px;">
+            <!-- Paid Amount, Balance Due, Due Date will be populated here -->
+        </div>
+        <div class="dashboard-section">
+            <h3>Payment History</h3>
+            <div class="dashboard-info">
+                <table class="payment-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Payment Mode</th>
+                            <th>Amount</th>
+                            <th>Receipt</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payment-history">
+                        <!-- Payment history will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Receipt Modal -->
+    <div id="receipt-modal" class="receipt-modal">
+        <div class="receipt-modal-content" id="receipt-modal-content">
+            <span class="close-receipt-modal" onclick="closeReceiptModal()">&times;</span>
+            <div id="receipt-content"></div>
+            <button class="download-btn" onclick="downloadReceiptPDF()">Download Receipt</button>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="js/fee-alert.js"></script>
+    <script>
+        // Add this at the top of your <script> block, after jsPDF is loaded
+        // NOTE: You must place NotoSans-Regular.ttf in public/fonts/ and use the correct path below
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (window.jspdf && window.jspdf.jsPDF) {
+                const fontUrl = '/fonts/NotoSans-Regular.ttf';
+                const fontName = 'NotoSans';
+                const fontStyle = 'normal';
+                const jsPDF = window.jspdf.jsPDF;
+                const response = await fetch(fontUrl);
+                const fontData = await response.arrayBuffer();
+                jsPDF.API.events.push(['addFonts', function() {
+                    this.addFileToVFS('NotoSans-Regular.ttf', btoa(String.fromCharCode.apply(null, new Uint8Array(fontData))));
+                    this.addFont('NotoSans-Regular.ttf', fontName, fontStyle);
+                }]);
+            }
+        });
+        // Fetch and display fee details
+        async function loadFeeDetails() {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.style.display = 'none';
+            try {
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('/api/fees', {
+                    headers: {
+                        'Authorization': token ? `Bearer ${token}` : '',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response.status === 401) {
+                    errorDiv.textContent = 'You are not authorized. Please log in again.';
+                    errorDiv.style.display = 'block';
+                    document.getElementById('student-info').innerHTML = '';
+                    document.getElementById('fee-summary').innerHTML = '';
+                    document.getElementById('payment-history').innerHTML = '';
+                    return;
+                }
+                if (!response.ok) {
+                    throw new Error('Failed to fetch fee details');
+                }
+                const data = await response.json();
+                console.log('Raw API Response:', data);
+                console.log('Fee Structure:', data.feeStructure);
+                console.log('Payments:', data.payments);
+
+                // Display student info
+                document.getElementById('student-info').innerHTML = `
+                    <p><strong>Name:</strong> ${data.student.name}</p>
+                    <p><strong>Class:</strong> ${data.student.class}-${data.student.section}</p>
+                    <p><strong>Roll Number:</strong> ${data.student.rollNumber}</p>
+                `;
+                // Display payment history
+                renderPaymentHistory(data.payments || []);
+
+                // Use the pre-calculated values from the backend instead of recalculating
+                const latestPayment = data.payments && data.payments[0];
+                const paidAmount = latestPayment ? latestPayment.totalPaid : 0;
+                const balance = latestPayment ? latestPayment.balance : (data.feeStructure ? data.feeStructure.totalFee : 0);
+                const dueDate = latestPayment ? latestPayment.dueDate : null;
+                const status = latestPayment ? latestPayment.status : null;
+
+                const summaryBox = document.createElement('div');
+                summaryBox.style.display = 'flex';
+                summaryBox.style.justifyContent = 'space-between';
+                summaryBox.style.alignItems = 'center';
+                summaryBox.style.background = '#f8f9fa';
+                summaryBox.style.border = '1px solid #e0e0e0';
+                summaryBox.style.borderRadius = '8px';
+                summaryBox.style.padding = '14px 18px';
+                summaryBox.style.marginTop = '14px';
+                summaryBox.style.marginBottom = '0';
+                summaryBox.innerHTML = `
+                    <div><span style="color:#111;font-weight:700;">Paid Amount:</span> <span style="color:#28a745;font-weight:700;">₹${paidAmount}</span></div>
+                    <div><span style="color:#111;font-weight:700;">Balance Due:</span> <span style="color:#d9534f;font-weight:700;">₹${balance}</span></div>
+                    <div><span style="color:#111;font-weight:700;">Due Date:</span> <span style="color:#007bff;font-weight:700;">${dueDate ? new Date(dueDate).toLocaleDateString() : '-'}</span></div>
+                `;
+                document.getElementById('fee-summary').innerHTML = '';
+                document.getElementById('fee-summary').appendChild(summaryBox);
+                 if (status === 'overdue' && balance > 0) {
+                    document.getElementById('fee-summary').innerHTML += `<div style="margin-top:16px;"><div style='background:#ffdddd;color:#a00;padding:18px 24px;font-size:1.25em;border-radius:8px;font-weight:bold;border:2px solid #f99;text-align:center;box-shadow:0 2px 8px #fbb;'>⚠️ Your fee is overdue! Please pay immediately.</div></div>`;
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Failed to load fee details. Please try again later.';
+                errorDiv.style.display = 'block';
+                document.getElementById('student-info').innerHTML = '';
+                document.getElementById('fee-summary').innerHTML = '';
+                document.getElementById('payment-history').innerHTML = '';
+            }
+        }
+        function formatAmount(num) {
+            return num?.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+        }
+
+        function getStudentInfoFromPage() {
+            const infoDiv = document.getElementById('student-info');
+            if (!infoDiv) return {};
+            const name = infoDiv.querySelector('p:nth-child(1) strong') ? infoDiv.querySelector('p:nth-child(1)').textContent.replace('Name:', '').trim() : '';
+            const classSection = infoDiv.querySelector('p:nth-child(2) strong') ? infoDiv.querySelector('p:nth-child(2)').textContent.replace('Class:', '').trim() : '';
+            const rollNumber = infoDiv.querySelector('p:nth-child(3) strong') ? infoDiv.querySelector('p:nth-child(3)').textContent.replace('Roll Number:', '').trim() : '';
+            let className = '', section = '';
+            if (classSection.includes('-')) {
+                [className, section] = classSection.split('-').map(s => s.trim());
+            } else {
+                className = classSection;
+            }
+            return { name, class: className, section, rollNumber };
+        }
+
+        function generateReceiptPDF(doc, pay, openInNewWindow = false) {
+            try {
+                const student = getStudentInfoFromPage();
+                const docPDF = new window.jspdf.jsPDF();
+
+                // Draw border
+                docPDF.setDrawColor(100);
+                docPDF.rect(10, 10, 190, 277, 'S');
+
+                // Logo and header
+                // Add logo image (centered above school name, natural aspect ratio)
+                docPDF.addImage('images/logo.jpg', 'JPEG', 85, 14, 40, 18); // x,y,width,height
+                docPDF.setFont('helvetica', 'bold');
+                docPDF.setFontSize(20);
+                docPDF.setTextColor('#000');
+                docPDF.text("St. Mary's High School", 105, 40, { align: 'center' });
+                docPDF.setFont('helvetica', 'normal');
+                docPDF.setFontSize(11);
+                docPDF.setTextColor('#222');
+                docPDF.text('Hasanparthy,Dist: Hanamkonda, Telangana, 506371', 105, 47, { align: 'center' });
+                // docPDF.text('Biller name: St. Marys High School', 105, 49, { align: 'center' });
+                docPDF.setDrawColor(180);
+                docPDF.line(15, 54, 195, 54);
+
+                // Title
+                docPDF.setFontSize(15);
+                docPDF.setTextColor('#007bff');
+                docPDF.text('FEE PAYMENT RECEIPT', 105, 64, { align: 'center' });
+
+                docPDF.setDrawColor(220);
+                docPDF.line(15, 68, 195, 68);
+
+                // Receipt info
+                docPDF.setFontSize(12);
+                docPDF.setTextColor('#222');
+                docPDF.setFont('helvetica', 'normal');
+                let y = 74;
+
+                if (pay.receipt && pay.receipt.number) {
+                    docPDF.text(`Receipt No: ${pay.receipt.number}`, 22, y);
+                }
+                docPDF.text(`Date & Time: ${formatDateTime(pay.paymentDate)}`, 120, y);
+                y += 10;
+
+                docPDF.setDrawColor(240);
+                docPDF.line(15, y, 195, y);
+                y += 8;
+
+                // Student info
+                docPDF.text(`Name: ${student.name || doc.studentName || doc.student?.name || ''}`, 22, y);
+                docPDF.text(`Class: ${student.class || doc.class || doc.student?.class || ''}`, 120, y);
+                y += 8;
+                docPDF.text(`Section: ${student.section || doc.section || doc.student?.section || ''}`, 22, y);
+                docPDF.text(`Roll Number: ${student.rollNumber || doc.rollNumber || doc.student?.rollNumber || ''}`, 120, y);
+                y += 10;
+
+                docPDF.setDrawColor(240);
+                docPDF.line(15, y, 195, y);
+                y += 12;
+
+                // Amount paid - highlight
+                docPDF.setFontSize(14);
+                docPDF.setTextColor('#28a745');
+                const amountText = 'Amount Paid: Rs.' + formatAmount(pay.amount);
+                docPDF.setCharSpace(0); // Remove any extra character spacing
+                docPDF.text(amountText, 22, y);
+
+                docPDF.setFontSize(12);
+                docPDF.setTextColor('#222');
+                y += 10;
+                docPDF.text(`Payment Mode: ${pay.paymentMode || '-'}`, 22, y);
+                y += 8;
+                docPDF.text(`Transaction ID: ${pay.transactionId || '-'}`, 22, y);
+                y += 8;
+
+                // Use pre-calculated balance from the payment record
+                const balanceText = 'Balance Due: Rs.' + formatAmount(doc.balance || 0);
+                docPDF.setCharSpace(0); // Remove any extra character spacing
+                docPDF.text(balanceText, 22, y);
+                y += 8;
+
+                if (doc.dueDate) {
+                    docPDF.text(`Due Date: ${formatDateTime(doc.dueDate).split(' ')[0]}`, 22, y);
+                    y += 8;
+                }
+
+                if (doc.status === 'overdue' && doc.balance > 0) {
+                    docPDF.setTextColor('#a00');
+                    docPDF.setFont(undefined, 'bold');
+                    docPDF.text('OVERDUE - Please pay immediately!', 22, y);
+                    docPDF.setFont(undefined, 'normal');
+                    y += 8;
+                }
+
+                // PAID watermark
+                docPDF.setFontSize(40);
+                docPDF.setTextColor(200, 200, 200);
+                docPDF.text('PAID', 105, y + 40, { align: 'center', angle: 0 });
+
+                // Footer
+                docPDF.setFontSize(10);
+                docPDF.setTextColor('#888');
+                const now = new Date();
+                docPDF.text('This is a computer-generated receipt. No signature required.', 22, 270);
+                docPDF.text('For queries, contact: 9999999999, info@stmarys.com', 22, 276);
+                docPDF.text(`Receipt generated on: ${formatDateTime(now)}`, 120, 276);
+
+                // Output
+                if (openInNewWindow) {
+                    docPDF.output('dataurlnewwindow');
+                } else {
+                    let filename = `Receipt_${pay.receipt?.number || Date.now()}.pdf`;
+                    docPDF.save(filename);
+                }
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Failed to generate receipt. Please try again.');
+            }
+        }
+
+        function viewReceipt(doc, pay) {
+            generateReceiptPDF(doc, pay, true);
+        }
+
+        function downloadReceipt(doc, pay) {
+            generateReceiptPDF(doc, pay, false);
+        }
+
+        function renderPaymentHistory(paymentsDocs) {
+            const tbody = document.getElementById('payment-history');
+            if (!paymentsDocs || paymentsDocs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4"><em>No payments found.</em></td></tr>';
+                return;
+            }
+            let rows = [];
+            paymentsDocs.forEach(doc => {
+                if (Array.isArray(doc.payments)) {
+                    doc.payments.forEach((pay, idx) => {
+                        // Include student data in the doc object
+                        const docWithStudent = {
+                            ...doc,
+                            student: {
+                                name: doc.studentName,
+                                class: doc.class,
+                                section: doc.section,
+                                rollNumber: doc.rollNumber
+                            }
+                        };
+                        rows.push(`
+                            <tr>
+                                <td>${pay.paymentDate ? new Date(pay.paymentDate).toLocaleDateString() : '-'}</td>
+                                <td>${pay.paymentMode || '-'}</td>
+                                <td>₹${pay.amount || '-'}</td>
+                                <td>
+                                    <div class="receipt-actions">
+                                        <button class="view-receipt-link" onclick='viewReceipt(${JSON.stringify(docWithStudent)}, ${JSON.stringify(pay)})'>View Receipt</button>
+                                        <button class="download-btn" onclick='downloadReceipt(${JSON.stringify(docWithStudent)}, ${JSON.stringify(pay)})'>Download Receipt</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                }
+            });
+            tbody.innerHTML = rows.join('');
+        }
+        function closeReceiptModal() {
+            document.getElementById('receipt-modal').style.display = 'none';
+        }
+        document.addEventListener('DOMContentLoaded', loadFeeDetails);
+    </script>
+</body>
+</html>

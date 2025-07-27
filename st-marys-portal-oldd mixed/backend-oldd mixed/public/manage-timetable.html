@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Timetable - St. Mary's Portal</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/timetable.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Special header style to match noticeboard */
+    header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      padding: 1rem 0;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    
+    .header-left {
+      flex: 1;
+    }
+    
+    .header-title {
+      flex: 2;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    
+    .header-title h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .back-button {
+      color: white;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      transition: background-color 0.2s;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: none;
+      cursor: pointer;
+      width: fit-content;
+    }
+    
+    .back-button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Additional button styles to ensure proper sizing */
+    #view-timetable {
+      width: fit-content;
+      justify-content: center;
+      padding: 0.625rem 1.25rem;
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    #view-timetable:hover {
+      background-color: var(--primary-dark);
+    }
+    
+  
+    
+    #class-view-controls, #teacher-view-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+    }
+    
+    /* .control-group { */
+      /* Using styles from timetable.css */
+    /* } */
+    
+    /* Timetable styling for horizontal layout */
+    .timetable-editor {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+      background-color: white;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .timetable-editor th, .timetable-editor td {
+      padding: 0.75rem;
+      border: 1px solid #e0e0e0;
+      text-align: center;
+    }
+    
+    .timetable-editor th {
+      background-color: var(--primary-light);
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+    
+    .day-cell {
+      font-weight: 600;
+      background-color: #f5f5f5;
+      width: 120px;
+    }
+    
+    .cell-editor {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .cell-editor select {
+      width: 100%;
+      padding: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: var(--radius-sm);
+    }
+    
+    .actions-row {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+    
+    /* Teacher timetable specific styles */
+    .class-info {
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 5px;
+    }
+    
+    .subject-info {
+      margin-bottom: 8px;
+      color: var(--text-dark);
+    }
+    
+    .actions .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+    
+    .empty-cell {
+      background-color: #f9f9f9;
+    }
+    
+    .no-class {
+      color: #999;
+      font-style: italic;
+    }
+    
+    .timetable-editor td hr {
+      margin: 10px 0;
+      border: 0;
+      border-top: 1px dashed #ddd;
+    }
+    
+    /* Make sure the Edit button is not too large */
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .controls-container {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      
+      #class-view-controls, #teacher-view-controls {
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 100%;
+      }
+      
+      .control-group {
+        width: 100%;
+      }
+      
+      .control-group select {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <a href="dashboard.html" class="back-button">
+          <i class="fas fa-arrow-left"></i>
+          Return to Dashboard
+        </a>
+      </div>
+      <div class="header-title">
+        <h1><i class="fas fa-edit"></i> Manage Timetable</h1>
+      </div>
+    </div>
+  </header>
+
+  <main class="timetable-container">
+    <div class="timetable-header">
+      <h2 class="timetable-title">Timetable Management</h2>
+    </div>
+    
+    <div class="controls-container">
+      <div class="control-group">
+        <label for="view-type">View Type</label>
+        <select id="view-type">
+          <option value="class">By Class/Section</option>
+          <option value="teacher">By Teacher</option>
+        </select>
+      </div>
+      
+      <!-- Class/Section view (default) -->
+      <div id="class-view-controls">
+        <div class="control-group">
+          <label for="class-select">Class</label>
+          <select id="class-select">
+            <option value="">Select Class</option>
+            <!-- Classes will be loaded dynamically -->
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label for="section-select">Section</label>
+          <select id="section-select">
+            <option value="">Select Section</option>
+            <!-- Sections will be loaded dynamically -->
+          </select>
+        </div>
+      </div>
+      
+      <!-- Teacher view (hidden by default) -->
+      <div id="teacher-view-controls" style="display: none;">
+        <div class="control-group">
+          <label for="teacher-select">Teacher</label>
+          <select id="teacher-select">
+            <option value="">Select Teacher</option>
+            <!-- Teachers will be loaded dynamically -->
+          </select>
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label for="academic-year">Academic Year</label>
+        <select id="academic-year">
+          <!-- Will be generated based on current year -->
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <button id="view-timetable" class="btn btn-primary">View Timetable</button>
+      </div>
+    </div>
+    
+    <div id="timetable-editor-container">
+      <div class="loading-spinner" style="display: none;"></div>
+      <div id="message-area"></div>
+      <div id="editor-area"></div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      const userRole = localStorage.getItem('user_role');
+      if (userRole !== 'admin') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
+      // Elements
+      const viewTypeSelect = document.getElementById('view-type');
+      const classViewControls = document.getElementById('class-view-controls');
+      const teacherViewControls = document.getElementById('teacher-view-controls');
+      const classSelect = document.getElementById('class-select');
+      const sectionSelect = document.getElementById('section-select');
+      const teacherSelect = document.getElementById('teacher-select');
+      const academicYearSelect = document.getElementById('academic-year');
+      const viewButton = document.getElementById('view-timetable');
+      const loadingSpinner = document.querySelector('.loading-spinner');
+      const messageArea = document.getElementById('message-area');
+      const editorArea = document.getElementById('editor-area');
+      
+      // Get URL parameters (if any)
+      const urlParams = new URLSearchParams(window.location.search);
+      const classParam = urlParams.get('class');
+      const sectionParam = urlParams.get('section');
+      const teacherParam = urlParams.get('teacher');
+      
+      // If teacher parameter is present, switch to teacher view
+      if (teacherParam) {
+        viewTypeSelect.value = 'teacher';
+        teacherViewControls.style.display = 'flex';
+        classViewControls.style.display = 'none';
+      }
+      
+      // Handle view type change
+      viewTypeSelect.addEventListener('change', function() {
+        if (this.value === 'class') {
+          classViewControls.style.display = 'flex';
+          teacherViewControls.style.display = 'none';
+        } else {
+          classViewControls.style.display = 'none';
+          teacherViewControls.style.display = 'flex';
+          
+          // Make sure teachers are loaded
+          if (teachers.length === 0) {
+            fetchTeachers();
+          }
+        }
+      });
+      
+      // Populate academic year dropdown (current year and 2 years before/after)
+      const currentYear = new Date().getFullYear();
+      for (let year = currentYear - 2; year <= currentYear + 2; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) {
+          option.selected = true;
+        }
+        academicYearSelect.appendChild(option);
+      }
+      
+      // Fetch classes from API
+      fetchClasses();
+      
+      // Fetch teachers data
+      let teachers = [];
+      fetchTeachers();
+      
+      // Fetch subjects
+      let subjects = [];
+      fetchSubjects();
+      
+      // Check if there are URL parameters to auto-load a specific timetable
+      if (classParam && sectionParam) {
+        // Auto-load will happen after class and section options are populated
+        console.log(`Auto-loading timetable for Class ${classParam}-${sectionParam}`);
+      } else if (teacherParam) {
+        console.log(`Auto-loading timetable for teacher ID ${teacherParam}`);
+      }
+      
+      function fetchClasses() {
+        fetch('/api/teacher/classes', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch classes');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Clear current options
+          classSelect.innerHTML = '<option value="">Select Class</option>';
+          
+          // Sort classes numerically
+          const sortedClasses = data.classes.sort((a, b) => {
+            // If both are numbers, sort numerically
+            if (!isNaN(a) && !isNaN(b)) {
+              return parseInt(a) - parseInt(b);
+            }
+            // Otherwise, sort alphabetically
+            return a.localeCompare(b);
+          });
+          
+          // Add classes to dropdown
+          sortedClasses.forEach(className => {
+            const option = document.createElement('option');
+            option.value = className;
+            option.textContent = className;
+            classSelect.appendChild(option);
+          });
+          
+          // If URL has class parameter, select it
+          if (classParam) {
+            classSelect.value = classParam;
+            // Trigger change event to load sections
+            classSelect.dispatchEvent(new Event('change'));
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching classes:', error);
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>Failed to load classes. Using default values instead.</p>
+            </div>
+          `;
+          
+          // Fallback to predefined classes
+          const classOptions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+          
+          classOptions.forEach(className => {
+            const option = document.createElement('option');
+            option.value = className;
+            option.textContent = className;
+            classSelect.appendChild(option);
+          });
+          
+          // If URL has class parameter, select it
+          if (classParam) {
+            classSelect.value = classParam;
+            // Trigger change event to load sections
+            classSelect.dispatchEvent(new Event('change'));
+          }
+        });
+      }
+      
+      // Fetch teachers from the server
+      function fetchTeachers() {
+        fetch('/api/teacher/all', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch teachers');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.users && Array.isArray(data.users)) {
+            // Sort teachers alphabetically by name
+            data.users.sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Store teacher data globally
+            teachers = data.users;
+            
+            // Populate teacher select dropdown
+            teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
+            teachers.forEach(teacher => {
+              const option = document.createElement('option');
+              option.value = teacher._id;
+              option.textContent = teacher.name;
+              teacherSelect.appendChild(option);
+            });
+            
+            // If URL has teacher parameter, select it
+            if (teacherParam) {
+              teacherSelect.value = teacherParam;
+              // Auto-load teacher timetable if specified in URL
+              setTimeout(() => {
+                viewButton.click();
+              }, 500);
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching teachers:', error);
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>Failed to load teachers. Please try refreshing the page.</p>
+            </div>
+          `;
+        });
+      }
+      
+      function fetchSubjects() {
+        // Fetch subjects directly from the subjects collection
+        fetch('/api/subjects/all', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch subjects from database');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data && Array.isArray(data)) {
+            // Map the subject objects to just their names
+            subjects = data.map(subject => subject.name);
+            console.log('Subjects fetched from database:', subjects);
+          } else {
+            throw new Error('Invalid subject data format');
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching subjects:', error);
+          console.log('Falling back to default subjects');
+          
+          // Fallback: First try to extract from teacher data
+          if (teachers && teachers.length > 0) {
+            subjects = extractSubjectsFromTeachers();
+            console.log('Using subjects from teacher data as fallback:', subjects);
+          } else {
+            // Last resort: Use default subjects
+            subjects = getDefaultSubjects();
+            console.log('Using default subjects as fallback:', subjects);
+            
+            // Try again with teacher data after a delay if teacher data loads later
+            setTimeout(() => {
+              if (teachers && teachers.length > 0 && (!subjects || subjects.length === 0)) {
+                subjects = extractSubjectsFromTeachers();
+                console.log('Updated subjects from teacher data (delayed):', subjects);
+              }
+            }, 2000);
+          }
+        });
+      }
+      
+      // Function to extract unique subjects from teacher data
+      function extractSubjectsFromTeachers() {
+        // Extract subjects from teacher info
+        const extractedSubjects = teachers.reduce((allSubjects, teacher) => {
+          if (teacher.teacherInfo && teacher.teacherInfo.subjects) {
+            teacher.teacherInfo.subjects.forEach(subject => allSubjects.add(subject));
+          }
+          return allSubjects;
+        }, new Set());
+        
+        // If we couldn't extract any subjects, use defaults
+        return extractedSubjects.size > 0 ? Array.from(extractedSubjects).sort() : getDefaultSubjects();
+      }
+      
+      // Function to get default subject list
+      function getDefaultSubjects() {
+        return ['Mathematics', 'Science', 'English', 'History', 'Geography', 'Hindi', 
+                'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Physical Education'];
+      }
+      
+      // Handle class selection change
+      classSelect.addEventListener('change', function() {
+        const selectedClass = this.value;
+        
+        // Clear current options
+        sectionSelect.innerHTML = '<option value="">Select Section</option>';
+        
+        if (!selectedClass) return;
+        
+        // Fetch sections for the selected class
+        fetch(`/api/teacher/sections/${selectedClass}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch sections');
+          }
+          return response.json();
+        })
+        .then(sections => {
+          // Add sections to dropdown
+          sections.forEach(section => {
+            const option = document.createElement('option');
+            option.value = section;
+            option.textContent = section;
+            sectionSelect.appendChild(option);
+          });
+          
+          // If URL has section parameter and it matches the current class, select it
+          if (sectionParam && selectedClass === classParam) {
+            sectionSelect.value = sectionParam;
+            
+            // If both class and section are from URL, auto-load the timetable
+            if (classParam && sectionParam) {
+              // Wait a bit to ensure sections are loaded
+              setTimeout(() => {
+                viewButton.click();
+              }, 500);
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching sections:', error);
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>Failed to load sections. Using default values instead.</p>
+            </div>
+          `;
+          
+          // Fallback to predefined sections
+          const sectionsByClass = {
+            '1': ['A', 'B', 'C'],
+            '2': ['A', 'B', 'C'],
+            '3': ['A', 'B'],
+            '4': ['A', 'B'],
+            '5': ['A', 'B'],
+            '6': ['A', 'B'],
+            '7': ['A', 'B'],
+            '8': ['A', 'B'],
+            '9': ['A', 'B'],
+            '10': ['A', 'B'],
+            '11': ['Science', 'Commerce', 'Arts'],
+            '12': ['Science', 'Commerce', 'Arts']
+          };
+          
+          if (sectionsByClass[selectedClass]) {
+            sectionsByClass[selectedClass].forEach(section => {
+              const option = document.createElement('option');
+              option.value = section;
+              option.textContent = section;
+              sectionSelect.appendChild(option);
+            });
+          }
+          
+          // If URL has section parameter and it matches the current class, select it
+          if (sectionParam && selectedClass === classParam) {
+            sectionSelect.value = sectionParam;
+            
+            // If both class and section are from URL, auto-load the timetable
+            if (classParam && sectionParam) {
+              // Wait a bit to ensure sections are loaded
+              setTimeout(() => {
+                viewButton.click();
+              }, 500);
+            }
+          }
+        });
+      });
+      
+      // View timetable button click handler
+      viewButton.addEventListener('click', function() {
+        if (viewTypeSelect.value === 'class') {
+          const selectedClass = classSelect.value;
+          const selectedSection = sectionSelect.value;
+          
+          if (!selectedClass || !selectedSection) {
+            messageArea.innerHTML = `
+              <div class="message error">
+                <p>Please select both class and section.</p>
+              </div>
+            `;
+            return;
+          }
+          
+          fetchClassTimetable(selectedClass, selectedSection);
+        } else {
+          const selectedTeacher = teacherSelect.value;
+          
+          if (!selectedTeacher) {
+            messageArea.innerHTML = `
+              <div class="message error">
+                <p>Please select a teacher.</p>
+              </div>
+            `;
+            return;
+          }
+          
+          fetchTeacherTimetable(selectedTeacher);
+        }
+      });
+      
+      function fetchClassTimetable(className, section) {
+        // Clear editor area and show loading
+        editorArea.innerHTML = '';
+        messageArea.innerHTML = '';
+        loadingSpinner.style.display = 'flex';
+        
+        const academicYear = academicYearSelect.value;
+        
+        fetch(`/api/timetable/${className}/${section}?academicYear=${academicYear}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          loadingSpinner.style.display = 'none';
+          
+          if (response.status === 404) {
+            // Timetable not found, create new one
+            messageArea.innerHTML = `
+              <div class="message info">
+                <p>No timetable found for Class ${className}-${section}. Create a new one below.</p>
+              </div>
+            `;
+            createEmptyTimetableEditor(className, section);
+            return null;
+          }
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch timetable');
+          }
+          
+          return response.json();
+        })
+        .then(data => {
+          if (data) {
+            // Timetable exists, render it
+            renderClassTimetableEditor(data.timetable, className, section);
+          }
+        })
+        .catch(error => {
+          loadingSpinner.style.display = 'none';
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>Failed to load timetable. Please try again later.</p>
+              <p>${error.message}</p>
+            </div>
+          `;
+          console.error('Error fetching timetable:', error);
+        });
+      }
+      
+      function fetchTeacherTimetable(teacherId) {
+        // Clear editor area and show loading
+        editorArea.innerHTML = '';
+        messageArea.innerHTML = '';
+        loadingSpinner.style.display = 'flex';
+        
+        const academicYear = academicYearSelect.value;
+        
+        // Make sure we have a valid teacher ID
+        if (!teacherId) {
+          loadingSpinner.style.display = 'none';
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>Please select a teacher first.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Check if teacher exists in our data
+        const teacher = teachers.find(t => t._id === teacherId);
+        if (!teacher) {
+          loadingSpinner.style.display = 'none';
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>Teacher not found. Please refresh the page and try again.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        console.log(`Fetching timetable for teacher: ${teacher.name} (${teacherId})`);
+        
+        fetch(`/api/timetable/teachers?teacherId=${teacherId}&academicYear=${academicYear}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          loadingSpinner.style.display = 'none';
+          
+          if (response.status === 404) {
+            messageArea.innerHTML = `
+              <div class="message info">
+                <p>No timetable found for this teacher. Create a new one below.</p>
+              </div>
+            `;
+            createTeacherTimetableEditor(teacherId, teacher.name);
+            return null;
+          }
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch teacher timetable');
+          }
+          
+          return response.json();
+        })
+        .then(data => {
+          if (!data) return;
+          
+          if (!data.timetables || data.timetables.length === 0) {
+            messageArea.innerHTML = `
+              <div class="message info">
+                <p>No timetable found for ${teacher.name}. Create a new one below.</p>
+              </div>
+            `;
+            createTeacherTimetableEditor(teacherId, teacher.name);
+            return;
+          }
+          
+          // Render teacher timetable for editing
+          renderTeacherTimetableEditor(data.timetables, teacherId);
+        })
+        .catch(error => {
+          loadingSpinner.style.display = 'none';
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>Failed to load teacher timetable: ${error.message}</p>
+            </div>
+          `;
+          console.error('Error fetching teacher timetable:', error);
+        });
+      }
+      
+      function createEmptyTimetableEditor(className, section) {
+        // Days of the week
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        // Number of periods per day
+        const periodsPerDay = 8;
+        
+        // Get subjects from our global list or extract from teachers as fallback
+        const availableSubjects = subjects.length > 0 ? subjects : extractSubjectsFromTeachers();
+        
+        // Create table for empty timetable with horizontal periods
+        let tableHTML = `
+          <h3>New Timetable for Class ${className}-${section}</h3>
+          <table class="timetable-editor" data-class="${className}" data-section="${section}">
+            <thead>
+              <tr>
+                <th>Day/Period</th>
+                ${Array.from({length: periodsPerDay}, (_, i) => i + 1).map(period => `<th>Period ${period}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
+          // dayOfWeek is 0-based (0 = Sunday), so Monday = 1, Tuesday = 2, etc.
+          const dayOfWeek = dayIndex + 1;
+          
+          tableHTML += `
+            <tr>
+              <td class="day-cell">${days[dayIndex]}</td>
+          `;
+          
+          for (let period = 1; period <= periodsPerDay; period++) {
+            tableHTML += `
+              <td>
+                <div class="cell-editor">
+                  <select class="subject-select" data-day="${dayOfWeek}" data-period="${period}">
+                    <option value="">Select Subject</option>
+                    ${availableSubjects.map(subject => `<option value="${subject}">${subject}</option>`).join('')}
+                  </select>
+                  <select class="teacher-select" data-day="${dayOfWeek}" data-period="${period}">
+                    <option value="">Select Teacher</option>
+                    ${teachers.map(teacher => `<option value="${teacher._id}">${teacher.name}</option>`).join('')}
+                  </select>
+                </div>
+              </td>
+            `;
+          }
+          
+          tableHTML += `</tr>`;
+        }
+        
+        tableHTML += `
+            </tbody>
+          </table>
+          
+          <div class="actions-row">
+            <button id="save-timetable" class="btn btn-primary">Save Timetable</button>
+          </div>
+        `;
+        
+        editorArea.innerHTML = tableHTML;
+        
+        // Add save button handler
+        document.getElementById('save-timetable').addEventListener('click', function() {
+          saveTimetable();
+        });
+      }
+      
+      function renderClassTimetableEditor(timetableData, className, section) {
+        // Days of the week (0 = Sunday, 1 = Monday, etc.)
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+        // Get all days present in the timetable
+        const daysInTimetable = Object.keys(timetableData).map(Number).sort();
+        
+        // Find the min/max periods
+        let minPeriod = 8;
+        let maxPeriod = 1;
+        
+        daysInTimetable.forEach(day => {
+          timetableData[day].forEach(entry => {
+            if (entry.period < minPeriod) minPeriod = entry.period;
+            if (entry.period > maxPeriod) maxPeriod = entry.period;
+          });
+        });
+        
+        // Ensure we have at least 8 periods
+        maxPeriod = Math.max(maxPeriod, 8);
+        
+        // Get subjects from our global list or extract from teachers as fallback
+        const availableSubjects = subjects.length > 0 ? subjects : extractSubjectsFromTeachers();
+        
+        // Create table for editing with horizontal periods
+        let tableHTML = `
+          <h3>Edit Timetable for Class ${className}-${section}</h3>
+          <table class="timetable-editor" data-class="${className}" data-section="${section}">
+            <thead>
+              <tr>
+                <th>Day/Period</th>
+                ${Array.from({length: maxPeriod - minPeriod + 1}, (_, i) => i + minPeriod).map(period => `<th>Period ${period}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        daysInTimetable.forEach(day => {
+          tableHTML += `
+            <tr>
+              <td class="day-cell">${dayNames[day]}</td>
+          `;
+          
+          for (let period = minPeriod; period <= maxPeriod; period++) {
+            // Find entry for this day and period
+            const entry = timetableData[day].find(e => e.period === period);
+            
+            tableHTML += `
+              <td>
+                <div class="cell-editor">
+                  <select class="subject-select" data-day="${day}" data-period="${period}" ${entry ? `data-entry-id="${entry._id}"` : ''}>
+                    <option value="">Select Subject</option>
+                    ${availableSubjects.map(subject => 
+                      `<option value="${subject}" ${entry && entry.subject === subject ? 'selected' : ''}>${subject}</option>`
+                    ).join('')}
+                  </select>
+                  <select class="teacher-select" data-day="${day}" data-period="${period}">
+                    <option value="">Select Teacher</option>
+                    ${teachers.map(teacher => 
+                      `<option value="${teacher._id}" ${entry && entry.assignedTeacher && entry.assignedTeacher._id === teacher._id ? 'selected' : ''}>${teacher.name}</option>`
+                    ).join('')}
+                  </select>
+                </div>
+              </td>
+            `;
+          }
+          
+          tableHTML += `</tr>`;
+        });
+        
+        tableHTML += `
+            </tbody>
+          </table>
+          
+          <div class="actions-row">
+            <button id="save-timetable" class="btn btn-primary">Save Changes</button>
+          </div>
+        `;
+        
+        editorArea.innerHTML = tableHTML;
+        
+        // Add save button handler
+        document.getElementById('save-timetable').addEventListener('click', function() {
+          saveTimetable();
+        });
+      }
+      
+      function renderTeacherTimetableEditor(timetables, teacherId) {
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const teacher = teachers.find(t => t._id === teacherId);
+        
+        if (!teacher) {
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>Teacher information not found.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Group timetables by day
+        const timetableByDay = {};
+        
+        // Process all entries
+        timetables.forEach(entry => {
+          // Make sure dayOfWeek is a number
+          const dayOfWeek = typeof entry.dayOfWeek === 'string' ? parseInt(entry.dayOfWeek) : entry.dayOfWeek;
+          
+          if (!timetableByDay[dayOfWeek]) {
+            timetableByDay[dayOfWeek] = [];
+          }
+          timetableByDay[dayOfWeek].push(entry);
+        });
+        
+        // Find all days that have classes
+        const daysWithClasses = Object.keys(timetableByDay).map(d => parseInt(d)).sort();
+        
+        // Find min and max periods
+        let minPeriod = 8;
+        let maxPeriod = 1;
+        
+        daysWithClasses.forEach(day => {
+          timetableByDay[day].forEach(entry => {
+            if (entry.period < minPeriod) minPeriod = entry.period;
+            if (entry.period > maxPeriod) maxPeriod = entry.period;
+          });
+        });
+        
+        // Ensure we have at least 8 periods
+        maxPeriod = Math.max(maxPeriod, 8);
+        
+        // Create table for editing with horizontal periods
+        let tableHTML = `
+          <h3>Timetable for ${teacher.name}</h3>
+          <table class="timetable-editor" data-teacher="${teacherId}">
+            <thead>
+              <tr>
+                <th>Day/Period</th>
+                ${Array.from({length: maxPeriod - minPeriod + 1}, (_, i) => i + minPeriod).map(period => `<th>Period ${period}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        // Add rows for each day
+        daysWithClasses.forEach(day => {
+          tableHTML += `
+            <tr>
+              <td class="day-cell">${dayNames[day]}</td>
+          `;
+          
+          // Add cells for each period
+          for (let period = minPeriod; period <= maxPeriod; period++) {
+            // Find all entries for this day and period
+            const entries = timetableByDay[day].filter(e => e.period === period);
+            
+            if (entries.length > 0) {
+              tableHTML += `<td>`;
+              
+              entries.forEach((entry, index) => {
+                if (index > 0) tableHTML += `<hr>`;
+                
+                tableHTML += `
+                  <div class="class-info" data-entry-id="${entry._id}">
+                    Class: ${entry.class}-${entry.section}
+                  </div>
+                  <div class="subject-info">
+                    Subject: ${entry.subject}
+                  </div>
+                  <div class="actions">
+                    <a href="manage-timetable.html?class=${entry.class}&section=${entry.section}" class="btn btn-primary btn-sm">Edit</a>
+                  </div>
+                `;
+              });
+              
+              tableHTML += `</td>`;
+            } else {
+              tableHTML += `
+                <td class="empty-cell">
+                  <div class="no-class">No Class</div>
+                </td>
+              `;
+            }
+          }
+          
+          tableHTML += `</tr>`;
+        });
+        
+        tableHTML += `
+            </tbody>
+          </table>
+          <p class="message info">To make changes to a specific class timetable, click on the Edit button for that class.</p>
+        `;
+        
+        editorArea.innerHTML = tableHTML;
+      }
+      
+      function createTeacherTimetableEditor(teacherId, teacherName) {
+        // Days of the week
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        // Number of periods per day
+        const periodsPerDay = 8;
+        
+        // Get all available classes and sections
+        const classOptions = [...new Set(Array.from(document.querySelectorAll('#class-select option')).map(opt => opt.value).filter(Boolean))];
+        const sectionsByClass = {};
+        
+        // Get subjects from our global list or extract from teachers as fallback
+        const availableSubjects = subjects.length > 0 ? subjects : extractSubjectsFromTeachers();
+
+        // Create table for empty teacher timetable
+        let tableHTML = `
+          <h3>New Timetable for ${teacherName}</h3>
+          <p class="message info">Select classes, sections, and subjects to create a timetable.</p>
+          <table class="timetable-editor" data-teacher="${teacherId}">
+            <thead>
+              <tr>
+                <th>Day/Period</th>
+                ${Array.from({length: periodsPerDay}, (_, i) => i + 1).map(period => `<th>Period ${period}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
+          // dayOfWeek is 0-based (0 = Sunday), so Monday = 1, Tuesday = 2, etc.
+          const dayOfWeek = dayIndex + 1;
+          
+          tableHTML += `
+            <tr>
+              <td class="day-cell">${days[dayIndex]}</td>
+          `;
+          
+          for (let period = 1; period <= periodsPerDay; period++) {
+            tableHTML += `
+              <td>
+                <div class="cell-editor">
+                  <select class="class-select" data-day="${dayOfWeek}" data-period="${period}" onchange="updateSectionOptions(this)">
+                    <option value="">Select Class</option>
+                    ${classOptions.map(className => `<option value="${className}">${className}</option>`).join('')}
+                  </select>
+                  <select class="section-select" data-day="${dayOfWeek}" data-period="${period}" disabled>
+                    <option value="">Select Section</option>
+                  </select>
+                  <select class="subject-select" data-day="${dayOfWeek}" data-period="${period}">
+                    <option value="">Select Subject</option>
+                    ${availableSubjects.map(subject => `<option value="${subject}">${subject}</option>`).join('')}
+                  </select>
+                </div>
+              </td>
+            `;
+          }
+          
+          tableHTML += `</tr>`;
+        }
+        
+        tableHTML += `
+            </tbody>
+          </table>
+          
+          <div class="actions-row">
+            <button id="save-teacher-timetable" class="btn btn-primary">Save Timetable</button>
+          </div>
+        `;
+        
+        editorArea.innerHTML = tableHTML;
+        
+        // Add function to update section options when class is selected
+        window.updateSectionOptions = function(classSelect) {
+          const selectedClass = classSelect.value;
+          const dayOfWeek = classSelect.getAttribute('data-day');
+          const period = classSelect.getAttribute('data-period');
+          const sectionSelect = document.querySelector(`.section-select[data-day="${dayOfWeek}"][data-period="${period}"]`);
+          
+          if (!selectedClass) {
+            sectionSelect.disabled = true;
+            sectionSelect.innerHTML = '<option value="">Select Section</option>';
+            return;
+          }
+          
+          // If we don't have sections for this class yet, fetch them
+          if (!sectionsByClass[selectedClass]) {
+            // Temporarily disable while fetching
+            sectionSelect.disabled = true;
+            sectionSelect.innerHTML = '<option value="">Loading...</option>';
+            
+            // Fetch sections
+            fetch(`/api/teacher/sections/${selectedClass}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              }
+            })
+            .then(response => {
+              if (!response.ok) throw new Error('Failed to fetch sections');
+              return response.json();
+            })
+            .then(sections => {
+              // Store for future use
+              sectionsByClass[selectedClass] = sections;
+              
+              // Update the dropdown
+              sectionSelect.innerHTML = '<option value="">Select Section</option>';
+              sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section;
+                option.textContent = section;
+                sectionSelect.appendChild(option);
+              });
+              
+              sectionSelect.disabled = false;
+            })
+            .catch(error => {
+              console.error('Error fetching sections:', error);
+              
+              // Fallback to predefined sections
+              const fallbackSections = {
+                '1': ['A', 'B', 'C'],
+                '2': ['A', 'B', 'C'],
+                '3': ['A', 'B'],
+                '4': ['A', 'B'],
+                '5': ['A', 'B'],
+                '6': ['A', 'B'],
+                '7': ['A', 'B'],
+                '8': ['A', 'B'],
+                '9': ['A', 'B'],
+                '10': ['A', 'B'],
+                '11': ['Science', 'Commerce', 'Arts'],
+                '12': ['Science', 'Commerce', 'Arts']
+              };
+              
+              // Store for future use
+              sectionsByClass[selectedClass] = fallbackSections[selectedClass] || ['A', 'B'];
+              
+              // Update the dropdown
+              sectionSelect.innerHTML = '<option value="">Select Section</option>';
+              sectionsByClass[selectedClass].forEach(section => {
+                const option = document.createElement('option');
+                option.value = section;
+                option.textContent = section;
+                sectionSelect.appendChild(option);
+              });
+              
+              sectionSelect.disabled = false;
+            });
+          } else {
+            // We already have the sections, just update the dropdown
+            sectionSelect.innerHTML = '<option value="">Select Section</option>';
+            sectionsByClass[selectedClass].forEach(section => {
+              const option = document.createElement('option');
+              option.value = section;
+              option.textContent = section;
+              sectionSelect.appendChild(option);
+            });
+            
+            sectionSelect.disabled = false;
+          }
+        };
+        
+        // Add save button handler
+        document.getElementById('save-teacher-timetable').addEventListener('click', function() {
+          saveTeacherTimetable(teacherId);
+        });
+      }
+      
+      function saveTeacherTimetable(teacherId) {
+        // Show loading spinner
+        loadingSpinner.style.display = 'flex';
+        messageArea.innerHTML = '';
+        
+        const academicYear = academicYearSelect.value;
+        const entries = [];
+        
+        // Process each cell in the timetable
+        document.querySelectorAll('.class-select').forEach(classSelect => {
+          const dayOfWeek = parseInt(classSelect.getAttribute('data-day'));
+          const period = parseInt(classSelect.getAttribute('data-period'));
+          const className = classSelect.value;
+          
+          // Skip if no class selected
+          if (!className) return;
+          
+          // Get corresponding section and subject
+          const sectionSelect = document.querySelector(`.section-select[data-day="${dayOfWeek}"][data-period="${period}"]`);
+          const subjectSelect = document.querySelector(`.subject-select[data-day="${dayOfWeek}"][data-period="${period}"]`);
+          
+          const section = sectionSelect.value;
+          const subject = subjectSelect.value;
+          
+          // Skip if no section or subject selected
+          if (!section || !subject) return;
+          
+          // Create entry object
+          const entry = {
+            class: className,
+            section,
+            dayOfWeek,
+            period,
+            subject,
+            assignedTeacher: teacherId,
+            academicYear
+          };
+          
+          entries.push(entry);
+        });
+        
+        if (entries.length === 0) {
+          loadingSpinner.style.display = 'none';
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>No valid timetable entries found. Please assign at least one class, section, and subject.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Call API to save entries
+        fetch('/api/timetable/bulk', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ entries })
+        })
+        .then(response => {
+          loadingSpinner.style.display = 'none';
+          
+          if (!response.ok) {
+            throw new Error('Failed to save timetable');
+          }
+          
+          return response.json();
+        })
+        .then(data => {
+          // Show success message
+          messageArea.innerHTML = `
+            <div class="message success">
+              <p>Teacher timetable saved successfully!</p>
+              <p>Created: ${data.summary.created}, Updated: ${data.summary.updated}, Errors: ${data.summary.errors}</p>
+            </div>
+          `;
+          
+          // Refresh teacher timetable data after save
+          fetchTeacherTimetable(teacherId);
+        })
+        .catch(error => {
+          loadingSpinner.style.display = 'none';
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>Failed to save timetable. Please try again.</p>
+              <p>${error.message}</p>
+            </div>
+          `;
+          console.error('Error saving teacher timetable:', error);
+        });
+      }
+      
+      // Add back the original saveTimetable function that was accidentally replaced
+      function saveTimetable() {
+        // Show loading spinner
+        loadingSpinner.style.display = 'flex';
+        messageArea.innerHTML = '';
+        
+        // Get table and its data attributes
+        const table = document.querySelector('.timetable-editor');
+        const className = table.getAttribute('data-class');
+        const section = table.getAttribute('data-section');
+        const academicYear = academicYearSelect.value;
+        
+        // Collect timetable entries
+        const entries = [];
+        
+        // Process each subject select element
+        document.querySelectorAll('.subject-select').forEach(subjectSelect => {
+          const dayOfWeek = parseInt(subjectSelect.getAttribute('data-day'));
+          const period = parseInt(subjectSelect.getAttribute('data-period'));
+          const entryId = subjectSelect.getAttribute('data-entry-id');
+          const subject = subjectSelect.value;
+          
+          // Skip if no subject selected
+          if (!subject) return;
+          
+          // Get the corresponding teacher select
+          const teacherSelect = document.querySelector(`.teacher-select[data-day="${dayOfWeek}"][data-period="${period}"]`);
+          const teacherId = teacherSelect.value;
+          
+          // Skip if no teacher selected
+          if (!teacherId) return;
+          
+          // Create entry object
+          const entry = {
+            class: className,
+            section,
+            dayOfWeek,
+            period,
+            subject,
+            assignedTeacher: teacherId,
+            academicYear
+          };
+          
+          // If this is an existing entry, add the ID
+          if (entryId) {
+            entry._id = entryId;
+          }
+          
+          entries.push(entry);
+        });
+        
+        if (entries.length === 0) {
+          loadingSpinner.style.display = 'none';
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>No valid timetable entries found. Please assign at least one subject and teacher.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Call API to save entries
+        fetch('/api/timetable/bulk', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ entries })
+        })
+        .then(response => {
+          loadingSpinner.style.display = 'none';
+          
+          if (!response.ok) {
+            throw new Error('Failed to save timetable');
+          }
+          
+          return response.json();
+        })
+        .then(data => {
+          // Show success message
+          messageArea.innerHTML = `
+            <div class="message success">
+              <p>Timetable saved successfully!</p>
+              <p>Created: ${data.summary.created}, Updated: ${data.summary.updated}, Errors: ${data.summary.errors}</p>
+            </div>
+          `;
+          
+          // Refresh timetable data after save
+          if (viewTypeSelect.value === 'class') {
+            fetchClassTimetable(className, section);
+          } else {
+            fetchTeacherTimetable(teacherSelect.value);
+          }
+        })
+        .catch(error => {
+          loadingSpinner.style.display = 'none';
+          messageArea.innerHTML = `
+            <div class="message error">
+              <p>Failed to save timetable. Please try again.</p>
+              <p>${error.message}</p>
+            </div>
+          `;
+          console.error('Error saving timetable:', error);
+        });
+      }
+    });
+  </script>
+</body>
+</html> 

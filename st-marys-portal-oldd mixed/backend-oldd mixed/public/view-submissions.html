@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Homework Submissions</title>
+    <link rel="stylesheet" href="css/homework.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Submission specific styles */
+        .submission-card {
+            border-left: 4px solid #28a745;
+            margin-bottom: 15px;
+            padding: 18px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .submission-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        
+        .submission-header h3 {
+            margin: 0;
+            color: #343a40;
+            font-size: 1.2rem;
+        }
+        
+        .submission-header span {
+            background-color: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #495057;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .submission-meta {
+            margin-bottom: 12px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .submission-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .submission-meta i {
+            color: #495057;
+        }
+        
+        .submission-notes {
+            background-color: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 3px solid #6c757d;
+        }
+        
+        .submission-notes strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+        
+        .submission-notes p {
+            margin: 0;
+            color: #6c757d;
+            line-height: 1.5;
+        }
+        
+        .submission-attachments a.download-link {
+            margin-top: 0;
+            margin-right: 10px;
+        }
+        
+        .no-submissions {
+            padding: 40px 30px;
+            text-align: center;
+            color: #6c757d;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px dashed #dee2e6;
+        }
+        
+        .no-submissions i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+        
+        .homework-select-container {
+            margin-bottom: 25px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .homework-select-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .homework-select-container select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Return to Dashboard
+                </a>
+            </div>
+            <div class="header-title">
+                <h1><i class="fas fa-file-alt"></i> View Homework Submissions</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="homework-card">
+            <div class="homework-select-container">
+                <label for="homeworkSelect">Select Homework:</label>
+                <select id="homeworkSelect" class="form-control">
+                    <option value="">Loading homework assignments...</option>
+                </select>
+            </div>
+            
+            <div id="submissionsList" class="submissions-container">
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
+                    <p>Please select a homework assignment to view submissions</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Load teacher's homework assignments
+        async function loadHomeworkAssignments() {
+            try {
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                const response = await fetch('/api/homework/teacher', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const homeworkList = await response.json();
+                    console.log('Homework assignments:', homeworkList);
+                    
+                    const select = document.getElementById('homeworkSelect');
+                    select.innerHTML = '<option value="">Select a homework assignment</option>';
+                    
+                    // Filter the homework list to only include those that allow submissions
+                    const submissionEnabledHomework = homeworkList.filter(hw => hw.allowSubmission === true);
+                    
+                    if (submissionEnabledHomework.length === 0) {
+                        select.innerHTML += '<option disabled>No homework with submissions enabled found</option>';
+                    } else {
+                        submissionEnabledHomework.forEach(hw => {
+                            const option = document.createElement('option');
+                            option.value = hw._id;
+                            option.textContent = `${hw.title} (Class ${hw.class}-${hw.section})`;
+                            select.appendChild(option);
+                        });
+                    }
+                    
+                    select.addEventListener('change', loadSubmissions);
+                    
+                    // Check if homework ID is in URL (e.g., from manage page)
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const homeworkId = urlParams.get('id');
+                    
+                    if (homeworkId) {
+                        // Find if the option exists in our dropdown
+                        const option = Array.from(select.options).find(opt => opt.value === homeworkId);
+                        if (option) {
+                            select.value = homeworkId;
+                            loadSubmissions(); // Load submissions for this homework
+                        }
+                    }
+                } else {
+                    console.error('Failed to load homework assignments');
+                    document.getElementById('submissionsList').innerHTML = 
+                        '<div class="no-submissions"><i class="fas fa-exclamation-circle"></i><p>Failed to load homework assignments</p></div>';
+                }
+            } catch (error) {
+                console.error('Error loading homework assignments:', error);
+                document.getElementById('submissionsList').innerHTML = 
+                    '<div class="no-submissions"><i class="fas fa-exclamation-circle"></i><p>Error loading homework assignments</p></div>';
+            }
+        }
+        
+        // Load submissions for selected homework
+        async function loadSubmissions() {
+            const homeworkId = document.getElementById('homeworkSelect').value;
+            if (!homeworkId) {
+                document.getElementById('submissionsList').innerHTML = 
+                    '<div class="no-submissions"><i class="fas fa-file-upload"></i><p>Please select a homework assignment to view submissions</p></div>';
+                return;
+            }
+            
+            try {
+                document.getElementById('submissionsList').innerHTML = 
+                    '<div style="text-align: center; padding: 40px;"><div class="loading-spinner" style="margin: 0 auto 20px;"></div><p>Loading submissions...</p></div>';
+                
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch(`/api/homework/submissions/${homeworkId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const submissions = await response.json();
+                    console.log('Submissions:', submissions);
+                    
+                    if (submissions.length === 0) {
+                        document.getElementById('submissionsList').innerHTML = 
+                            '<div class="no-submissions"><i class="fas fa-inbox"></i><p>No submissions yet for this homework</p></div>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    submissions.forEach(sub => {
+                        html += `
+                        <div class="submission-card">
+                            <div class="submission-header">
+                                <h3>${sub.student?.name || 'Unknown Student'}</h3>
+                                <span>${new Date(sub.submissionDate).toLocaleString()}</span>
+                            </div>
+                            <div class="submission-meta">
+                                <span><i class="fas fa-graduation-cap"></i> Class: ${sub.student?.studentInfo?.class || 'N/A'}-${sub.student?.studentInfo?.section || 'N/A'}</span>
+                                <span><i class="fas fa-clock"></i> Status: ${sub.status}</span>
+                            </div>
+                            ${sub.notes ? `
+                            <div class="submission-notes">
+                                <strong>Notes:</strong>
+                                <p>${sub.notes}</p>
+                            </div>` : ''}
+                            <div class="submission-attachments">
+                                ${sub.attachments && sub.attachments.length > 0 ? 
+                                    sub.attachments.map(att => `
+                                    <a href="${att.path}" target="_blank" class="download-link">
+                                        <i class="fas fa-download"></i> Download ${att.filename}
+                                    </a>`).join('') : 
+                                    '<p>No attachments</p>'}
+                            </div>
+                        </div>`;
+                    });
+                    
+                    document.getElementById('submissionsList').innerHTML = html;
+                } else {
+                    const errorData = await response.json();
+                    console.error('Failed to load submissions:', errorData);
+                    document.getElementById('submissionsList').innerHTML = 
+                        `<div class="no-submissions"><i class="fas fa-exclamation-circle"></i><p>Failed to load submissions: ${errorData.message || 'Unknown error'}</p></div>`;
+                }
+            } catch (error) {
+                console.error('Error loading submissions:', error);
+                document.getElementById('submissionsList').innerHTML = 
+                    '<div class="no-submissions"><i class="fas fa-exclamation-circle"></i><p>Error loading submissions: ' + error.message + '</p></div>';
+            }
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', loadHomeworkAssignments);
+    </script>
+</body>
+</html> 

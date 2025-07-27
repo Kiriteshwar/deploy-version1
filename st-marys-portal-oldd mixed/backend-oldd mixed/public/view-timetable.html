@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Timetable - St. Mary's Portal</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/timetable.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Special header style to match noticeboard */
+    header {
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      color: white;
+      padding: 1rem 0;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    
+    .header-left {
+      flex: 1;
+    }
+    
+    .header-title {
+      flex: 2;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    
+    .header-title h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .back-button {
+      color: white;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      transition: background-color 0.2s;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: none;
+      cursor: pointer;
+      width: fit-content;
+    }
+    
+    .back-button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Additional styles for teacher timetable */
+    .class-info {
+      font-weight: bold;
+      color: #1a73e8;
+      margin-bottom: 4px;
+      font-size: 0.9rem;
+    }
+    
+    .timetable-table td hr {
+      margin: 8px 0;
+      border: 0;
+      border-top: 1px dashed #ddd;
+    }
+    
+    .timetable-table td {
+      padding: 8px;
+      vertical-align: middle;
+    }
+    
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .btn:hover {
+      background-color: #0d47a1;
+    }
+    
+    .btn-primary {
+      background-color: #1a73e8;
+    }
+    
+    .mt-3 {
+      margin-top: 1rem;
+    }
+    
+    /* Timetable styles */
+    .timetable-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    
+    .timetable-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .timetable-title {
+      font-size: 1.75rem;
+      margin: 0;
+      color: #0d47a1;
+      font-weight: 600;
+    }
+    
+    #class-section-info {
+      margin-bottom: 0;
+      margin-top: 0.5rem;
+      font-size: 1.1rem;
+      color: #1a73e8;
+    }
+    
+    .timetable-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .timetable-table th, .timetable-table td {
+      border: 1px solid #ddd;
+      padding: 12px 15px;
+      text-align: center;
+    }
+    
+    .timetable-table th {
+      background-color: #1a73e8;
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .timetable-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .timetable-table tr:hover {
+      background-color: #e8f0fe;
+    }
+    
+    .period-cell {
+      font-weight: 700;
+      background-color: #e8f0fe;
+      color: #0d47a1;
+    }
+    
+    .time-cell {
+      font-size: 0.85rem;
+      color: #666;
+      background-color: #f8f9fa;
+    }
+    
+    .no-class {
+      color: #999;
+      font-style: italic;
+      background-color: #f9f9f9;
+      font-size: 0.9rem;
+    }
+    
+    /* Loading spinner */
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+    }
+    
+    .loading-spinner:after {
+      content: '';
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #1a73e8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Message styling */
+    .message {
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    
+    .message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .message.info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    
+    /* New styles for teacher attendance */
+    .teacher-attendance {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f7f7f7;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    
+    .attendance-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .attendance-button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .present-button {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    .absent-button {
+      background-color: #f44336;
+      color: white;
+    }
+    
+    .reason-input {
+      margin-top: 10px;
+      width: 100%;
+      padding: 8px;
+      display: none;
+    }
+    
+    .teacher-absent {
+      color: #f44336;
+      font-weight: bold;
+    }
+    
+    .attendance-status {
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      display: inline-block;
+      margin-left: 10px;
+    }
+    
+    .status-present {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .status-absent {
+      background-color: #ffebee;
+      color: #c62828;
+    }
+    
+    .status-not-marked {
+      background-color: #f5f5f5;
+      color: #757575;
+    }
+    
+    .absent-teachers-list {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #ffebee;
+      border-radius: 5px;
+      border: 1px solid #ffcdd2;
+    }
+    
+    .absent-teachers-list h3 {
+      color: #c62828;
+      margin-top: 0;
+    }
+    
+    /* Styles for absent teacher highlighting */
+    .teacher-absent {
+      background-color: #ffebee !important;
+    }
+    
+    .teacher-name {
+      font-size: 0.85rem;
+      margin-top: 4px;
+      color: #555;
+      font-style: italic;
+    }
+    
+    .subject-absent {
+      color: #d32f2f !important;
+      font-weight: bold;
+    }
+    
+    .teacher-absent-name {
+      color: #d32f2f !important;
+      font-weight: bold;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .timetable-table {
+        font-size: 0.9rem;
+      }
+      
+      .timetable-table th, .timetable-table td {
+        padding: 8px 10px;
+      }
+      
+      .timetable-title {
+        font-size: 1.5rem;
+      }
+      
+      #class-section-info {
+        font-size: 1rem;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .timetable-table {
+        font-size: 0.8rem;
+      }
+      
+      .timetable-table th, .timetable-table td {
+        padding: 6px 8px;
+      }
+      
+      .teacher-name {
+        font-size: 0.75rem;
+      }
+    }
+    
+    /* Teacher attendance status card */
+    .attendance-status-card {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .attendance-status-present {
+      border-left: 5px solid #28a745;
+    }
+    
+    .attendance-status-absent {
+      border-left: 5px solid #dc3545;
+    }
+    
+    .attendance-status-not_marked {
+      border-left: 5px solid #ffc107;
+    }
+    
+    .status-icon {
+      font-size: 2rem;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .attendance-status-present .status-icon {
+      color: #28a745;
+    }
+    
+    .attendance-status-absent .status-icon {
+      color: #dc3545;
+    }
+    
+    .attendance-status-not_marked .status-icon {
+      color: #ffc107;
+    }
+    
+    .status-text {
+      flex: 1;
+    }
+    
+    .status-text p {
+      margin: 0 0 10px 0;
+      font-size: 1rem;
+    }
+    
+    .status-text strong {
+      color: #495057;
+      font-weight: 600;
+    }
+    
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.875rem;
+    }
+    
+    /* Make break periods more prominent */
+    .break-period {
+      background-color: #f0ad4e !important; /* Darker amber/orange */
+      color: #ffffff !important; /* White text for better contrast */
+      font-weight: bold !important;
+      text-align: center !important;
+    }
+    
+    /* Ensure it applies to all possible break period cells */
+    .timetable-table td.break-period,
+    td.break-period,
+    tr.break-period td {
+      background-color: #f0ad4e !important;
+      color: #ffffff !important;
+      font-weight: bold !important;
+    }
+    
+    /* Apply to period 3, 6, 9, 12 for visual clarity - excluding period 8 which is not a break */
+    .timetable-table tr:nth-child(3) td:not(.period-cell):not(.time-cell),
+    .timetable-table tr:nth-child(6) td:not(.period-cell):not(.time-cell),
+    .timetable-table tr:nth-child(9) td:not(.period-cell):not(.time-cell),
+    .timetable-table tr:nth-child(12) td:not(.period-cell):not(.time-cell) {
+      background-color: #f0ad4e !important;
+      color: #ffffff !important;
+      font-weight: bold !important;
+    }
+    
+    .teacher-class-cell {
+      padding: 8px;
+      background-color: #e8f4ff;
+    }
+    
+    .class-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .class-entry:last-child {
+      border-bottom: none;
+    }
+    
+    .status-absent {
+      color: #f44336;
+      font-weight: bold;
+      margin-left: 6px;
+    }
+  </style>
+</head>
+<script src="js/timetable-data.js"></script>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <a href="dashboard.html" class="back-button">
+          <i class="fas fa-arrow-left"></i>
+          Return to Dashboard
+        </a>
+      </div>
+      <div class="header-title">
+        <h1><i class="fas fa-calendar-alt"></i> My Timetable</h1>
+      </div>
+    </div>
+  </header>
+
+  <main class="timetable-container">
+    <div id="timetable-content">
+      <div class="loading-spinner"></div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      const userRole = localStorage.getItem('user_role');
+      
+      // Check URL parameters for demo purposes
+      const urlParams = new URLSearchParams(window.location.search);
+      const demoTeacher = urlParams.get('teacher');
+      const demoClass = urlParams.get('class');
+      const demoSection = urlParams.get('section');
+      
+      // Log available info
+      console.log('User role:', userRole);
+      console.log('URL params:', { demoTeacher, demoClass, demoSection });
+      
+      // Apply URL parameters for demo/testing purposes
+      if (userRole === 'student' && demoClass && demoSection) {
+        console.log(`Setting demo class/section from URL: ${demoClass}-${demoSection}`);
+        localStorage.setItem('student_info', JSON.stringify({ 
+          class: demoClass, 
+          section: demoSection 
+        }));
+      }
+      
+      if (userRole === 'teacher' && demoTeacher) {
+        console.log(`Setting demo teacher from URL: ${demoTeacher}`);
+        localStorage.setItem('user_name', demoTeacher);
+      }
+      
+      // Get timetable from API
+      fetchTimetable();
+    });
+    
+    // --- CHANGES: Timetable data is now loaded from js/timetable-data.js (window.timetableData) ---
+    // All hardcoded sample data and dynamic generation functions are commented out below for reference.
+    // To update the timetable, edit js/timetable-data.js only.
+    
+    // --- Old sample data and functions (commented out) ---
+    /*
+    const sampleTimetableData = {
+      periods: [...],
+      days: [...],
+      classes: [...]
+    };
+    
+    function formatSampleDataForStudentTimetable(studentClass, studentSection) { ... }
+    function formatSampleDataForTeacherTimetable(teacherName) { ... }
+    function createClass10BTimetable() { ... }
+    function createClass9ATimetable() { ... }
+    function createClass9BTimetable() { ... }
+    function createClass11ATimetable() { ... }
+    function createClass12ATimetable() { ... }
+    */
+    
+    // --- Use static timetable data from window.timetableData ---
+    function renderStudentTimetableWithSampleData() {
+      fetchUserClassAndSection()
+        .then(({ studentClass, studentSection }) => {
+          const timetableByDay = {};
+          const dayIndices = {
+            'Monday': 1,
+            'Tuesday': 2,
+            'Wednesday': 3,
+            'Thursday': 4,
+            'Friday': 5,
+            'Saturday': 6
+          };
+          // Filter timetableData for this class/section
+          const studentClasses = window.timetableData.classes.filter(c => c.class === studentClass && c.section === studentSection);
+          
+          if (studentClasses.length === 0) {
+            document.getElementById('timetable-content').innerHTML = `
+              <div class="message error">
+                <p>No timetable data found for Class ${studentClass}-${studentSection}. Please contact your class teacher.</p>
+              </div>
+            `;
+            return;
+          }
+          
+          studentClasses.forEach(classInfo => {
+            const dayIndex = dayIndices[classInfo.day];
+            if (!timetableByDay[dayIndex]) timetableByDay[dayIndex] = [];
+            timetableByDay[dayIndex].push({
+              period: classInfo.period,
+              subject: classInfo.subject,
+              teacher: classInfo.teacher,
+              isBreak: classInfo.isBreak
+            });
+          });
+          const formattedData = {
+            studentClass: studentClass,
+            studentSection: studentSection,
+            timetable: timetableByDay
+          };
+          renderStudentTimetable(formattedData);
+        })
+        .catch(error => {
+          console.error('Error getting student class/section:', error);
+          document.getElementById('timetable-content').innerHTML = `
+            <div class="message error">
+              <p>Error loading timetable data. Please try again or contact support.</p>
+            </div>
+          `;
+        });
+    }
+    
+    function renderTeacherTimetableWithSampleData() {
+      fetchTeacherInfo()
+        .then(({ teacherName, attendanceStatus }) => {
+          const timetableByDay = {};
+          const dayIndices = {
+            'Monday': 1,
+            'Tuesday': 2,
+            'Wednesday': 3,
+            'Thursday': 4,
+            'Friday': 5,
+            'Saturday': 6
+          };
+          // Filter timetableData for this teacher
+          const teacherClasses = window.timetableData.classes.filter(c => c.teacher === teacherName);
+          
+          if (teacherClasses.length === 0) {
+            document.getElementById('timetable-content').innerHTML = `
+              <div class="message error">
+                <p>No timetable data found for teacher: ${teacherName}. Please contact the admin.</p>
+              </div>
+            `;
+            return;
+          }
+          
+          teacherClasses.forEach(classInfo => {
+            const dayIndex = dayIndices[classInfo.day];
+            const classKey = `${classInfo.class}-${classInfo.section}`;
+            if (!timetableByDay[dayIndex]) timetableByDay[dayIndex] = {};
+            if (!timetableByDay[dayIndex][classKey]) timetableByDay[dayIndex][classKey] = [];
+            timetableByDay[dayIndex][classKey].push({
+              period: classInfo.period,
+              subject: classInfo.subject,
+              class: classInfo.class,
+              section: classInfo.section
+            });
+          });
+          const formattedData = {
+            teacherName: teacherName,
+            attendanceStatus: attendanceStatus,
+            timetable: timetableByDay
+          };
+          renderTeacherTimetable(formattedData);
+        })
+        .catch(error => {
+          console.error('Error getting teacher info:', error);
+          document.getElementById('timetable-content').innerHTML = `
+            <div class="message error">
+              <p>Error loading teacher timetable data. Please try again or contact support.</p>
+            </div>
+          `;
+        });
+    }
+    // --- End of timetable static data integration ---
+    
+    // Get timetable from API
+    fetchTimetable();
+    
+    function fetchTimetable() {
+      // Show loading spinner
+      document.getElementById('timetable-content').innerHTML = '<div class="loading-spinner"></div>';
+      
+      // Get user role for appropriate display
+      const userRole = localStorage.getItem('user_role');
+      
+      // For testing: use sample data directly (comment this out when API is ready)
+      if (userRole === 'student') {
+        renderStudentTimetableWithSampleData();
+        return;
+      } else if (userRole === 'teacher') {
+        // First get the teacher name
+        fetchTeacherInfo().then(({ teacherName }) => {
+          console.log(`Teacher name confirmed: ${teacherName}`);
+          renderTeacherTimetableWithSampleData();
+        }).catch(error => {
+          console.error('Error fetching teacher info:', error);
+          renderTeacherTimetableWithSampleData();
+        });
+        return;
+      }
+      
+      // Get the appropriate endpoint based on user role
+      let endpoint = '';
+      if (userRole === 'student') {
+        endpoint = '/api/timetable/student';
+        console.log('Using student endpoint:', endpoint);
+        console.log('User role:', userRole);
+      } else if (userRole === 'teacher') {
+        // For teachers, we need their name
+        const userName = localStorage.getItem('user_name');
+        console.log('Teacher name from localStorage:', userName);
+        console.log('User role:', userRole);
+        
+        if (!userName) {
+          document.getElementById('timetable-content').innerHTML = `
+            <div class="message error">
+              <p>Could not determine your name. Please log in again.</p>
+            </div>
+          `;
+          return;
+        }
+        endpoint = `/api/timetable/teacher`;
+      } else {
+        document.getElementById('timetable-content').innerHTML = `
+          <div class="message error">
+            <p>Access denied. You are not authorized to view timetables.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      console.log('Fetching timetable from:', endpoint);
+      console.log('Auth token:', localStorage.getItem('auth_token'));
+      
+      fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        if (!response.ok) {
+          // Try to extract error message from response
+          return response.json().then(errData => {
+            console.error('Error response data:', errData);
+            throw new Error(`Failed to fetch timetable: ${response.status} ${response.statusText} - ${errData.message || 'Unknown error'}`);
+          }).catch(err => {
+            if (err.message.includes('JSON')) {
+              throw new Error(`Failed to fetch timetable: ${response.status} ${response.statusText}`);
+            }
+            throw err;
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Timetable data:', data);
+        
+        // Check if we got empty data, if so use sample data
+        if (!data || !data.timetable || Object.keys(data.timetable).length === 0) {
+          console.log('No timetable data from API, using sample data');
+          if (userRole === 'student') {
+            renderStudentTimetableWithSampleData();
+          } else if (userRole === 'teacher') {
+            renderTeacherTimetableWithSampleData();
+          }
+          return;
+        }
+        
+        // If we have data, use it
+        if (userRole === 'student') {
+          renderStudentTimetable(data);
+        } else if (userRole === 'teacher') {
+          renderTeacherTimetable(data);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching timetable:', error);
+        
+        // Use sample data instead when API fails
+        console.log('API error, using sample data instead');
+        if (userRole === 'student') {
+          renderStudentTimetableWithSampleData();
+        } else if (userRole === 'teacher') {
+          renderTeacherTimetableWithSampleData();
+        }
+      });
+    }
+    
+    // Function to render student timetable with sample data
+    function renderStudentTimetableWithSampleData() {
+      // Get student class and section from API or user data
+      fetchUserClassAndSection()
+        .then(({ studentClass, studentSection }) => {
+          console.log(`Rendering timetable for Class ${studentClass}-${studentSection}`);
+          
+          // Create a timetable object in the format expected by the renderer
+          const formattedData = {
+            studentClass: studentClass,
+            studentSection: studentSection,
+            timetable: formatSampleDataForStudentTimetable(studentClass, studentSection)
+          };
+          
+          // Render the timetable
+          renderStudentTimetable(formattedData);
+        })
+        .catch(error => {
+          console.error('Error getting student class/section:', error);
+          document.getElementById('timetable-content').innerHTML = `
+            <div class="message error">
+              <p>Error loading student timetable data. Please try again or contact support.</p>
+            </div>
+          `;
+        });
+    }
+    
+    // Function to render teacher timetable with sample data
+    function renderTeacherTimetableWithSampleData() {
+      // Get teacher info from API or local storage
+      fetchTeacherInfo()
+        .then(({ teacherName, attendanceStatus }) => {
+          console.log(`Rendering timetable for teacher: ${teacherName}`);
+          
+          // Create a timetable object in the format expected by the renderer
+          const formattedData = {
+            teacherName: teacherName,
+            attendanceStatus: attendanceStatus, 
+            timetable: formatSampleDataForTeacherTimetable(teacherName)
+          };
+          
+          // Render the timetable
+          renderTeacherTimetable(formattedData);
+        })
+        .catch(error => {
+          console.error('Error getting teacher info:', error);
+          document.getElementById('timetable-content').innerHTML = `
+            <div class="message error">
+              <p>Error loading teacher timetable data. Please try again or contact support.</p>
+            </div>
+          `;
+        });
+    }
+    
+    // Helper function to format sample data for teacher timetable
+    function formatSampleDataForTeacherTimetable(teacherName) {
+      // Convert the sample data to the expected format
+      const timetableByDay = {};
+      
+      console.log(`Formatting timetable data for teacher: ${teacherName}`);
+      
+      // Group classes by day
+      const dayIndices = {
+        'Monday': 1,
+        'Tuesday': 2,
+        'Wednesday': 3,
+        'Thursday': 4,
+        'Friday': 5,
+        'Saturday': 6
+      };
+      
+      // Filter classes for this teacher
+      const teacherClasses = window.timetableData.classes.filter(c => c.teacher === teacherName);
+      
+      if (teacherClasses.length === 0) {
+        throw new Error(`No timetable data found for teacher: ${teacherName}`);
+      }
+      
+      // Group by day
+      teacherClasses.forEach(classInfo => {
+        const dayIndex = dayIndices[classInfo.day];
+        if (!timetableByDay[dayIndex]) {
+          timetableByDay[dayIndex] = {};
+        }
+        
+        const classKey = `${classInfo.class}-${classInfo.section}`;
+        if (!timetableByDay[dayIndex][classKey]) {
+          timetableByDay[dayIndex][classKey] = [];
+        }
+        
+        timetableByDay[dayIndex][classKey].push({
+          period: classInfo.period,
+          subject: classInfo.subject,
+          class: classInfo.class,
+          section: classInfo.section
+        });
+      });
+      
+      return timetableByDay;
+    }
+    
+    // Function to fetch user's class and section from API or localStorage
+    async function fetchUserClassAndSection() {
+      try {
+          const token = localStorage.getItem('auth_token');
+          if (!token) throw new Error('No auth token found');
+            const response = await fetch('/api/student/profile', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            if (response.ok) {
+              const data = await response.json();
+          let studentClass = '';
+          let studentSection = '';
+              if (data.user && data.user.studentInfo) {
+                studentClass = data.user.studentInfo.class || '';
+                studentSection = data.user.studentInfo.section || '';
+              } else if (data.user) {
+                studentClass = data.user.class || '';
+                studentSection = data.user.section || '';
+              } else if (data.studentInfo) {
+                studentClass = data.studentInfo.class || '';
+                studentSection = data.studentInfo.section || '';
+              } else {
+                studentClass = data.class || '';
+                studentSection = data.section || '';
+              }
+              if (studentClass && studentSection) {
+            return { studentClass, studentSection };
+          } else {
+            throw new Error('Class and section not found in API response');
+          }
+        } else {
+          throw new Error('Failed to fetch student profile');
+            }
+          } catch (error) {
+        // Show error in timetable content
+        document.getElementById('timetable-content').innerHTML = `
+          <div class="message error">
+            <p>Could not determine your class and section. Please contact your class teacher or try logging in again.</p>
+          </div>
+        `;
+        throw error;
+      }
+    }
+    
+    // Function to fetch teacher info
+    async function fetchTeacherInfo() {
+      try {
+        let teacherName = '';
+        let attendanceStatus = 'not_marked';
+        
+        // Try from localStorage (but do not set anything)
+        try {
+          const userData = JSON.parse(localStorage.getItem('user_data')) || {};
+          if (userData.name) {
+            teacherName = userData.name;
+          } else if (userData.user && userData.user.name) {
+            teacherName = userData.user.name;
+          }
+        } catch (e) {}
+        if (!teacherName) {
+          teacherName = localStorage.getItem('user_name') || '';
+          }
+        if (!teacherName) {
+          try {
+            const userInfo = JSON.parse(localStorage.getItem('user_info')) || {};
+            teacherName = userInfo.name || '';
+          } catch (e) {}
+        }
+        attendanceStatus = localStorage.getItem('attendance_status') || 'not_marked';
+        
+        // If still not found, try from API
+        if (!teacherName) {
+          const token = localStorage.getItem('auth_token');
+          if (!token) throw new Error('No auth token found');
+          try {
+            const response = await fetch('/api/auth/profile', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            if (response.ok) {
+              const data = await response.json();
+              teacherName = data.name || '';
+            }
+          } catch (apiError) {
+            console.error('API error in fetchTeacherInfo:', apiError);
+          }
+        }
+        // If still no teacher name, show error
+        if (!teacherName) {
+          document.getElementById('timetable-content').innerHTML = `
+            <div class="message error">
+              <p>Could not determine your name. Please log in again.</p>
+            </div>
+          `;
+          throw new Error('Teacher name not found');
+        }
+        return { teacherName, attendanceStatus };
+      } catch (error) {
+        console.error('Error in fetchTeacherInfo:', error);
+        document.getElementById('timetable-content').innerHTML = `
+          <div class="message error">
+            <p>Could not determine your name. Please log in again.</p>
+          </div>
+        `;
+        throw error;
+      }
+    }
+    
+    function renderStudentTimetable(data) {
+      // First fetch absent teachers with error handling
+      // Removed fetchAbsentTeachers()
+      
+          // Set the title with the header HTML - using the correct class and section from the data
+          const timetableHeaderHtml = `
+            <div class="timetable-header">
+              <div>
+                <h2 class="timetable-title">Weekly Timetable</h2>
+                <p class="class-info">Class: ${data.studentClass || '-'} | Section: ${data.studentSection || '-'}</p>
+              </div>
+            </div>
+          `;
+          
+          // Define day names and period times
+          const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          const periodTimes = [
+              '9:30 - 10:15 AM',
+              '10:15 - 11:00 AM',
+              '11:00 - 11:15 AM', // Interval
+              '11:15 - 12:00 PM',
+              '12:00 - 12:45 PM',
+              '12:45 - 1:20 PM', // Lunch Break
+              '1:20 - 2:00 PM',
+              '2:00 - 2:40 PM',
+              '2:40 - 2:50 PM', // Break
+              '2:50 - 3:30 PM',
+              '3:30 - 4:10 PM',
+              '4:10 - 4:20 PM' // Diary Period
+          ];
+          
+          // Check if timetable data exists
+          if (!data.timetable || Object.keys(data.timetable).length === 0) {
+            document.getElementById('timetable-content').innerHTML = `
+              ${timetableHeaderHtml}
+              <div class="message info">
+                <p>No timetable data available for your class. Please contact your class teacher.</p>
+              </div>
+            `;
+            return;
+          }
+          
+          // Create a direct view of the timetable with all days of the week
+          // This will display the timetable in a more professional format with days as columns
+          
+          // Create table HTML with fixed columns for each day of the week
+          let tableHTML = `
+            ${timetableHeaderHtml}
+            <table class="timetable-table">
+              <thead>
+                <tr>
+                  <th>PERIOD</th>
+                  <th>TIME</th>
+                  <th>MONDAY</th>
+                  <th>TUESDAY</th>
+                  <th>WEDNESDAY</th>
+                  <th>THURSDAY</th>
+                  <th>FRIDAY</th>
+                  <th>SATURDAY</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          
+          // Add rows for each period (1-12)
+          for (let p = 1; p <= 12; p++) {
+            // Check if this is a break period
+            const isBreak = p === 3 || p === 6 || p === 9 || p === 12;
+            
+            tableHTML += `
+              <tr>
+                <td class="period-cell">Period ${p}</td>
+                <td class="time-cell">${periodTimes[p-1] || ''}</td>
+            `;
+            
+            // Add cells for each day (Monday to Saturday)
+            for (let day = 1; day <= 6; day++) {
+              const periodData = (data.timetable[day] || []).find(period => period.period === p);
+              
+              if (periodData) {
+                // Check if it's a break period
+                if (periodData.isBreak) {
+                  tableHTML += `<td class="break-period">${periodData.subject}</td>`;
+                } else {
+                  // Check if teacher is absent
+                  const teacherName = periodData.assignedTeacher?.name || periodData.teacher || '';
+              // Removed absent teacher logic
+                  tableHTML += `
+                <td>
+                  <div>${periodData.subject}</div>
+                  ${teacherName ? `<div class="teacher-name">${teacherName}</div>` : ''}
+                    </td>
+                  `;
+                }
+              } else if (isBreak) {
+                // For break periods that don't have data, display them as breaks anyway
+                let breakName = '';
+                if (p === 3) breakName = 'Interval';
+                else if (p === 6) breakName = 'Lunch Break';
+                else if (p === 9) breakName = 'Break';
+                else if (p === 12) breakName = 'Diary Period';
+                
+                tableHTML += `<td class="break-period">${breakName}</td>`;
+              } else {
+                tableHTML += '<td class="no-class">No Class</td>';
+              }
+            }
+            
+            tableHTML += '</tr>';
+          }
+          
+          tableHTML += '</tbody></table>';
+          
+          document.getElementById('timetable-content').innerHTML = tableHTML;
+    }
+    
+    function renderTeacherTimetable(data) {
+      // Ensure we have a teacher name, even if data is incomplete
+              const teacherName = data.teacherName || localStorage.getItem('user_name') || 'Teacher User';
+      
+      // Display the teacher name in the console for debugging
+      console.log(`Rendering timetable for teacher: ${teacherName}`);
+      
+      // First fetch absent teachers with error handling
+      // Removed fetchAbsentTeachers()
+          
+          // Set the title and teacher info with the verified teacher name
+          const timetableHeaderHtml = `
+            <div class="timetable-header">
+              <div>
+                <h2 class="timetable-title">Weekly Timetable</h2>
+            <p class="class-info">Teacher: ${teacherName}</p>
+              </div>
+            </div>
+          `;
+          
+          // Define day names and period times
+          const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          const periodTimes = [
+            '9:30 - 10:15 AM',
+            '10:15 - 11:00 AM',
+            '11:00 - 11:15 AM', // Interval
+            '11:15 - 12:00 PM',
+            '12:00 - 12:45 PM',
+            '12:45 - 1:20 PM', // Lunch Break
+            '1:20 - 2:00 PM',
+            '2:00 - 2:40 PM',
+            '2:40 - 2:50 PM', // Break
+            '2:50 - 3:30 PM',
+            '3:30 - 4:10 PM',
+            '4:10 - 4:20 PM' // Diary Period
+          ];
+          
+          // Check if timetable data exists
+          if (!data.timetable || Object.keys(data.timetable).length === 0) {
+            document.getElementById('timetable-content').innerHTML = `
+              ${timetableHeaderHtml}
+              <div class="message info">
+                <p>No timetable data available for you. Please contact the admin.</p>
+              </div>
+            `;
+            return;
+          }
+          
+          console.log('Teacher timetable data:', data);
+          
+          // Create a direct view of the timetable with all days of the week
+          // This will display the timetable in a more professional format with days as columns
+          
+          // Create table HTML with fixed columns for each day of the week
+          let tableHTML = `
+            ${timetableHeaderHtml}
+            <table class="timetable-table">
+              <thead>
+                <tr>
+                  <th>PERIOD</th>
+                  <th>TIME</th>
+                  <th>MONDAY</th>
+                  <th>TUESDAY</th>
+                  <th>WEDNESDAY</th>
+                  <th>THURSDAY</th>
+                  <th>FRIDAY</th>
+                  <th>SATURDAY</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          
+          // Add rows for each period (1-12)
+          for (let p = 1; p <= 12; p++) {
+            // Check if this is a break period
+            const isBreak = p === 3 || p === 6 || p === 9 || p === 12;
+            
+            tableHTML += `
+              <tr>
+                <td class="period-cell">Period ${p}</td>
+                <td class="time-cell">${periodTimes[p-1] || ''}</td>
+            `;
+            
+            // Add cells for each day (Monday to Saturday)
+            for (let day = 1; day <= 6; day++) {
+              // Handle cases where data.timetable[day] might be undefined or not an object
+              const dayData = data.timetable[day] || {};
+              
+              if (isBreak) {
+                // For break periods, always display them consistently
+                let breakName = '';
+                if (p === 3) breakName = 'Interval';
+                else if (p === 6) breakName = 'Lunch Break';
+                else if (p === 9) breakName = 'Break';
+                else if (p === 12) breakName = 'Diary Period';
+                
+                tableHTML += `<td class="break-period">${breakName}</td>`;
+              } else if (typeof dayData === 'object') {
+                // Get class keys and check if there's any class for this period
+                const classKeys = Object.keys(dayData);
+                let hasClass = false;
+                let classHTML = '';
+                
+                classKeys.forEach(classKey => {
+                  // Make sure dayData[classKey] is an array before trying to find
+                  const classDataArray = Array.isArray(dayData[classKey]) ? dayData[classKey] : [];
+                  const classData = classDataArray.find(c => c && c.period === p);
+                  
+                  if (classData) {
+                    hasClass = true;
+                    classHTML += `
+                      <div class="class-entry">
+                        <strong>${classKey}</strong> - ${classData.subject}
+                      </div>
+                    `;
+                  }
+                });
+                
+                if (hasClass) {
+                  tableHTML += `<td class="teacher-class-cell">${classHTML}</td>`;
+                } else {
+                  tableHTML += '<td class="no-class">No Class</td>';
+                }
+              } else {
+                tableHTML += '<td class="no-class">No Class</td>';
+              }
+            }
+            
+            tableHTML += '</tr>';
+          }
+          
+          tableHTML += '</tbody></table>';
+          
+      // Removed extra styling for teacher timetable
+          document.getElementById('timetable-content').innerHTML = tableHTML;
+    }
+    
+    // Removed fetchAbsentTeachers function (delete the entire function)
+    
+    // Helper function to format sample data for student timetable
+    function formatSampleDataForStudentTimetable(studentClass, studentSection) {
+      // Convert the sample data to the expected format
+      const timetableByDay = {};
+      
+      console.log(`Formatting timetable for Class ${studentClass}-${studentSection}`);
+      
+      // Group classes by day
+      const dayIndices = {
+        'Monday': 1,
+        'Tuesday': 2,
+        'Wednesday': 3,
+        'Thursday': 4,
+        'Friday': 5,
+        'Saturday': 6
+      };
+      
+      // Filter classes for this student's class and section directly from timetable data
+      const studentClasses = window.timetableData.classes.filter(c => 
+        c.class === studentClass && c.section === studentSection
+      );
+      
+      if (studentClasses.length === 0) {
+        throw new Error(`No timetable data found for Class ${studentClass}-${studentSection}`);
+      }
+      
+      // Group by day
+      studentClasses.forEach(classInfo => {
+        const dayIndex = dayIndices[classInfo.day];
+        if (!timetableByDay[dayIndex]) {
+          timetableByDay[dayIndex] = [];
+        }
+        
+        timetableByDay[dayIndex].push({
+          period: classInfo.period,
+          subject: classInfo.subject,
+          teacher: classInfo.teacher,
+          isBreak: classInfo.isBreak
+        });
+      });
+      
+      return timetableByDay;
+    }
+    
+    // Note: All custom timetable generation functions have been removed.
+    // Timetable data is now managed entirely through js/timetable-data.js
+  </script>
+</body>
+</html>

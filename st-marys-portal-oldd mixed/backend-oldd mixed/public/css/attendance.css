@@ -1,0 +1,483 @@
+/* Reset and Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f0f2f5;
+    color: #1a1a1a;
+    line-height: 1.6;
+}
+
+header {
+    background: linear-gradient(135deg, #1a73e8, #0d47a1);
+    color: white;
+    padding: 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    display: flex;
+    align-items: stretch;
+    min-height: 64px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-title {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2rem;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.back-button i {
+    font-size: 1.1rem;
+}
+
+header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+header h1 i {
+    font-size: 1.5rem;
+}
+
+/* Container Layout */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+    display: grid;
+    gap: 2rem;
+}
+
+/* Card Design */
+.card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+h2 {
+    margin-bottom: 1.5rem;
+    color: #1a1a1a;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Progress Bar */
+.progress-container {
+    background-color: #e8eef7;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 24px;
+    margin-bottom: 1.5rem;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+    width: 100%;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: width 0.8s ease-out;
+    border-radius: 12px;
+}
+
+/* Progress bar color variants */
+.progress-bar.high {
+    background: linear-gradient(90deg, #34c759, #28a745);
+}
+
+.progress-bar.medium {
+    background: linear-gradient(90deg, #ffc107, #f7b500);
+}
+
+.progress-bar.low {
+    background: linear-gradient(90deg, #dc3545, #c82333);
+}
+
+/* Status Colors */
+.status-present {
+    color: #28a745;
+}
+
+.status-absent {
+    color: #dc3545;
+}
+
+.status-no-session {
+    color: #6c757d;
+}
+
+/* Attendance Summary */
+.attendance-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.attendance-summary span {
+    padding: 1rem;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    text-align: center;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.overall-percent {
+    margin-top: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Subject Cards */
+.subject-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.subject-card {
+    padding: 1.5rem;
+    border-radius: 16px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.subject-card:hover {
+    transform: translateY(-4px);
+}
+
+.subject-card h3 {
+    margin-bottom: 1rem;
+    color: #1a73e8;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.subject-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.subject-stats span {
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background-color: #f8f9fa;
+}
+
+.subject-percent {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+/* Daily Attendance */
+.daily-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.daily-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.daily-card .date {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1a73e8;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.periods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.period {
+    padding: 1rem;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+}
+
+.period-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.period-number {
+    font-weight: 600;
+}
+
+.period-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+/* Loading state */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #1a73e8;
+    font-size: 1.2rem;
+}
+
+.loading::before {
+    content: '';
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    border: 3px solid #1a73e8;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Error message styling */
+.error-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    background-color: #fff3f3;
+    border: 1px solid #ffcdd2;
+    border-radius: 12px;
+    color: #d32f2f;
+    margin: 1rem 0;
+}
+
+.error-message i {
+    font-size: 2rem;
+}
+
+.error-message p {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+
+    .attendance-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .subject-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .periods {
+        grid-template-columns: 1fr;
+    }
+
+    .header-content {
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    .header-left {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 0.75rem 1rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header-title {
+        padding: 1rem;
+    }
+
+    .back-button {
+        font-size: 0.9rem;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+  header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  }
+  .container {
+    padding: 0 2vw !important;
+    max-width: 100vw !important;
+  }
+  .attendance-card, .form-container, .attendance-table {
+    border-radius: 8px !important;
+    padding: 12px 6px !important;
+    font-size: 15px !important;
+    margin-bottom: 16px !important;
+  }
+  .attendance-table {
+    width: 100vw !important;
+    min-width: 600px !important;
+    overflow-x: auto !important;
+    display: block !important;
+  }
+  .attendance-table th, .attendance-table td {
+    font-size: 13px !important;
+    padding: 0.5rem 0.3rem !important;
+  }
+  .attendance-table th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+    background: #f8f9fa !important;
+  }
+  .btn, .submit-btn {
+    width: 100% !important;
+    font-size: 1.05rem !important;
+    padding: 14px 0 !important;
+    border-radius: 6px !important;
+    margin-bottom: 8px !important;
+  }
+}
+
+/* Status-specific styles */
+.period.status-present {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.period.status-absent {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+.period.status-no-session {
+    background-color: #e9ecef;
+    border: 1px solid #dee2e6;
+}
+
+/* Remove the animation that might be interfering */
+@keyframes progressFill {
+    from { width: 0; }
+    to { width: var(--progress-width); }
+}
+
+/* Remove the animation from progress bar */
+.progress-bar {
+    animation: none;
+}
+
+/* Improved scrollbar styling */
+.daily-attendance {
+    scrollbar-width: thin;
+    scrollbar-color: #1a73e8 #f0f2f5;
+}
+
+.daily-attendance::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.daily-attendance::-webkit-scrollbar-track {
+    background: #f0f2f5;
+    border-radius: 4px;
+}
+
+.daily-attendance::-webkit-scrollbar-thumb {
+    background: #1a73e8;
+    border-radius: 4px;
+}
+
+.daily-attendance::-webkit-scrollbar-thumb:hover {
+    background: #1557b0;
+}
+  

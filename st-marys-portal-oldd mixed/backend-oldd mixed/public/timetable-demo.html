@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timetable Demo - St. Mary's Portal</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      color: #1a73e8;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    
+    p {
+      color: #555;
+      margin-bottom: 20px;
+    }
+    
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+      background-color: #1a73e8;
+      color: white;
+      padding: 15px;
+    }
+    
+    .card-title {
+      margin: 0;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .card-body {
+      padding: 15px;
+    }
+    
+    .card-text {
+      color: #666;
+      margin-bottom: 15px;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #1a73e8;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .btn:hover {
+      background-color: #0d47a1;
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #888;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>St. Mary's School Timetable Demo</h1>
+      <p>View sample timetables for students and teachers</p>
+    </header>
+    
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-user-graduate"></i> Student View</h2>
+        </div>
+        <div class="card-body">
+          <p class="card-text">View a sample student timetable for Class 10-A showing all subjects and teachers.</p>
+          <a href="student-timetable.html" class="btn">View Student Timetable</a>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-chalkboard-teacher"></i> Teacher View</h2>
+        </div>
+        <div class="card-body">
+          <p class="card-text">View a sample teacher timetable showing all assigned classes and attendance status.</p>
+          <a href="teacher-timetable.html" class="btn">View Teacher Timetable</a>
+        </div>
+      </div>
+    </div>
+    
+    <footer>
+      <p>St. Mary's School Portal - Timetable Module Demo</p>
+    </footer>
+  </div>
+</body>
+</html> 

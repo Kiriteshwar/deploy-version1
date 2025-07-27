@@ -1,0 +1,602 @@
+<!-- public/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - St. Mary's Portal</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* Teacher attendance button styling */
+    .attendance-status-wrapper {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f7f7f7;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      display: none;
+    }
+
+    .attendance-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .attendance-button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .present-button {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .absent-button {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .reason-input {
+      margin-top: 10px;
+      width: 100%;
+      padding: 8px;
+      display: none;
+    }
+
+    .attendance-status {
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      display: inline-block;
+      margin-left: 10px;
+    }
+
+    .status-present {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-absent {
+      background-color: #ffebee;
+      color: #c62828;
+    }
+
+    .status-not-marked {
+      background-color: #f5f5f5;
+      color: #757575;
+    }
+
+    /* Profile Dropdown Modern Styles */
+    .profile-dropdown {
+      position: relative;
+      display: inline-block;
+      margin-left: auto;
+    }
+
+    .profile-collapsed {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px 18px 8px 8px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+      transition: background 0.2s;
+      border: 1px solid #e0e0e0;
+      min-width: 140px;
+    }
+
+    .profile-collapsed:hover {
+      background: #f3f3f3;
+    }
+
+    .profile-pic-collapsed {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+
+    .dropdown-arrow {
+      margin-left: 8px;
+      font-size: 1.1em;
+      color: #888;
+    }
+
+    .profile-expanded {
+      position: absolute;
+      right: 0;
+      top: 48px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      min-width: 260px;
+      z-index: 100;
+      padding: 1.2rem 1.2rem 0.5rem 1.2rem;
+      animation: fadeIn 0.2s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-direction: row;
+      gap: 16px;
+    }
+
+    .profile-pic-large {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e0e0e0;
+      margin-right: 0;
+    }
+
+    .profile-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+
+    .profile-name {
+      font-size: 1.2em;
+      font-weight: 600;
+      margin-bottom: 0;
+      margin-right: 0.5em;
+      white-space: nowrap;
+    }
+
+    .profile-details {
+      font-size: 0.98em;
+      color: #666;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .profile-details span {
+      margin-bottom: 2px;
+      display: block;
+    }
+
+    .profile-actions {
+      margin-bottom: 0.7rem;
+    }
+
+    .profile-action-link {
+      display: flex;
+      align-items: center;
+      color: #1976d2;
+      text-decoration: none;
+      font-size: 1em;
+      margin-bottom: 0.5em;
+      font-weight: 500;
+    }
+
+    .profile-action-link:hover {
+      text-decoration: underline;
+    }
+
+    .profile-divider {
+      border-top: 1px solid #eee;
+      margin: 0.7rem 0 0.7rem 0;
+    }
+
+    .profile-logout-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      color: #d32f2f;
+      font-size: 1em;
+      font-weight: 500;
+      padding: 0.7em 0;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+
+    .profile-logout-btn:hover {
+      background: #fbe9e7;
+    }
+
+    .highlight-username {
+      color: #1976d2;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+
+    .profile-action-link {
+      display: flex;
+      align-items: center;
+      color: #1976d2;
+      text-decoration: none;
+      font-size: 1.08em;
+      font-weight: 600;
+      padding: 0.5em 0;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .profile-action-link:hover {
+      background: #f0f7ff;
+      text-decoration: none;
+    }
+
+    .settings-text {
+      font-size: 1.08em;
+      font-weight: 600;
+    }
+
+    .profile-divider {
+      border-top: 1.5px solid #eee;
+      margin: 0.7rem 0 0.7rem 0;
+    }
+
+    .profile-logout-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      color: #d32f2f;
+      font-size: 1.08em;
+      font-weight: 700;
+      padding: 0.9em 0;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.15s;
+      margin-top: 0.2em;
+      letter-spacing: 0.5px;
+    }
+
+    .profile-logout-btn:hover {
+      background: #fbe9e7;
+      color: #b71c1c;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard-wrapper">
+    <header class="dashboard-header" style="display: flex; align-items: center; justify-content: space-between;">
+      <h2 style="margin: 0 1.5rem 0 0; font-weight: bold;">Welcome, <span id="user-name"
+          class="highlight-username">User</span></h2>
+      <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-collapsed" id="profileCollapsed">
+          <img src="default-avatar.jpg" alt="Profile" id="profile-pic-collapsed" class="profile-pic-collapsed">
+          <span id="profile-name-collapsed">User</span>
+          <span class="dropdown-arrow">&#9662;</span>
+        </div>
+        <div class="profile-expanded" id="profileExpanded" style="display:none;">
+          <div class="profile-header">
+            <img src="default-avatar.jpg" alt="Profile" id="profile-pic" class="profile-pic-large">
+            <div class="profile-info">
+              <div class="profile-name" id="profile-name">User</div>
+              <div class="profile-details">
+                <span id="profile-roll" style="display:none">Roll: Loading...</span>
+                <span id="profile-class" style="display:none">Class: Loading...</span>
+                <span id="profile-section" style="display:none">Section: Loading...</span>
+              </div>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <a href="#" id="account-settings-link" class="profile-action-link"><span
+                style="margin-right:8px;">&#9881;</span> <span class="settings-text">Settings</span></a>
+          </div>
+          <div class="profile-divider"></div>
+          <button id="logout-btn" class="profile-logout-btn">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- <div class="dashboard-info">
+      <p>Email: <span id="user-email"></span></p>
+    </div> -->
+
+    <!-- Teacher Attendance Status - Only visible for teachers -->
+    <div id="teacher-attendance-status" class="attendance-status-wrapper">
+      <h3>Mark Your Attendance Today</h3>
+      <p>Please mark your attendance for today's classes:</p>
+      <div class="attendance-buttons">
+        <button id="present-button" class="attendance-button present-button">Mark as Present</button>
+        <button id="absent-button" class="attendance-button absent-button">Mark as Absent</button>
+      </div>
+      <textarea id="absence-reason" class="reason-input" placeholder="Please provide reason for absence (required)"
+        rows="3"></textarea>
+
+      <div id="attendance-status" style="margin-top: 15px;">
+        Your attendance status: <span id="current-attendance-status" class="attendance-status status-not-marked">Not
+          Marked</span>
+      </div>
+    </div>
+
+    <div class="card-container">
+      <!-- Student-specific cards -->
+      <div class="dashboard-card student-only" id="attendance-card">📅 Attendance</div>
+      <div class="dashboard-card student-only" id="homework-card">📚 Homework</div>
+      <div class="dashboard-card student-only" id="results-card">📝 Exam Results</div>
+      <div class="dashboard-card student-only" id="timetable-card">🕒 Timetable</div>
+      <div class="dashboard-card student-only" id="fees-card">💰 Fee Details</div>
+      <div class="dashboard-card student-only" id="complaints-card">💬 Complaints & Remarks</div>
+
+      <!-- Teacher-specific cards -->
+      <div class="dashboard-card teacher-only" id="mark-attendance-card">📋 Mark Attendance</div>
+      <div class="dashboard-card teacher-only" id="teacher-attendance-card">🔄 Mark My Attendance</div>
+      <div class="dashboard-card teacher-only" id="assign-homework-card">📖 Assign Homework</div>
+      <div class="dashboard-card teacher-only" id="view-submissions-card">📥 View Homework Submissions</div>
+      <div class="dashboard-card teacher-only" id="grade-exams-card">✍️ Grade Exams</div>
+      <div class="dashboard-card teacher-only" id="class-schedule-card">📅 Class Schedule</div>
+      <div class="dashboard-card teacher-only" id="manage-complaints-card">💬 Manage Complaints</div>
+
+      <!-- Admin-specific cards -->
+      <div class="dashboard-card admin-only" id="admin-complaints-card">💬 Manage All Complaints</div>
+      <div class="dashboard-card admin-only" id="manage-users-card">👥 Manage Users</div>
+      <div class="dashboard-card admin-only" id="manage-classes-card">🏫 Manage Classes</div>
+      <div class="dashboard-card admin-only" id="teacher-notice-access-card">🔐 Teacher Notice Access</div>
+      <div class="dashboard-card admin-only" id="manage-timetable-card">📅 Manage Timetables</div>
+      <div class="dashboard-card admin-only" id="manage-fees-card">💰 Manage Fees</div>
+      <div class="dashboard-card admin-only" id="manage-inquiries-card">📞 View Inquiries</div>
+
+      <!-- Common cards for both roles -->
+      <div class="dashboard-card" id="notices-card">📌 Notice Board</div>
+      <!-- <div class="dashboard-card" id="analytics-card">📊 Performance</div> -->
+    </div>
+
+    <!-- Container to load feature data dynamically -->
+    <div id="feature-data" class="feature-container"></div>
+    <!-- <div id="smhs-footer" 
+         style="
+            margin: 40px auto 0 auto;
+            padding: 18px 0 10px 0;
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: bold;
+            font-style: italic;
+            color: #111;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+            background: #f7f7f7;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            max-width: 600px;
+         ">
+      Made with <span style="color:#e25555;">&#10084;&#65039;</span> by SMHS<br>
+      &copy; 2025 SMHS. All rights reserved.
+    </div> -->
+    <div id="smhs-footer"
+      style="
+        margin: 40px auto 0 auto;
+        padding: 18px 0 10px 0;
+        text-align: center;
+        max-width: 600px;
+        background: #f7f7f7;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      ">
+      <div style="font-size: 1.15rem; font-weight: bold; font-style: italic; color: #111;">
+        Made with <span style="color:#e25555;">&#10084;&#65039;</span> by SMHS
+      </div>
+      <div style="font-size: 1rem; font-weight: 400; color: #222121; margin-top: 2px;">
+        &copy; 2025 SMHS. All rights reserved.
+      </div>
+    </div>
+  </div>
+
+  <script src="js/dashboard.js"></script>
+  <script src="js/fee-alert.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Check user role and set up attendance UI if teacher
+      const userRole = localStorage.getItem('user_role');
+      if (userRole === 'teacher') {
+        document.getElementById('teacher-attendance-status').style.display = 'block';
+        setupTeacherAttendance();
+      }
+
+      // Setup teacher attendance buttons
+      function setupTeacherAttendance() {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return;
+
+        const presentButton = document.getElementById('present-button');
+        const absentButton = document.getElementById('absent-button');
+        const reasonInput = document.getElementById('absence-reason');
+        const currentStatus = document.getElementById('current-attendance-status');
+
+        // Check current attendance status
+        fetch('/api/teacher/attendance', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch attendance status');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.attendanceHistory && data.attendanceHistory.length > 0) {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+
+              const todayAttendance = data.attendanceHistory.find(record => {
+                const recordDate = new Date(record.date);
+                recordDate.setHours(0, 0, 0, 0);
+                return recordDate.getTime() === today.getTime();
+              });
+
+              if (todayAttendance) {
+                updateAttendanceStatus(todayAttendance.status);
+                if (todayAttendance.status === 'absent' && todayAttendance.reason) {
+                  reasonInput.value = todayAttendance.reason;
+                  reasonInput.style.display = 'block';
+                }
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching attendance status:', error);
+          });
+
+        // Present button handler
+        presentButton.addEventListener('click', function () {
+          markAttendance('present', '');
+        });
+
+        // Absent button handler
+        absentButton.addEventListener('click', function () {
+          reasonInput.style.display = 'block';
+
+          if (reasonInput.value.trim()) {
+            markAttendance('absent', reasonInput.value.trim());
+          } else {
+            alert('Please provide a reason for your absence');
+          }
+        });
+
+        // Mark teacher attendance
+        function markAttendance(status, reason) {
+          fetch('/api/teacher/attendance', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              status,
+              reason
+            })
+          })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Failed to mark attendance');
+              }
+              return response.json();
+            })
+            .then(data => {
+              updateAttendanceStatus(status);
+              alert(`You have been marked as ${status} for today`);
+
+              if (status === 'present') {
+                document.getElementById('absence-reason').style.display = 'none';
+              }
+            })
+            .catch(error => {
+              console.error('Error marking attendance:', error);
+              alert('Failed to mark attendance. Please try again.');
+            });
+        }
+
+        // Update attendance status display
+        function updateAttendanceStatus(status) {
+          const statusElement = document.getElementById('current-attendance-status');
+          statusElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+
+          // Remove all status classes
+          statusElement.classList.remove('status-present', 'status-absent', 'status-not-marked');
+
+          // Add appropriate status class
+          if (status === 'present') {
+            statusElement.classList.add('status-present');
+          } else if (status === 'absent') {
+            statusElement.classList.add('status-absent');
+          } else {
+            statusElement.classList.add('status-not-marked');
+          }
+        }
+      }
+    });
+
+    document.getElementById('assign-homework-card').onclick = function () {
+      window.location.href = 'assign-homework.html';
+    };
+
+    document.getElementById('view-submissions-card').onclick = function () {
+      window.location.href = 'view-submissions.html';
+    };
+
+    document.getElementById('complaints-card').onclick = function () {
+      window.location.href = 'complaints.html';
+    };
+
+    document.getElementById('manage-complaints-card').onclick = function () {
+      window.location.href = 'admin-complaints.html';
+    };
+
+    document.getElementById('admin-complaints-card').onclick = function () {
+      window.location.href = 'admin-complaints.html';
+    };
+
+    document.getElementById('teacher-notice-access-card').onclick = function () {
+      window.location.href = 'teacher-notice-access.html';
+    };
+
+    document.getElementById('notices-card').onclick = function () {
+      window.location.href = 'noticeboard.html';
+    };
+
+    document.getElementById('timetable-card').onclick = function () {
+      window.location.href = 'view-timetable.html';
+    };
+
+    document.getElementById('fees-card').onclick = function () {
+      window.location.href = 'fee-details.html';
+    };
+
+    document.getElementById('class-schedule-card').onclick = function () {
+      window.location.href = 'view-timetable.html';
+    };
+
+    document.getElementById('manage-timetable-card').onclick = function () {
+      window.location.href = 'admin-timetable.html';
+    };
+
+    document.getElementById('teacher-attendance-card').onclick = function () {
+      // Toggle attendance panel
+      const panel = document.getElementById('teacher-attendance-status');
+      if (panel.style.display === 'none' || panel.style.display === '') {
+        panel.style.display = 'block';
+        // Scroll to attendance panel
+        panel.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        panel.style.display = 'none';
+      }
+    };
+
+    document.getElementById('manage-fees-card').onclick = function () {
+      window.location.href = 'admin-fees.html';
+    };
+
+    document.getElementById('manage-inquiries-card').onclick = function () {
+      window.location.href = 'admin-inquiries.html';
+    };
+
+    document.getElementById('results-card').onclick = function () {
+      window.location.href = 'view-results.html';
+    };
+  </script>
+</body>
+
+</html>

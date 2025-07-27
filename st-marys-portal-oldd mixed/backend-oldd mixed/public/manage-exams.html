@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Exams - St. Mary's Portal</title>
+    <link rel="stylesheet" href="css/attendance.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+      
+
+        .form-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .exam-form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .button-group {
+            margin-bottom: 10px;
+        }
+        .exam-list {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Return to Dashboard
+                </a>
+            </div>
+            <div class="header-title">
+                <h1><i class="fas fa-file-alt"></i> Manage Exams</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="alert-container"></div>
+        <!-- Exam Creation Card -->
+        <section class="card">
+            <h2><i class="fas fa-plus-circle"></i> Create New Exam</h2>
+            <form id="examForm" class="exam-form">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="examName">Exam Name:</label>
+                        <input type="text" name="examName" id="examName" class="form-control" placeholder="Enter Exam Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="examType">Exam Type:</label>
+                        <select name="examType" id="examType" class="form-control" required>
+                            <option value="">Select Exam Type</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="academicYear">Academic Year:</label>
+                        <input type="text" name="academicYear" id="academicYear" class="form-control" placeholder="YYYY-YYYY" readonly required>
+                    </div>
+                    <div class="form-group">
+                        <label for="startDate">Start Date:</label>
+                        <input type="date" name="startDate" id="startDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">End Date:</label>
+                        <input type="date" name="endDate" id="endDate" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <label><strong>Classes and Sections:</strong></label>
+                    <div id="classSectionGridActions" style="margin-bottom: 10px;">
+                        <button type="button" class="btn btn-secondary" id="selectAllClassSections">Select All</button>
+                        <button type="button" class="btn btn-secondary" id="clearAllClassSections">Clear All</button>
+                    </div>
+                    <div id="classesContainer">
+                        <!-- Class-section grid will be rendered here -->
+                    </div>
+                </div>
+                <div class="form-section">
+                    <label><strong>Subjects:</strong></label>
+                    <div id="subjectsContainer">
+                        <!-- Subject rows will be added here -->
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addSubjectRow()">
+                        <i class="fas fa-plus"></i> Add Subject
+                    </button>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Exam</button>
+            </form>
+        </section>
+
+        <!-- Exam List Card -->
+        <section class="card">
+            <h2><i class="fas fa-list"></i> Exam List</h2>
+            <div id="examListContainer">
+                <!-- Exam list will be loaded here -->
+            </div>
+        </section>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/manage-exams.js"></script>
+</body>
+</html>

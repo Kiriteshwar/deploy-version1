@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Timetable - St. Mary's Portal</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/timetable.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Special header style to match noticeboard */
+    header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      padding: 1rem 0;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    
+    .header-left {
+      flex: 1;
+    }
+    
+    .header-title {
+      flex: 2;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    
+    .header-title h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .back-button {
+      color: white;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      transition: background-color 0.2s;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: none;
+      cursor: pointer;
+      width: fit-content;
+    }
+    
+    .back-button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Additional button styles to ensure proper sizing */
+    #view-teacher-timetables,
+    #view-class-timetables,
+    #fetch-teacher-timetable,
+    #fetch-class-timetable {
+      width: fit-content;
+      justify-content: center;
+      padding: 0.625rem 1.25rem;
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    #view-teacher-timetables:hover,
+    #view-class-timetables:hover,
+    #fetch-teacher-timetable:hover,
+    #fetch-class-timetable:hover {
+      background-color: var(--primary-dark);
+    }
+
+    /* Button sizes for the table actions */
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      margin: 0.125rem;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #5a6268;
+    }
+    
+    /* Timetable grid styles for teacher view */
+    .timetable-grid {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .timetable-grid th {
+      background-color: #1a73e8;
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .timetable-grid td {
+      padding: 0.75rem;
+      border: 1px solid #e0e0e0;
+      vertical-align: top;
+    }
+    
+    .timetable-grid tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .timetable-grid tr:hover {
+      background-color: #e8f0fe;
+    }
+    
+    .period-cell {
+      font-weight: 700;
+      background-color: #e8f0fe;
+      color: #0d47a1;
+      text-align: center;
+    }
+    
+    .time-cell {
+      font-size: 0.85rem;
+      color: #666;
+      background-color: #f8f9fa;
+    }
+    
+    .no-class {
+      color: #aaa;
+      font-style: italic;
+      text-align: center;
+    }
+    
+    .class-info {
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 4px;
+    }
+    
+    .teacher-name {
+      display: block;
+      font-size: 0.85rem;
+      color: #555;
+      font-style: italic;
+      margin-top: 4px;
+    }
+    
+    /* Break period styles with darker colors */
+    .break-period {
+      background-color: #f0ad4e !important; /* Darker amber/orange */
+      color: #ffffff !important; /* White text for better contrast */
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    /* Add these styles for timetable-table */
+    .timetable-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .timetable-table th {
+      background-color: #1a73e8;
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .timetable-table td {
+      padding: 0.75rem;
+      border: 1px solid #e0e0e0;
+      vertical-align: top;
+      text-align: center;
+    }
+    
+    .timetable-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .timetable-table tr:hover {
+      background-color: #e8f0fe;
+    }
+    
+    .period-cell {
+      font-weight: 700;
+      background-color: #e8f0fe;
+      color: #0d47a1;
+    }
+    
+    .time-cell {
+      font-size: 0.85rem;
+      color: #666;
+      background-color: #f8f9fa;
+    }
+    
+    .no-class {
+      color: #aaa;
+      font-style: italic;
+    }
+    
+    /* Ensure the timetable cells are properly styled */
+    .timetable-table td.break-period {
+      background-color: #f0ad4e !important;
+      color: #ffffff !important;
+      font-weight: bold;
+    }
+    
+    .actions {
+      margin-top: 5px;
+    }
+    
+    .actions-row {
+      margin-top: 15px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    hr {
+      margin: 10px 0;
+      border: 0;
+      border-top: 1px dashed #ddd;
+    }
+    
+    /* Alert styles for upload messages */
+    .alert {
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .alert-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .alert-info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    
+    /* Absent teacher styles */
+    .absent-teachers-panel {
+      background-color: #ffebee;
+      border: 1px solid #ffcdd2;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .absent-teachers-panel h3 {
+      color: #c62828;
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+    
+    .absent-teachers-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .absent-teachers-list li {
+      padding: 8px 10px;
+      margin-bottom: 5px;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .absent-teachers-list .reason {
+      font-style: italic;
+      color: #777;
+      font-size: 0.9em;
+    }
+    
+    .teacher-absent,
+    .subject-absent {
+      color: #c62828 !important;
+      font-weight: bold;
+    }
+    
+    .refresh-absent {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .refresh-absent:hover {
+      background-color: #d32f2f;
+    }
+    
+    /* Form styles */
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      max-width: 300px;
+    }
+
+    /* Add these new styles for the attendance tabs */
+    .attendance-tabs {
+      display: flex;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 15px 0;
+      border: 1px solid #e9ecef;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 15px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+      position: relative;
+      color: #495057;
+    }
+
+    .tab-btn:not(:last-child) {
+      border-right: 1px solid #e9ecef;
+    }
+
+    .tab-btn:hover {
+      background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      background-color: #ffffff;
+      border-bottom: 3px solid var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .tab-content {
+      position: relative;
+      min-height: 200px;
+      background-color: #fff;
+      border-radius: 4px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+      border: 1px solid #e9ecef;
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    .teachers-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .teachers-list li {
+      padding: 12px 15px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f8f9fa;
+      border-left: 4px solid #6c757d;
+    }
+
+    #absent-teachers-list li {
+      border-left-color: #dc3545;
+      background-color: #fff5f5;
+    }
+
+    #present-teachers-list li {
+      border-left-color: #28a745;
+      background-color: #f2fff5;
+    }
+
+    #not-marked-teachers-list li {
+      border-left-color: #ffc107;
+      background-color: #fffdf2;
+    }
+
+    .refresh-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .refresh-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .refresh-btn i {
+      font-size: 1rem;
+    }
+
+    /* Style for teacher list items */
+    .teacher-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .status-present {
+      background-color: #28a745;
+    }
+
+    .status-absent {
+      background-color: #dc3545;
+    }
+
+    .status-not-marked {
+      background-color: #ffc107;
+    }
+
+    .reason {
+      font-style: italic;
+      color: #777;
+      font-size: 0.9em;
+    }
+
+    /* Styling for the Teacher Attendance Status card */
+    .card-header {
+      padding: 15px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+      margin: 0;
+      color: #fff;
+    }
+
+    .teacher-attendance-card .card-header {
+      background: linear-gradient(135deg, #2196f3, #1976d2);
+    }
+
+    .teacher-absent {
+      background-color: #ffebee !important;
+    }
+    
+    .teacher-absent .subject-name {
+      color: #d32f2f;
+      font-weight: bold;
+    }
+    
+    .text-danger {
+      color: #d32f2f !important;
+    }
+    
+    .fw-bold {
+      font-weight: bold !important;
+    }
+    
+    .teacher-name {
+      display: block;
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .break-period {
+      background-color: #fff3cd;
+    }
+
+    /* Timetable data-table style for single day view */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .data-table th {
+      background-color: #1a73e8;
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .data-table td {
+      padding: 0.75rem;
+      border: 1px solid #e0e0e0;
+      vertical-align: middle;
+      text-align: center;
+    }
+    
+    .data-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .data-table tr:hover {
+      background-color: #e8f0fe;
+    }
+    
+    /* Subject cell specific styles */
+    .data-table td:nth-child(3) {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    /* Teacher cell specific styles */
+    .data-table td:nth-child(4) {
+      font-style: italic;
+      color: #555;
+    }
+    
+    /* Add a rule to handle all possible break period cells across different table styles */
+    .timetable-grid td.break-period,
+    .data-table td.break-period,
+    .timetable-table td.break-period,
+    tr.break-period td,
+    td.break-period {
+      background-color: #f0ad4e !important;
+      color: #ffffff !important;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    /* Ensure consistent styling for period columns */
+    .timetable-table .period-cell,
+    .timetable-grid .period-cell,
+    .data-table .period-cell {
+      font-weight: 700;
+      background-color: #e8f0fe;
+      color: #0d47a1;
+      text-align: center;
+    }
+    
+    /* Ensure consistent styling for time columns */
+    .timetable-table .time-cell,
+    .timetable-grid .time-cell,
+    .data-table .time-cell {
+      font-size: 0.85rem;
+      color: #666;
+      background-color: #f8f9fa;
+      text-align: center;
+    }
+  </style>
+</head>
+<script src="js/timetable-data.js"></script>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <a href="dashboard.html" class="back-button">
+          <i class="fas fa-arrow-left"></i>
+          Return to Dashboard
+        </a>
+      </div>
+      <div class="header-title">
+        <h1><i class="fas fa-calendar-alt"></i> Timetable Administration</h1>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Teacher Attendance Panel -->
+    <div class="card teacher-attendance-card">
+        <div class="card-header">
+        <h2 class="card-title"><i class="fas fa-user-check"></i> Teacher Attendance Status</h2>
+        </div>
+        <div class="card-body">
+        <div class="attendance-tabs">
+          <button class="tab-btn" data-tab="absent">Absent Teachers</button>
+          <button class="tab-btn" data-tab="present">Present Teachers</button>
+          <button class="tab-btn" data-tab="not-marked">Not Marked</button>
+        </div>
+        
+        <div class="tab-content">
+          <div id="absent-tab" class="tab-pane">
+            <div id="absent-teachers-loading" class="loading-spinner"></div>
+            <div id="absent-teachers-message"></div>
+            <ul id="absent-teachers-list" class="teachers-list"></ul>
+        </div>
+          
+          <div id="present-tab" class="tab-pane">
+            <div id="present-teachers-loading" class="loading-spinner"></div>
+            <div id="present-teachers-message"></div>
+            <ul id="present-teachers-list" class="teachers-list"></ul>
+      </div>
+      
+          <div id="not-marked-tab" class="tab-pane">
+            <div id="not-marked-teachers-loading" class="loading-spinner"></div>
+            <div id="not-marked-teachers-message"></div>
+            <ul id="not-marked-teachers-list" class="teachers-list"></ul>
+        </div>
+        </div>
+        
+        <button id="refresh-teachers-attendance" class="refresh-btn">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+        </div>
+      </div>
+      
+    <!-- Main options for admin -->
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Teacher Timetables</h2>
+        </div>
+        <div class="card-body">
+          <p class="card-text">View and manage timetables for all teachers. See which classes each teacher is assigned to teach.</p>
+        </div>
+        <div class="card-footer">
+          <button id="view-teacher-timetables" class="btn btn-primary">View Teacher Timetables</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Class Timetables</h2>
+        </div>
+        <div class="card-body">
+          <p class="card-text">View and manage timetables for all classes. These timetables will be visible to students in each class.</p>
+            </div>
+        <div class="card-footer">
+          <button id="view-class-timetables" class="btn btn-primary">View Class Timetables</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Teacher timetable section, hidden by default -->
+    <div id="teacher-timetable-section" style="display: none;">
+      <h2>Teacher Timetables</h2>
+      
+      <div class="filters">
+        <div class="filter-group">
+          <div class="filter-item">
+            <label for="teacher-select">Select Teacher</label>
+            <select id="teacher-select">
+              <option value="">All Teachers</option>
+              <!-- Teachers will be populated dynamically -->
+            </select>
+          </div>
+          
+          <div class="filter-item">
+            <label for="teacher-day-select">Day of Week</label>
+            <select id="teacher-day-select">
+              <option value="">All Days</option>
+              <option value="1">Monday</option>
+              <option value="2">Tuesday</option>
+              <option value="3">Wednesday</option>
+              <option value="4">Thursday</option>
+              <option value="5">Friday</option>
+              <option value="6">Saturday</option>
+            </select>
+          </div>
+          
+          <button id="fetch-teacher-timetable" class="btn btn-primary">Apply Filters</button>
+        </div>
+      </div>
+      
+      <div id="teacher-timetable-container" class="table-container">
+        <div class="loading-spinner" id="teacher-loading-spinner" style="display: none;"></div>
+        <div id="teacher-message-area"></div>
+        <div id="teacher-timetable-data"></div>
+      </div>
+    </div>
+    
+    <!-- Class timetable section, hidden by default -->
+    <div id="class-timetable-section" style="display: none;">
+      <h2>Class Timetables</h2>
+      
+      <div class="filters">
+        <div class="filter-group">
+          <div class="filter-item">
+            <label for="class-select">Select Class</label>
+            <select id="class-select">
+              <option value="">Select Class</option>
+              <!-- Classes will be populated dynamically -->
+            </select>
+          </div>
+          
+          <div class="filter-item">
+            <label for="section-select">Select Section</label>
+            <select id="section-select">
+              <option value="">Select Section</option>
+              <!-- Sections will be populated based on class selection -->
+            </select>
+          </div>
+          
+          <div class="filter-item">
+            <label for="class-day-select">Day of Week</label>
+            <select id="class-day-select">
+              <option value="">All Days</option>
+              <option value="1">Monday</option>
+              <option value="2">Tuesday</option>
+              <option value="3">Wednesday</option>
+              <option value="4">Thursday</option>
+              <option value="5">Friday</option>
+              <option value="6">Saturday</option>
+            </select>
+          </div>
+          
+          <button id="fetch-class-timetable" class="btn btn-primary">View Timetable</button>
+        </div>
+      </div>
+      
+      <div id="class-timetable-container" class="table-container">
+        <div class="loading-spinner" id="class-loading-spinner" style="display: none;"></div>
+        <div id="class-message-area"></div>
+        <div id="class-timetable-data"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check for admin privileges
+      const token = localStorage.getItem('auth_token');
+      const userRole = localStorage.getItem('user_role');
+      
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      if (userRole !== 'admin') {
+        alert('You do not have permission to access this page.');
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
+      // DOM elements
+      const viewTeacherTimetablesBtn = document.getElementById('view-teacher-timetables');
+      const viewClassTimetablesBtn = document.getElementById('view-class-timetables');
+      const teacherTimetableSection = document.getElementById('teacher-timetable-section');
+      const classTimetableSection = document.getElementById('class-timetable-section');
+      const teacherSelect = document.getElementById('teacher-select');
+      const classSelect = document.getElementById('class-select');
+      const sectionSelect = document.getElementById('section-select');
+      const fetchTeacherTimetableBtn = document.getElementById('fetch-teacher-timetable');
+      const fetchClassTimetableBtn = document.getElementById('fetch-class-timetable');
+      const teacherLoadingSpinner = document.getElementById('teacher-loading-spinner');
+      const classLoadingSpinner = document.getElementById('class-loading-spinner');
+      const teacherMessageArea = document.getElementById('teacher-message-area');
+      const classMessageArea = document.getElementById('class-message-area');
+      const teacherTimetableData = document.getElementById('teacher-timetable-data');
+      const classTimetableData = document.getElementById('class-timetable-data');
+      const refreshTeachersAttendanceBtn = document.getElementById('refresh-teachers-attendance');
+      
+      // Tab functionality
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      
+      // Set a default tab (present) to be active
+      document.querySelector('.tab-btn[data-tab="present"]').classList.add('active');
+      document.getElementById('present-tab').classList.add('active');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // Remove active class from all buttons
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          // Add active class to current button
+          this.classList.add('active');
+          
+          // Hide all tab panes
+          document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.remove('active');
+          });
+          
+          // Show the current tab pane
+          const tabId = this.getAttribute('data-tab');
+          document.getElementById(`${tabId}-tab`).classList.add('active');
+          
+          // Additionally, refresh the data when switching tabs
+          fetchTeacherAttendance();
+        });
+      });
+      
+      // Fetch classes and sections from the database
+      fetchClasses();
+      
+      // Fetch teachers as soon as the page loads
+      fetchTeachers();
+      
+      // Fetch teacher attendance
+      fetchTeacherAttendance();
+      
+      // Refresh teacher attendance when button is clicked
+      refreshTeachersAttendanceBtn.addEventListener('click', function() {
+        fetchTeacherAttendance();
+      });
+      
+      // Set a global refresh interval (every 5 minutes)
+      setInterval(fetchTeacherAttendance, 300000); // 300000 ms = 5 minutes
+      
+      function fetchClasses() {
+        fetch('/api/teacher/classes', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch classes');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Clear current options
+          classSelect.innerHTML = '<option value="">Select Class</option>';
+          
+          // Sort classes numerically
+          const sortedClasses = data.classes.sort((a, b) => {
+            // If both are numbers, sort numerically
+            if (!isNaN(a) && !isNaN(b)) {
+              return parseInt(a) - parseInt(b);
+            }
+            // Otherwise, sort alphabetically
+            return a.localeCompare(b);
+          });
+          
+          // Add classes to dropdown
+          sortedClasses.forEach(className => {
+            const option = document.createElement('option');
+            option.value = className;
+            option.textContent = className;
+            classSelect.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching classes:', error);
+          // If API fails, fallback to predefined classes with class 10 pre-selected
+          const classOptions = ['10'];
+          
+          classOptions.forEach(className => {
+            const option = document.createElement('option');
+            option.value = className;
+            option.textContent = className;
+            classSelect.appendChild(option);
+          });
+          
+          // Auto-select class 10 since our sample data is for class 10
+          classSelect.value = '10';
+          
+          // Trigger the change event to populate sections
+          const changeEvent = new Event('change');
+          classSelect.dispatchEvent(changeEvent);
+        });
+      }
+      
+      // Handle class selection change
+      classSelect.addEventListener('change', function() {
+        const selectedClass = this.value;
+        
+        // Clear current options
+        sectionSelect.innerHTML = '<option value="">Select Section</option>';
+        
+        if (!selectedClass) return;
+        
+        // Fetch sections for the selected class
+        fetch(`/api/teacher/sections/${selectedClass}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch sections');
+          }
+          return response.json();
+        })
+        .then(sections => {
+          // Add sections to dropdown
+          sections.forEach(section => {
+            const option = document.createElement('option');
+            option.value = section;
+            option.textContent = section;
+            sectionSelect.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching sections:', error);
+          // If API fails, fallback to predefined sections for class 10 (A and B)
+          if (selectedClass === '10') {
+            const sections = ['A', 'B'];
+            sections.forEach(section => {
+              const option = document.createElement('option');
+              option.value = section;
+              option.textContent = section;
+              sectionSelect.appendChild(option);
+            });
+            
+            // Auto-select section A since our sample data is mainly for 10-A
+            sectionSelect.value = 'A';
+          } else {
+          const sectionsByClass = {
+            '1': ['A', 'B', 'C'],
+            '2': ['A', 'B', 'C'],
+            '3': ['A', 'B'],
+            '4': ['A', 'B'],
+            '5': ['A', 'B'],
+            '6': ['A', 'B'],
+            '7': ['A', 'B'],
+            '8': ['A', 'B'],
+            '9': ['A', 'B'],
+            '10': ['A', 'B'],
+            '11': ['Science', 'Commerce', 'Arts'],
+            '12': ['Science', 'Commerce', 'Arts']
+          };
+          
+          if (sectionsByClass[selectedClass]) {
+            sectionsByClass[selectedClass].forEach(section => {
+              const option = document.createElement('option');
+              option.value = section;
+              option.textContent = section;
+              sectionSelect.appendChild(option);
+            });
+            }
+          }
+        });
+      });
+      
+      // Fetch teachers for the dropdown
+      function fetchTeachers() {
+        teacherLoadingSpinner.style.display = 'flex';
+        teacherMessageArea.innerHTML = '';
+        
+        fetch('/api/teacher/all', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch teachers');
+          }
+          return response.json();
+        })
+        .then(data => {
+          teacherLoadingSpinner.style.display = 'none';
+          
+          // Clear current options except the first one
+          while (teacherSelect.options.length > 1) {
+            teacherSelect.remove(1);
+          }
+          
+          if (data.users && Array.isArray(data.users)) {
+            // Sort teachers alphabetically by name
+            data.users.sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Populate teacher dropdown
+            data.users.forEach(teacher => {
+              const option = document.createElement('option');
+              option.value = teacher._id;
+              option.textContent = teacher.name;
+              teacherSelect.appendChild(option);
+            });
+          }
+        })
+        .catch(error => {
+          teacherLoadingSpinner.style.display = 'none';
+          teacherMessageArea.innerHTML = `
+            <div class="message error">
+              <p>Failed to load teachers from API. Using sample data instead.</p>
+            </div>
+          `;
+          console.error('Error fetching teachers:', error);
+          
+          // Fallback to sample data if API fails
+          const sampleTeachers = [
+            { id: '1', name: 'Teacher User' },
+            { id: '2', name: 'Teacher User-2' },
+            { id: '3', name: 'Teacher User-3' }
+          ];
+          
+          // Populate teacher dropdown with sample data
+          sampleTeachers.forEach(teacher => {
+            const option = document.createElement('option');
+            option.value = teacher.name; // Use name as value for simple matching
+            option.textContent = teacher.name;
+            teacherSelect.appendChild(option);
+          });
+        });
+      }
+      
+      // Event listeners for main view buttons
+      viewTeacherTimetablesBtn.addEventListener('click', function() {
+        teacherTimetableSection.style.display = 'block';
+        classTimetableSection.style.display = 'none';
+      });
+      
+      viewClassTimetablesBtn.addEventListener('click', function() {
+        classTimetableSection.style.display = 'block';
+        teacherTimetableSection.style.display = 'none';
+      });
+      
+      // Fetch and display teacher timetable
+      fetchTeacherTimetableBtn.addEventListener('click', function() {
+        const teacherId = teacherSelect.value;
+        const dayOfWeek = document.getElementById('teacher-day-select').value;
+        
+        // Clear previous data
+        teacherTimetableData.innerHTML = '';
+        teacherMessageArea.innerHTML = '';
+        teacherLoadingSpinner.style.display = 'flex';
+        
+        // Display sample timetable data directly
+        setTimeout(() => {
+          teacherLoadingSpinner.style.display = 'none';
+          displayTeacherTimetables([], []);
+        }, 500);
+      });
+      
+      // Fetch and display class timetable
+      fetchClassTimetableBtn.addEventListener('click', function() {
+        const className = classSelect.value;
+        const section = sectionSelect.value;
+        const dayOfWeek = document.getElementById('class-day-select').value;
+        
+        if (!className || !section) {
+          classMessageArea.innerHTML = `
+            <div class="message error">
+              <p>Please select both class and section.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Clear previous data
+        classTimetableData.innerHTML = '';
+        classMessageArea.innerHTML = '';
+        classLoadingSpinner.style.display = 'flex';
+        
+        // Use the selected class and section
+        console.log(`Fetching timetable for class ${className}-${section}, day: ${dayOfWeek}`);
+        
+        // Display sample timetable data directly
+        setTimeout(() => {
+          classLoadingSpinner.style.display = 'none';
+          
+          // Use the actual selected class and section values
+          displayClassTimetable({}, className, section, dayOfWeek);
+        }, 500);
+      });
+      
+      // Trigger the class and section selection with defaults on page load
+      window.addEventListener('DOMContentLoaded', function() {
+        // Auto-show the class timetable section
+        setTimeout(() => {
+          viewClassTimetablesBtn.click();
+          
+          // After classes are fetched, auto-select class 10 and set to Section A
+          setTimeout(() => {
+            if (classSelect.options.length > 1) {
+              // Find and select Class 10
+              for (let i = 0; i < classSelect.options.length; i++) {
+                if (classSelect.options[i].value === '10') {
+                  classSelect.selectedIndex = i;
+                  break;
+                }
+              }
+              
+              // Trigger the change event to populate sections
+              const changeEvent = new Event('change');
+              classSelect.dispatchEvent(changeEvent);
+              
+              // After sections are populated, select Section A and trigger fetch
+              setTimeout(() => {
+                if (sectionSelect.options.length > 1) {
+                  for (let i = 0; i < sectionSelect.options.length; i++) {
+                    if (sectionSelect.options[i].value === 'A') {
+                      sectionSelect.selectedIndex = i;
+                      
+                      // Finally, trigger the fetch button to load the timetable
+                      setTimeout(() => {
+                        fetchClassTimetableBtn.click();
+                      }, 200);
+                      
+                      break;
+                    }
+                  }
+                }
+              }, 300);
+            }
+          }, 500);
+        }, 300);
+      });
+      
+      // Function to display teacher timetables
+      function displayTeacherTimetables(_, __) {
+        const teacherSelect = document.getElementById('teacher-select');
+        const selectedTeacherName = teacherSelect.options[teacherSelect.selectedIndex].text;
+        const timetableData = window.timetableData;
+        const filtered = timetableData.classes.filter(c => c.teacher === selectedTeacherName);
+        const dayIndices = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
+        const timetableByDay = {};
+        filtered.forEach(classInfo => {
+              const dayIndex = dayIndices[classInfo.day];
+          if (!timetableByDay[dayIndex]) timetableByDay[dayIndex] = [];
+          timetableByDay[dayIndex].push({
+            period: classInfo.period,
+            subject: classInfo.subject,
+                class: classInfo.class,
+                section: classInfo.section,
+                isBreak: classInfo.isBreak
+              });
+            });
+        const periodTimes = timetableData.periods.map(p => p.time);
+        let html = `<h3>Timetable for ${selectedTeacherName}</h3>`;
+        html += `<table class="timetable-table"><thead><tr><th>PERIOD</th><th>TIME</th><th>MONDAY</th><th>TUESDAY</th><th>WEDNESDAY</th><th>THURSDAY</th><th>FRIDAY</th><th>SATURDAY</th></tr></thead><tbody>`;
+            for (let p = 1; p <= 12; p++) {
+          html += `<tr><td class="period-cell">Period ${p}</td><td class="time-cell">${periodTimes[p-1] || ''}</td>`;
+              for (let day = 1; day <= 6; day++) {
+            const periodData = (timetableByDay[day] || []).find(period => period.period === p);
+            if (periodData) {
+              if (periodData.isBreak) {
+                html += `<td class="break-period">${periodData.subject}</td>`;
+                  } else {
+                html += `<td><div>${periodData.subject}</div><div class="class-info">${periodData.class}-${periodData.section}</div></td>`;
+              }
+            } else if ([3,6,9,12].includes(p)) {
+                  let breakName = '';
+                  if (p === 3) breakName = 'Interval';
+                  else if (p === 6) breakName = 'Lunch Break';
+                  else if (p === 9) breakName = 'Break';
+                  else if (p === 12) breakName = 'Diary Period';
+                  html += `<td class="break-period">${breakName}</td>`;
+                } else {
+              html += '<td class="no-class">No Class</td>';
+            }
+          }
+          html += '</tr>';
+        }
+        html += '</tbody></table>';
+        document.getElementById('teacher-timetable-data').innerHTML = html;
+      }
+      
+      // Function to display class timetable
+      function displayClassTimetable(_, className, section, dayFilter) {
+        // Filter timetable data for this class/section
+        const timetableData = window.timetableData;
+        const filtered = timetableData.classes.filter(c => c.class === className && c.section === section);
+        const dayIndices = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
+          const timetableByDay = {};
+        filtered.forEach(classInfo => {
+            const dayIndex = dayIndices[classInfo.day];
+          if (!timetableByDay[dayIndex]) timetableByDay[dayIndex] = [];
+            timetableByDay[dayIndex].push({
+              period: classInfo.period,
+              subject: classInfo.subject,
+              teacher: classInfo.teacher,
+              isBreak: classInfo.isBreak
+            });
+          });
+        const periodTimes = timetableData.periods.map(p => p.time);
+        let html = `<h3>Timetable for Class ${className}-${section}</h3>`;
+        html += `<table class="timetable-table"><thead><tr><th>PERIOD</th><th>TIME</th><th>MONDAY</th><th>TUESDAY</th><th>WEDNESDAY</th><th>THURSDAY</th><th>FRIDAY</th><th>SATURDAY</th></tr></thead><tbody>`;
+            for (let p = 1; p <= 12; p++) {
+          html += `<tr><td class="period-cell">Period ${p}</td><td class="time-cell">${periodTimes[p-1] || ''}</td>`;
+              for (let day = 1; day <= 6; day++) {
+                const periodData = (timetableByDay[day] || []).find(period => period.period === p);
+                if (periodData) {
+                  if (periodData.isBreak) {
+                    html += `<td class="break-period">${periodData.subject}</td>`;
+                  } else {
+                html += `<td><div>${periodData.subject}</div>${periodData.teacher ? `<div class="teacher-name">${periodData.teacher}</div>` : ''}</td>`;
+              }
+            } else if ([3,6,9,12].includes(p)) {
+                  let breakName = '';
+                  if (p === 3) breakName = 'Interval';
+                  else if (p === 6) breakName = 'Lunch Break';
+                  else if (p === 9) breakName = 'Break';
+                  else if (p === 12) breakName = 'Diary Period';
+                  html += `<td class="break-period">${breakName}</td>`;
+                } else {
+              html += '<td class="no-class">No Class</td>';
+            }
+          }
+          html += '</tr>';
+        }
+        html += '</tbody></table>';
+        document.getElementById('class-timetable-data').innerHTML = html;
+      }
+      
+      // Function to fetch teacher attendance status
+      function fetchTeacherAttendance() {
+        const loadingElements = [
+          document.getElementById('absent-teachers-loading'),
+          document.getElementById('present-teachers-loading'),
+          document.getElementById('not-marked-teachers-loading')
+        ];
+        
+        const messageElements = [
+          document.getElementById('absent-teachers-message'),
+          document.getElementById('present-teachers-message'),
+          document.getElementById('not-marked-teachers-message')
+        ];
+        
+        const listElements = [
+          document.getElementById('absent-teachers-list'),
+          document.getElementById('present-teachers-list'),
+          document.getElementById('not-marked-teachers-list')
+        ];
+        
+        // Show loading indicators
+        loadingElements.forEach(el => {
+          if (el) el.style.display = 'flex';
+        });
+        
+        // Clear previous content
+        messageElements.forEach(el => {
+          if (el) el.innerHTML = '';
+        });
+        listElements.forEach(el => {
+          if (el) el.innerHTML = '';
+        });
+        
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        
+        // First fetch all teachers
+        fetch(`/api/teacher/all?t=${timestamp}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch teachers');
+          }
+          return response.json();
+        })
+        .then(teachersData => {
+          // Now fetch attendance data
+          return fetch(`/api/teacher/admin/attendance?t=${timestamp}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch teacher attendance');
+            }
+            return response.json().then(attendanceData => {
+              return { 
+                allTeachers: teachersData.users || [],
+                attendanceData: attendanceData 
+              };
+            });
+          });
+        })
+        .then(({ allTeachers, attendanceData }) => {
+          // Hide loading indicators
+          loadingElements.forEach(el => {
+            if (el) el.style.display = 'none';
+          });
+          
+          // Sort teachers alphabetically by name
+          allTeachers.sort((a, b) => a.name.localeCompare(b.name));
+          
+          // Group teachers by attendance status
+          const absentTeachers = [];
+          const presentTeachers = [];
+          const notMarkedTeachers = [];
+          
+          // Process all teachers to categorize them
+          if (attendanceData.teachers && Array.isArray(attendanceData.teachers)) {
+            attendanceData.teachers.forEach(teacher => {
+              if (teacher.attendance) {
+                if (teacher.attendance.status === 'absent') {
+                  absentTeachers.push(teacher);
+                } else if (teacher.attendance.status === 'present') {
+                  presentTeachers.push(teacher);
+                } else if (teacher.attendance.status === 'not_marked') {
+                  notMarkedTeachers.push(teacher);
+                }
+              }
+            });
+          }
+          
+          // Update absent teachers list
+          if (absentTeachers.length === 0) {
+            document.getElementById('absent-teachers-message').innerHTML = 
+              '<p>No teachers have marked themselves as absent today.</p>';
+          } else {
+            absentTeachers.forEach(teacher => {
+              const li = document.createElement('li');
+              li.innerHTML = `
+                <span class="teacher-status">
+                  <span class="status-indicator status-absent"></span>
+                  ${teacher.name}
+                </span>
+                <span class="reason">${teacher.attendance.reason || 'No reason provided'}</span>
+              `;
+              document.getElementById('absent-teachers-list').appendChild(li);
+            });
+          }
+          
+          // Update present teachers list
+          if (presentTeachers.length === 0) {
+            document.getElementById('present-teachers-message').innerHTML = 
+              '<p>No teachers have marked themselves as present today.</p>';
+          } else {
+            presentTeachers.forEach(teacher => {
+              // Default message in case we can't determine the actual time
+              let timestampStr = 'Time not recorded';
+              
+              // Try to use createdAt/updatedAt from the attendance data
+              if (teacher.attendance) {
+                // Try createdAt timestamp first (when they initially marked attendance)
+                if (teacher.attendance.createdAt) {
+                  try {
+                    const timestamp = new Date(teacher.attendance.createdAt);
+                    if (!isNaN(timestamp.getTime())) {
+                      const options = {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      };
+                      timestampStr = `Marked at ${timestamp.toLocaleTimeString(undefined, options)}`;
+                    }
+                  } catch (e) {
+                    console.error('Error parsing createdAt timestamp:', e);
+                  }
+                }
+                // If createdAt failed, try updatedAt (when they last updated attendance)
+                else if (teacher.attendance.updatedAt) {
+                  try {
+                    const timestamp = new Date(teacher.attendance.updatedAt);
+                    if (!isNaN(timestamp.getTime())) {
+                      const options = {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      };
+                      timestampStr = `Updated at ${timestamp.toLocaleTimeString(undefined, options)}`;
+                    }
+                  } catch (e) {
+                    console.error('Error parsing updatedAt timestamp:', e);
+                  }
+                }
+              }
+              
+              const li = document.createElement('li');
+              li.innerHTML = `
+                <span class="teacher-status">
+                  <span class="status-indicator status-present"></span>
+                  ${teacher.name}
+                </span>
+                <span class="timestamp">${timestampStr}</span>
+              `;
+              document.getElementById('present-teachers-list').appendChild(li);
+            });
+          }
+          
+          // Update not marked teachers list
+          if (notMarkedTeachers.length === 0) {
+            document.getElementById('not-marked-teachers-message').innerHTML = 
+              '<p>All teachers have marked their attendance today.</p>';
+          } else {
+            notMarkedTeachers.forEach(teacher => {
+              const li = document.createElement('li');
+              li.innerHTML = `
+                <span class="teacher-status">
+                  <span class="status-indicator status-not-marked"></span>
+                  ${teacher.name}
+                </span>
+                <span class="timestamp">Attendance not marked</span>
+              `;
+              document.getElementById('not-marked-teachers-list').appendChild(li);
+            });
+          }
+          
+          // Update counts in tab buttons
+          document.querySelector('.tab-btn[data-tab="absent"]').textContent = 
+            `Absent Teachers (${absentTeachers.length})`;
+          document.querySelector('.tab-btn[data-tab="present"]').textContent = 
+            `Present Teachers (${presentTeachers.length})`;
+          document.querySelector('.tab-btn[data-tab="not-marked"]').textContent = 
+            `Not Marked (${notMarkedTeachers.length})`;
+        })
+        .catch(error => {
+          // Hide loading indicators
+          loadingElements.forEach(el => {
+            if (el) el.style.display = 'none';
+          });
+          
+          // Show error messages
+          messageElements.forEach(el => {
+            if (el) el.innerHTML = `<p>Error loading teacher attendance: ${error.message}</p>`;
+          });
+          
+          console.error('Error fetching teacher attendance:', error);
+        });
+      }
+
+      // Add this function after fetchTeacherAttendance
+      function fetchAbsentTeachersList() {
+        // Return a Promise that resolves to the list of absent teachers
+        return new Promise((resolve, reject) => {
+          const timestamp = new Date().getTime();
+          fetch(`/api/teacher/admin/attendance?t=${timestamp}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch teacher attendance');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Extract names of absent teachers
+            const absentTeachers = data.teachers
+              .filter(teacher => teacher.attendance && teacher.attendance.status === 'absent')
+              .map(teacher => teacher.name);
+            
+            resolve(absentTeachers);
+          })
+          .catch(error => {
+            console.error('Error fetching absent teachers:', error);
+            // Resolve with empty array in case of error
+            resolve([]);
+          });
+        });
+      }
+    });
+  </script>
+</body>
+</html> 

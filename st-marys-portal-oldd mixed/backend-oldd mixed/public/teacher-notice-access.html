@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Teacher Notice Access - St. Mary's Portal</title>
+    <link rel="stylesheet" href="css/noticeboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Additional styles for teacher notice access page */
+        .teacher-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .teacher-card {
+            background-color: var(--card-background);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        
+        .teacher-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .teacher-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .teacher-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .teacher-email {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .class-teacher-badge {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .section-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .section-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .notice-access-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .save-button {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .save-button:hover {
+            background-color: #2ab350;
+            transform: translateY(-1px);
+        }
+        
+        .save-button:disabled {
+            background-color: #c0c9d6;
+            cursor: not-allowed;
+        }
+        
+        .section-search {
+            margin-bottom: 1.5rem;
+        }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        
+        .loading-spinner::after {
+            content: "";
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Return to Dashboard
+                </a>
+            </div>
+            <div class="header-title">
+                <h1><i class="fas fa-user-lock"></i> Manage Teacher Notice Access</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <div class="section-header">
+                <h2><i class="fas fa-key"></i> Teacher Notice Section Access</h2>
+                <div class="search-box section-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchTeacher" placeholder="Search teachers...">
+                </div>
+            </div>
+            
+            <p>Control which sections' notices each teacher can view. By default, teachers can see notices for their own class section.</p>
+            
+            <div id="teacherList" class="teacher-list">
+                <!-- Teacher cards will be dynamically added here -->
+                <div class="loading-spinner"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <i class="toast-icon"></i>
+            <span class="toast-message"></span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is admin
+            const token = localStorage.getItem("auth_token");
+            const userRole = localStorage.getItem("user_role");
+            
+            if (!token) {
+                window.location.href = "login.html";
+                return;
+            }
+            
+            // Only admin can access this page
+            if (userRole !== 'admin') {
+                alert("You do not have permission to access this page");
+                window.location.href = "dashboard.html";
+                return;
+            }
+            
+            const teacherList = document.getElementById('teacherList');
+            const searchInput = document.getElementById('searchTeacher');
+            
+            // Fetch all sections and teachers
+            let allSections = [];
+            let allTeachers = [];
+            
+            Promise.all([
+                fetchAllSections(),
+                fetchAllTeachers()
+            ]).then(([sections, teachers]) => {
+                allSections = sections;
+                allTeachers = teachers;
+                displayTeachers(teachers);
+                
+                // Setup search functionality
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase().trim();
+                    const filteredTeachers = allTeachers.filter(teacher => 
+                        teacher.name.toLowerCase().includes(searchTerm) || 
+                        teacher.email.toLowerCase().includes(searchTerm)
+                    );
+                    displayTeachers(filteredTeachers);
+                });
+            }).catch(error => {
+                console.error('Error initializing page:', error);
+                showToast('Failed to load data. Please refresh the page.', 'error');
+                teacherList.innerHTML = '<div class="error-message">Failed to load teachers. Please refresh the page.</div>';
+            });
+            
+            // Fetch all sections
+            function fetchAllSections() {
+                return fetch('/api/teacher/sections', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch sections');
+                    return response.json();
+                })
+                .catch(error => {
+                    console.error('Error fetching sections:', error);
+                    return ['A', 'B', 'C', 'D']; // Fallback
+                });
+            }
+            
+            // Fetch all teachers
+            function fetchAllTeachers() {
+                return fetch('/api/teacher/all', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch teachers');
+                    return response.json();
+                })
+                .then(data => data.users || [])
+                .catch(error => {
+                    console.error('Error fetching teachers:', error);
+                    throw error;
+                });
+            }
+            
+            // Display teachers in cards with section access controls
+            function displayTeachers(teachers) {
+                teacherList.innerHTML = '';
+                
+                if (teachers.length === 0) {
+                    teacherList.innerHTML = '<div class="no-results">No teachers found</div>';
+                    return;
+                }
+                
+                // First, fetch all classes to get proper mapping of sections to classes
+                fetch('/api/teacher/classes', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch classes');
+                    return response.json();
+                })
+                .then(data => {
+                    const allClasses = data.classes || [];
+                    
+                    // Create array to hold all class-section combinations
+                    let classSectionCombinations = [];
+                    
+                    // For each class, get its sections
+                    const fetchSectionsPromises = allClasses.map(classId => {
+                        return fetch(`/api/teacher/sections/${classId}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) throw new Error(`Failed to fetch sections for class ${classId}`);
+                            return response.json();
+                        })
+                        .then(sections => {
+                            // Store each class-section combination
+                            sections.forEach(section => {
+                                classSectionCombinations.push({
+                                    class: classId,
+                                    section: section,
+                                    // Create a unique identifier for this class-section combination
+                                    id: `${classId}-${section}`
+                                });
+                            });
+                        });
+                    });
+                    
+                    // Once all sections and their classes are fetched
+                    Promise.all(fetchSectionsPromises)
+                    .then(() => {
+                        // Sort the combinations by class and then by section
+                        classSectionCombinations.sort((a, b) => {
+                            // First sort by class
+                            const aClass = parseInt(a.class.replace(/\D/g, '')) || 0;
+                            const bClass = parseInt(b.class.replace(/\D/g, '')) || 0;
+                            if (aClass !== bClass) return aClass - bClass;
+                            
+                            // Then sort by section
+                            return a.section.localeCompare(b.section);
+                        });
+                        
+                        // Now render teachers with distinct class-section combinations
+                        teachers.forEach(teacher => {
+                            const teacherId = teacher._id;
+                            const teacherName = teacher.name;
+                            const teacherEmail = teacher.email || '';
+                            const classTeacherClass = teacher.teacherInfo?.classTeacher?.class || null;
+                            const classTeacherSection = teacher.teacherInfo?.classTeacher?.section || null;
+                            
+                            // The teacher's assigned notice sections stored as "class-section" strings
+                            const storedNoticeSections = teacher.teacherInfo?.noticeSections || [];
+                            
+                            const card = document.createElement('div');
+                            card.className = 'teacher-card';
+                            card.dataset.teacherId = teacherId;
+                            
+                            let sectionsHtml = '';
+                            classSectionCombinations.forEach(combo => {
+                                // Check if this combo is in the teacher's assigned sections
+                                const comboId = `${combo.class}-${combo.section}`;
+                                
+                                // Check if teacher is assigned to this section or is the class teacher for it
+                                const isChecked = storedNoticeSections.includes(comboId) || 
+                                                 (classTeacherClass === combo.class && classTeacherSection === combo.section);
+                                
+                                // Disable if teacher is class teacher for this section
+                                const isDisabled = (classTeacherClass === combo.class && classTeacherSection === combo.section);
+                                
+                                sectionsHtml += `
+                                    <div class="section-item">
+                                        <input type="checkbox" id="section-${teacherId}-${comboId}" 
+                                            class="section-checkbox" 
+                                            value="${comboId}" 
+                                            data-teacher-id="${teacherId}"
+                                            ${isChecked ? 'checked' : ''}
+                                            ${isDisabled ? 'disabled' : ''}>
+                                        <label for="section-${teacherId}-${comboId}">Class ${combo.class}, Section ${combo.section}</label>
+                                    </div>
+                                `;
+                            });
+                            
+                            card.innerHTML = `
+                                <div class="teacher-header">
+                                    <div class="teacher-name">${teacherName}</div>
+                                </div>
+                                <div class="teacher-email">${teacherEmail}</div>
+                                ${classTeacherClass && classTeacherSection ? 
+                                    `<div class="class-teacher-badge">
+                                        <i class="fas fa-chalkboard-teacher"></i> Class Teacher: Class ${classTeacherClass}, Section ${classTeacherSection}
+                                    </div>` : ''}
+                                <div class="notice-access-title">Notice Access Sections:</div>
+                                <div class="section-list">
+                                    ${sectionsHtml}
+                                </div>
+                                <button class="save-button" data-teacher-id="${teacherId}">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            `;
+                            
+                            teacherList.appendChild(card);
+                            
+                            // Add event listener to the save button
+                            const saveButton = card.querySelector('.save-button');
+                            saveButton.addEventListener('click', function() {
+                                saveTeacherNoticeSections(teacherId);
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error building section-class mapping:', error);
+                        showToast('Failed to load section-class mapping, showing simple sections instead', 'error');
+                        
+                        // Fallback to displaying teachers without class mapping
+                        displayTeachersWithoutClassMapping(teachers);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching classes:', error);
+                    showToast('Failed to load classes, showing simple sections instead', 'error');
+                    
+                    // Fallback to displaying teachers without class mapping
+                    displayTeachersWithoutClassMapping(teachers);
+                });
+            }
+            
+            // Fallback function to display teachers without the class-section mapping
+            function displayTeachersWithoutClassMapping(teachers) {
+                teachers.forEach(teacher => {
+                    const teacherId = teacher._id;
+                    const teacherName = teacher.name;
+                    const teacherEmail = teacher.email || '';
+                    const classTeacherClass = teacher.teacherInfo?.classTeacher?.class || null;
+                    const classTeacherSection = teacher.teacherInfo?.classTeacher?.section || null;
+                    const assignedSections = teacher.teacherInfo?.noticeSections || [];
+                    
+                    const card = document.createElement('div');
+                    card.className = 'teacher-card';
+                    card.dataset.teacherId = teacherId;
+                    
+                    let sectionsHtml = '';
+                    allSections.forEach(section => {
+                        const isChecked = assignedSections.includes(section) || section === classTeacherSection;
+                        const isDisabled = section === classTeacherSection;
+                        
+                        sectionsHtml += `
+                            <div class="section-item">
+                                <input type="checkbox" id="section-${teacherId}-${section}" 
+                                    class="section-checkbox" 
+                                    value="${section}" 
+                                    data-teacher-id="${teacherId}"
+                                    ${isChecked ? 'checked' : ''}
+                                    ${isDisabled ? 'disabled' : ''}>
+                                <label for="section-${teacherId}-${section}">Section ${section}</label>
+                            </div>
+                        `;
+                    });
+                    
+                    card.innerHTML = `
+                        <div class="teacher-header">
+                            <div class="teacher-name">${teacherName}</div>
+                        </div>
+                        <div class="teacher-email">${teacherEmail}</div>
+                        ${classTeacherClass && classTeacherSection ? 
+                            `<div class="class-teacher-badge">
+                                <i class="fas fa-chalkboard-teacher"></i> Class Teacher: Class ${classTeacherClass}, Section ${classTeacherSection}
+                            </div>` : ''}
+                        <div class="notice-access-title">Notice Access Sections:</div>
+                        <div class="section-list">
+                            ${sectionsHtml}
+                        </div>
+                        <button class="save-button" data-teacher-id="${teacherId}">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    `;
+                    
+                    teacherList.appendChild(card);
+                    
+                    // Add event listener to the save button
+                    const saveButton = card.querySelector('.save-button');
+                    saveButton.addEventListener('click', function() {
+                        saveTeacherNoticeSections(teacherId);
+                    });
+                });
+            }
+            
+            // Save teacher notice sections - update this function to handle class-section combinations
+            function saveTeacherNoticeSections(teacherId) {
+                const checkboxes = document.querySelectorAll(`.section-checkbox[data-teacher-id="${teacherId}"]:not(:disabled):checked`);
+                const sections = Array.from(checkboxes).map(cb => cb.value);
+                
+                // Get the save button and disable it during the API call
+                const saveButton = document.querySelector(`.save-button[data-teacher-id="${teacherId}"]`);
+                saveButton.disabled = true;
+                
+                fetch(`/api/teacher/notice-sections/${teacherId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ noticeSections: sections })
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to update teacher notice sections');
+                    return response.json();
+                })
+                .then(data => {
+                    showToast('Teacher notice sections updated successfully', 'success');
+                    saveButton.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error updating teacher notice sections:', error);
+                    showToast('Failed to update teacher notice sections', 'error');
+                    saveButton.disabled = false;
+                });
+            }
+            
+            // Toast notification
+            function showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const toastMessage = toast.querySelector('.toast-message');
+                const toastIcon = toast.querySelector('.toast-icon');
+                
+                toastMessage.textContent = message;
+                
+                if (type === 'success') {
+                    toast.className = 'toast active success';
+                    toastIcon.className = 'toast-icon fas fa-check-circle';
+                } else {
+                    toast.className = 'toast active error';
+                    toastIcon.className = 'toast-icon fas fa-exclamation-circle';
+                }
+                
+                setTimeout(() => {
+                    toast.classList.add('active');
+                }, 100);
+                
+                setTimeout(() => {
+                    toast.classList.remove('active');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html> 

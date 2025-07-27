@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Homework</title>
+    <link rel="stylesheet" href="css/homework.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Additional styles specific to homework list */
+        .homework-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .homework-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+
+        .homework-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .homework-item h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .homework-content {
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+
+        .homework-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .download-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .download-link:hover {
+            background: #0069d9; /* Darker blue on hover */
+            color: white; /* Ensure text stays white */
+            text-decoration: none; /* Prevent underline */
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--border-color);
+        }
+
+        .filter-controls {
+            display: flex;
+            justify-content: flex-end;
+            padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+            margin-bottom: 0;
+        }
+
+        .homework-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .homework-list-container {
+            padding: 0 1.5rem 1rem 1.5rem;
+        }
+
+        /* Submission button and form styles */
+        .submission-area {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .btn-submit-homework {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: #28a745; /* Green button for submission */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-submit-homework:hover {
+            background-color: #218838; /* Darker green on hover */
+            color: white;
+        }
+        
+        .submission-form {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .submission-form.active {
+            display: block;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            line-height: 1;
+        }
+
+        .form-help {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Ensure text inputs and file inputs fit inside modal */
+        .modal-content .form-control {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .modal-content textarea {
+            min-height: 80px;
+            max-height: 150px;
+        }
+        
+        .modal-content .text-center {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .modal-content .btn {
+            padding: 8px 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Return to Dashboard
+                </a>
+            </div>
+            <div class="header-title">
+                <h1><i class="fas fa-book"></i> My Homework</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="homework-card">
+            <div class="filter-controls">
+                <div class="control-group" style="width: 200px;">
+                    <label for="filterSelect">Filter:</label>
+                    <select id="filterSelect" class="form-control">
+                        <option value="all">All Homework</option>
+                        <option value="active">Active Homework</option>
+                        <option value="expired">Expired Homework</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="homework-list-container">
+                <div id="homework-list">
+                    <div style="text-align: center; padding: 40px;">
+                        <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
+                        <p>Loading homework...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Submission Modal -->
+    <div id="submissionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Submit Homework: <span id="modalHomeworkTitle"></span></h3>
+                <button type="button" class="modal-close" onclick="closeSubmissionModal()">&times;</button>
+            </div>
+            <form id="submissionForm" onsubmit="submitHomework(event)">
+                <input type="hidden" id="submissionHomeworkId" name="homeworkId">
+                <div class="control-group">
+                    <label for="submissionFile">Upload Your Work:</label>
+                    <input type="file" id="submissionFile" name="submissionFile" class="form-control file-upload" 
+                           accept=".pdf,.doc,.docx,.txt,.stl,.obj,.fbx,.zip,.png,.jpg,.jpeg" required>
+                    <p class="form-help">Accepted file types: PDF, Word, Text, 3D Models (STL, OBJ, FBX), Archives (ZIP), Images (PNG, JPG) (Max: 10MB)</p>
+                </div>
+                <div class="control-group">
+                    <label for="submissionNotes">Notes (Optional):</label>
+                    <textarea id="submissionNotes" name="notes" class="form-control" rows="3" 
+                              placeholder="Add any notes for your teacher..."></textarea>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn" onclick="closeSubmissionModal()">Cancel</button>
+                    <button type="submit" id="submissionBtn" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get student info from profile or localStorage
+        async function getStudentInfo() {
+            // First check if we have a token
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                throw new Error('Authentication required');
+            }
+            
+            try {
+                // First try to get the student profile from the API
+                let profile = null;
+                let studentClass = null;
+                let studentSection = null;
+                
+                // Try the main student profile endpoint
+                const response = await fetch('/api/student/profile', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    profile = await response.json();
+                    console.log('Student profile loaded:', profile);
+                    
+                    // Try to find information in different possible locations
+                    if (profile.studentInfo) {
+                        // Direct studentInfo object
+                        studentClass = profile.studentInfo.class;
+                        studentSection = profile.studentInfo.section;
+                    } else if (profile.user && profile.user.studentInfo) {
+                        // Nested under user property
+                        studentClass = profile.user.studentInfo.class;
+                        studentSection = profile.user.studentInfo.section;
+                    } else if (profile.class && profile.section) {
+                        // Directly on the profile
+                        studentClass = profile.class;
+                        studentSection = profile.section;
+                    } else if (profile.user) {
+                        // Try user object directly
+                        studentClass = profile.user.class;
+                        studentSection = profile.user.section;
+                    }
+                } else {
+                    console.error('Failed to load student profile:', response.status, response.statusText);
+                }
+                
+                // If first endpoint didn't give us what we need, try an alternative endpoint
+                if ((!studentClass || !studentSection) && response.ok) {
+                    console.log('First profile endpoint did not contain class/section info, trying alternative...');
+                    
+                    try {
+                        const altResponse = await fetch('/api/users/me', {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (altResponse.ok) {
+                            const altProfile = await altResponse.json();
+                            console.log('Alternative profile loaded:', altProfile);
+                            
+                            // Try to extract from alternative endpoint response
+                            if (altProfile.studentInfo) {
+                                studentClass = altProfile.studentInfo.class;
+                                studentSection = altProfile.studentInfo.section;
+                            } else if (altProfile.class && altProfile.section) {
+                                studentClass = altProfile.class;
+                                studentSection = altProfile.section;
+                            }
+                        }
+                    } catch (altErr) {
+                        console.error('Error fetching alternative profile:', altErr);
+                    }
+                }
+                
+                console.log('Final extracted student info:', { class: studentClass, section: studentSection });
+                
+                if (studentClass && studentSection) {
+                    console.log(`Found student class: ${studentClass}, section: ${studentSection}`);
+                    
+                    return {
+                        classId: `${studentClass}-${studentSection}`,
+                        className: `Class ${studentClass}-${studentSection}`
+                    };
+                }
+                
+                console.warn('Student profile found but missing or couldn\'t extract class/section information');
+            } catch (err) {
+                console.error('Error fetching student profile:', err);
+            }
+            
+            // Fallback to student_info object (same as timetable uses)
+            try {
+                const studentInfo = JSON.parse(localStorage.getItem('student_info')) || {};
+                const fallbackClass = studentInfo.class || '';
+                const fallbackSection = studentInfo.section || '';
+            
+                if (fallbackClass && fallbackSection) {
+                    console.log(`Using cached student info from student_info: Class ${fallbackClass}-${fallbackSection}`);
+                return {
+                        classId: `${fallbackClass}-${fallbackSection}`,
+                        className: `Class ${fallbackClass}-${fallbackSection}`
+                };
+                }
+            } catch (e) {
+                console.warn('Error parsing student_info from localStorage', e);
+            }
+            
+            // Last resort fallback - shouldn't normally get here
+            console.warn('No student class/section information found, using defaults');
+            return {
+                classId: 'unknown-section',
+                className: 'My Class'
+            };
+        }
+        
+        // Fetch homework for the student's class
+        async function loadHomework() {
+            try {
+                // Show loading state
+                document.getElementById('homework-list').innerHTML = '<div style="text-align: center; padding: 40px;">' +
+                    '<div class="loading-spinner" style="margin: 0 auto 20px;"></div>' +
+                    '<p>Loading homework...</p>' +
+                    '</div>';
+                
+                // Get student info
+                const studentInfo = await getStudentInfo();
+                console.log('Student info:', studentInfo);
+                
+                // Update the page title with the student's class
+                document.querySelector('.header-title h1').innerHTML = 
+                    `<i class="fas fa-book"></i> ${studentInfo.className} Homework`;
+                
+                // Get auth token (required for API access)
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    document.getElementById('homework-list').innerHTML = '<div class="empty-state">' +
+                        '<i class="fas fa-lock"></i>' +
+                        '<p>Authentication required. Please <a href="login.html">login</a> to view your homework.</p>' +
+                        '</div>';
+                    return;
+                }
+                
+                console.log('Fetching homework for class:', studentInfo.classId);
+                
+                const response = await fetch(`/api/homework/class/${studentInfo.classId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const homework = await response.json();
+                    console.log('Homework data received:', homework);
+                    
+                    displayHomework(homework);
+                } else {
+                    const errorData = await response.text();
+                    console.error('Error response:', response.status, errorData);
+                    
+                    document.getElementById('homework-list').innerHTML = '<div class="empty-state">' +
+                        '<i class="fas fa-exclamation-circle"></i>' +
+                        '<p>Failed to load homework. Error: ' + response.status + ' ' + response.statusText + '</p>' +
+                        '<button onclick="loadHomework()" class="btn btn-primary">Try Again</button>' +
+                        '</div>';
+                }
+            } catch (error) {
+                console.error('Error loading homework:', error);
+                document.getElementById('homework-list').innerHTML = '<div class="empty-state">' +
+                    '<i class="fas fa-exclamation-circle"></i>' +
+                    '<p>Error loading homework: ' + error.message + '</p>' +
+                    '<button onclick="loadHomework()" class="btn btn-primary">Try Again</button>' +
+                    '</div>';
+            }
+        }
+
+        // Display homework items
+        function displayHomework(homeworkList) {
+            const container = document.getElementById('homework-list');
+            
+            if (homeworkList.length === 0) {
+                container.innerHTML = '<div class="empty-state">' +
+                    '<i class="fas fa-book-open"></i>' +
+                    '<p>No homework assigned for your class.</p>' +
+                    '</div>';
+                return;
+            }
+            
+            // Apply filter
+            const filterValue = document.getElementById('filterSelect').value;
+            const currentDate = new Date();
+            
+            let filteredHomework = [...homeworkList];
+            
+            if (filterValue !== 'all') {
+                filteredHomework = filteredHomework.filter(hw => {
+                    const expiryDate = new Date(hw.expiryDate);
+                    if (filterValue === 'active') {
+                        return expiryDate > currentDate;
+                    } else { // expired
+                        return expiryDate <= currentDate;
+                    }
+                });
+            }
+            
+            if (filteredHomework.length === 0) {
+                container.innerHTML = '<div class="empty-state">' +
+                    '<i class="fas fa-filter"></i>' +
+                    '<p>No homework matches your filter.</p>' +
+                    '</div>';
+                return;
+            }
+            
+            let html = '<ul class="homework-items">';
+            
+            filteredHomework.forEach(hw => {
+                const expiryDate = new Date(hw.expiryDate);
+                const isExpired = expiryDate <= currentDate;
+                const daysLeft = Math.ceil((expiryDate - currentDate) / (1000 * 60 * 60 * 24));
+                
+                html += `
+                <li class="homework-item" ${isExpired ? 'style="opacity: 0.7;"' : ''}>
+                    <h3>${hw.title} ${isExpired ? '<span style="color: var(--danger-color);">(Expired)</span>' : ''}</h3>
+                    <div class="homework-content">
+                        <p>${hw.description}</p>
+                    </div>
+                    <div class="homework-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            Due: ${expiryDate.toLocaleDateString()}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-user-tie"></i>
+                            Teacher: ${hw.teacher?.name || 'Unknown'}
+                        </span>
+                        ${!isExpired ? `
+                        <span class="meta-item">
+                            <i class="fas fa-hourglass-half"></i>
+                            Time left: ${daysLeft} day${daysLeft !== 1 ? 's' : ''}
+                        </span>` : ''}
+                    </div>
+                    
+                    <div class="homework-actions">
+                        ${hw.fileUrl ? `
+                        <a href="${hw.fileUrl}" target="_blank" class="download-link">
+                            <i class="fas fa-download"></i> Download Attachment
+                        </a>` : ''}
+                        
+                        ${hw.allowSubmission && !isExpired ? `
+                        <button type="button" class="btn-submit-homework" onclick="openSubmissionModal('${hw._id}', '${hw.title}')">
+                            <i class="fas fa-upload"></i> Submit Your Work
+                        </button>` : ''}
+                    </div>
+                </li>`;
+            });
+            
+            html += '</ul>';
+            container.innerHTML = html;
+            
+            // Log for debugging
+            console.log("Homework items with submission allowed:", 
+                filteredHomework.filter(hw => hw.allowSubmission).length,
+                "out of", filteredHomework.length, "total items");
+        }
+
+        // Open submission modal
+        function openSubmissionModal(homeworkId, homeworkTitle) {
+            document.getElementById('submissionHomeworkId').value = homeworkId;
+            document.getElementById('modalHomeworkTitle').textContent = homeworkTitle;
+            document.getElementById('submissionModal').classList.add('active');
+        }
+        
+        // Close submission modal
+        function closeSubmissionModal() {
+            document.getElementById('submissionModal').classList.remove('active');
+            document.getElementById('submissionForm').reset();
+        }
+        
+        // Submit homework
+        async function submitHomework(event) {
+            event.preventDefault();
+            
+            try {
+                const formData = new FormData(document.getElementById('submissionForm'));
+                const homeworkId = formData.get('homeworkId');
+                
+                if (!formData.get('submissionFile').name) {
+                    showToast('Please select a file to upload', 'error');
+                    return;
+                }
+                
+                // Show loading
+                document.getElementById('submissionBtn').disabled = true;
+                document.getElementById('submissionBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+                
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch(`/api/homework/submit/${homeworkId}`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showToast('Homework submitted successfully!', 'success');
+                    closeSubmissionModal();
+                    // Reload homework list to show updated status
+                    loadHomework();
+                } else {
+                    const error = await response.json();
+                    showToast(error.message || 'Error submitting homework', 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting homework:', error);
+                showToast('Error uploading file. Please try again.', 'error');
+            } finally {
+                document.getElementById('submissionBtn').disabled = false;
+                document.getElementById('submissionBtn').innerHTML = '<i class="fas fa-upload"></i> Submit';
+            }
+        }
+        
+        // Show toast message
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('active');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('active');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Set up the initial state and event handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Clean up legacy localStorage keys
+            localStorage.removeItem('studentClass');
+            localStorage.removeItem('studentSection');
+            
+            // Event listeners
+            document.getElementById('filterSelect').addEventListener('change', loadHomework);
+            
+            // Load the homework
+            loadHomework();
+        });
+    </script>
+</body>
+</html> 

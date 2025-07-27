@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Settings - St. Mary's Portal</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body {
+      background: #f7f9fb;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .settings-container {
+      max-width: 600px;
+      margin: 2.5rem auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+      padding: 2.5rem 2rem 2rem 2rem;
+    }
+    .settings-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .settings-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e0e0e0;
+      background: #f0f4f8;
+    }
+    .settings-user-info {
+      flex: 1;
+    }
+    .settings-user-info h2 {
+      margin: 0 0 0.2em 0;
+      font-size: 1.5em;
+      font-weight: 600;
+    }
+    .settings-user-info p {
+      margin: 0.1em 0;
+      color: #666;
+      font-size: 1.05em;
+    }
+    .settings-tabs {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 1.5px solid #e0e0e0;
+    }
+    .settings-tab {
+      padding: 0.7em 0;
+      cursor: pointer;
+      font-weight: 500;
+      color: #1976d2;
+      border: none;
+      background: none;
+      font-size: 1.08em;
+      border-bottom: 2.5px solid transparent;
+      transition: border 0.2s, color 0.2s;
+    }
+    .settings-tab.active {
+      color: #0d47a1;
+      border-bottom: 2.5px solid #1976d2;
+    }
+    .settings-section {
+      display: none;
+    }
+    .settings-section.active {
+      display: block;
+      animation: fadeIn 0.2s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .settings-form label {
+      display: block;
+      margin-bottom: 0.3em;
+      font-weight: 500;
+      color: #333;
+    }
+    .settings-form input[type="text"],
+    .settings-form input[type="email"],
+    .settings-form input[type="password"] {
+      width: 100%;
+      padding: 0.7em;
+      margin-bottom: 1.2em;
+      border: 1.5px solid #d0d7e2;
+      border-radius: 6px;
+      font-size: 1em;
+      background: #f7f9fb;
+      transition: border 0.2s;
+    }
+    .settings-form input:focus {
+      border-color: #1976d2;
+      outline: none;
+    }
+    .settings-form button {
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.7em 2.2em;
+      font-size: 1.08em;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5em;
+      transition: background 0.18s;
+    }
+    .settings-form button:hover {
+      background: #0d47a1;
+    }
+    .dark-mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+      margin-top: 1.5em;
+    }
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      color: #1976d2;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.08em;
+      background: #f4f8ff;
+      border-radius: 8px;
+      padding: 0.5em 1.2em;
+      box-shadow: 0 1px 4px rgba(25,118,210,0.06);
+      border: 1.5px solid #e0e7ef;
+      transition: background 0.18s, color 0.18s;
+    }
+  
+    .logout-modern {
+      background: none;
+      border: none;
+      color: #d32f2f;
+      font-size: 1.08em;
+      font-weight: 700;
+      padding: 0.5em 1.8em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      margin-left: 1em;
+      outline: none;
+      box-shadow: 0 1px 4px rgba(211,47,47,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logout-modern:hover {
+      background: #fbe9e7;
+      color: #b71c1c;
+    }
+    .back-link:hover {
+      color: #0800ff;
+      background: #007efd;
+      text-decoration: none;
+    }
+
+    /* Dark mode styles */
+    body.dark-mode {
+      background: #181c23;
+      color: #e3e6eb;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-mode .settings-container {
+      background: #232733;
+      color: #e3e6eb;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+    }
+    body.dark-mode .settings-header h2,
+    body.dark-mode .settings-header p,
+    body.dark-mode .settings-user-info h2,
+    body.dark-mode .settings-user-info p {
+      color: #e3e6eb;
+    }
+    body.dark-mode .settings-tabs {
+      border-bottom: 1.5px solid #333a4a;
+    }
+    body.dark-mode .settings-tab {
+      color: #90caf9;
+    }
+    body.dark-mode .settings-tab.active {
+      color: #fff;
+      border-bottom: 2.5px solid #90caf9;
+    }
+    body.dark-mode .settings-form input[type="text"],
+    body.dark-mode .settings-form input[type="email"],
+    body.dark-mode .settings-form input[type="password"] {
+      background: #232733;
+      color: #e3e6eb;
+      border: 1.5px solid #333a4a;
+    }
+    body.dark-mode .settings-form input:focus {
+      border-color: #90caf9;
+    }
+    body.dark-mode .settings-form button {
+      background: #1976d2;
+      color: #fff;
+    }
+    body.dark-mode .settings-form button:hover {
+      background: #1565c0;
+    }
+    body.dark-mode .back-link {
+      background: #232733;
+      color: #90caf9;
+      border: 1.5px solid #333a4a;
+    }
+    body.dark-mode .back-link:hover {
+      background: #1976d2;
+      color: #fff;
+    }
+    body.dark-mode .logout-modern {
+      background: none;
+      color: #ff8a65;
+      box-shadow: 0 1px 4px rgba(255,138,101,0.08);
+    }
+    body.dark-mode .logout-modern:hover {
+      background: #2d2320;
+      color: #ff7043;
+    }
+    body.dark-mode .dark-mode-toggle label {
+      color: #e3e6eb;
+    }
+  </style>
+</head>
+<body>
+  <div style="display: flex; justify-content: space-between; align-items: center; max-width: 600px; margin: 2.5rem auto 0 auto;">
+    <a href="dashboard.html" class="back-link" style="display: flex; align-items: center; gap: 0.5em; font-size: 1.08em; font-weight: 600; background: #f4f8ff; border-radius: 8px; padding: 0.5em 1.2em; box-shadow: 0 1px 4px rgba(25,118,210,0.06); border: 1.5px solid #e0e7ef; transition: background 0.18s, color 0.18s; text-decoration: none;"> <span style="font-size:1.2em;">&#8592;</span> Back to Dashboard</a>
+    <button id="logout-btn-settings" class="logout-modern">Logout</button>
+  </div>
+  <div class="settings-container">
+    <div class="settings-header">
+      <img src="https://ui-avatars.com/api/?name=User&background=E0E7EF&color=1976d2&size=128" alt="Profile" id="settings-avatar" class="settings-avatar">
+      <div class="settings-user-info">
+        <h2 id="settings-name">User</h2>
+        <p id="settings-email">user@email.com</p>
+        <p id="settings-role">Role: Loading...</p>
+      </div>
+      <div>
+        <button id="upload-avatar-btn" style="background:none;border:none;color:#1976d2;cursor:pointer;font-size:1.1em;">Change Photo</button>
+        <input type="file" id="avatar-input" accept="image/*" style="display:none;">
+      </div>
+    </div>
+    <div class="settings-tabs">
+      <button class="settings-tab active" data-tab="profile">Profile</button>
+      <button class="settings-tab" data-tab="security">Security</button>
+      <button class="settings-tab" data-tab="preferences">Preferences</button>
+    </div>
+    <div class="settings-section active" id="profile-section">
+      <form class="settings-form" id="profile-form">
+        <label for="profile-name">Name</label>
+        <input type="text" id="profile-name" name="name" required>
+        <label for="profile-email">Email</label>
+        <input type="email" id="profile-email" name="email" required>
+        <label for="profile-phone">Phone</label>
+        <input type="text" id="profile-phone" name="phone" required>
+        <button type="submit">Save Changes</button>
+      </form>
+    </div>
+    <div class="settings-section" id="security-section">
+      <form class="settings-form" id="password-form">
+        <label for="current-password">Current Password</label>
+        <input type="password" id="current-password" name="currentPassword" required>
+        <label for="new-password">New Password</label>
+        <input type="password" id="new-password" name="newPassword" required>
+        <label for="confirm-password">Confirm New Password</label>
+        <input type="password" id="confirm-password" name="confirmPassword" required>
+        <button type="submit">Change Password</button>
+      </form>
+    </div>
+    <div class="settings-section" id="preferences-section">
+      <div class="dark-mode-toggle">
+        <label for="dark-mode-switch" style="font-weight:500;">Dark Mode</label>
+        <input type="checkbox" id="dark-mode-switch">
+      </div>
+    </div>
+  </div>
+  <script src="js/account.js"></script>
+</body>
+</html> 
