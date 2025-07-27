@@ -134,6 +134,17 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
+    
+    // Handle phone number updates
+    if (req.body.phone) {
+        user.phone = req.body.phone;
+        
+        // For students, also update guardianPhone to keep them in sync
+        if (user.role === 'student' && user.studentInfo) {
+            user.studentInfo.guardianPhone = req.body.phone;
+            console.log(`Syncing phone numbers for student ${user.name}: ${req.body.phone}`);
+        }
+    }
 
     if (req.body.password) {
         const salt = await bcrypt.genSalt(10);
@@ -146,7 +157,9 @@ export const updateProfile = asyncHandler(async (req, res) => {
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
-        role: updatedUser.role
+        phone: updatedUser.phone,
+        role: updatedUser.role,
+        success: true
     });
 });
 
