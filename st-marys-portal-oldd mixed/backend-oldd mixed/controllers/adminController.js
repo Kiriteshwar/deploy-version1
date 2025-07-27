@@ -499,12 +499,40 @@ export const updateUser = asyncHandler(async (req, res) => {
     const { name, email, password, studentInfo, teacherInfo, phone } = req.body;
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    
     if (name) user.name = name;
     if (email) user.email = email;
     if (password) user.password = await bcrypt.hash(password, 10);
-    if (user.role === 'student' && studentInfo) user.studentInfo = studentInfo;
-    if (user.role === 'teacher' && teacherInfo) user.teacherInfo = teacherInfo;
-    if (phone) user.phone = phone;
+    
+    // Handle studentInfo updates - preserve existing fields
+    if (user.role === 'student' && studentInfo) {
+        // Merge with existing studentInfo to preserve all fields
+        user.studentInfo = {
+            ...user.studentInfo,  // Keep existing fields
+            ...studentInfo        // Update with new fields
+        };
+        console.log(`Updated studentInfo for ${user.name}:`, user.studentInfo);
+    }
+    
+    // Handle teacherInfo updates - preserve existing fields  
+    if (user.role === 'teacher' && teacherInfo) {
+        user.teacherInfo = {
+            ...user.teacherInfo,  // Keep existing fields
+            ...teacherInfo        // Update with new fields
+        };
+    }
+    
+    // Handle phone updates with sync for students
+    if (phone) {
+        user.phone = phone;
+        
+        // For students, also update guardianPhone to keep them in sync
+        if (user.role === 'student' && user.studentInfo) {
+            user.studentInfo.guardianPhone = phone;
+            console.log(`Syncing guardianPhone for student ${user.name}: ${phone}`);
+        }
+    }
+    
     await user.save();
     res.json({ success: true, user });
 });
