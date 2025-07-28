@@ -126,6 +126,33 @@
                 <i class="fas fa-user-plus"></i> Add User
             </button>
         </div>
+        
+        <!-- Filter Controls -->
+        <div class="filter-controls" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none;">
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <div class="filter-item">
+                    <label style="font-weight: 500; margin-bottom: 0.25rem; display: block;">Class:</label>
+                    <select id="classFilter" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; min-width: 120px;">
+                        <option value="">All Classes</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label style="font-weight: 500; margin-bottom: 0.25rem; display: block;">Section:</label>
+                    <select id="sectionFilter" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; min-width: 120px;">
+                        <option value="">All Sections</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label style="font-weight: 500; margin-bottom: 0.25rem; display: block;">Search:</label>
+                    <input type="text" id="searchFilter" placeholder="Search by name, email, or roll number" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; min-width: 250px;">
+                </div>
+                <div class="filter-item" style="align-self: flex-end;">
+                    <button id="clearFilters" style="padding: 0.5rem 1rem; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
+            </div>
+        </div>
         <div class="alert-container"></div>
         <div id="user-table-container">
             <table class="user-table">

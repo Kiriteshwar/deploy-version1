@@ -12,9 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
         tab.addEventListener('click', () => {
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            if (tab.id === 'tab-students') currentRole = 'student';
-            else if (tab.id === 'tab-teachers') currentRole = 'teacher';
-            else if (tab.id === 'tab-admins') currentRole = 'admin';
+            if (tab.id === 'tab-students') {
+                currentRole = 'student';
+                showStudentFilters();
+            } else if (tab.id === 'tab-teachers') {
+                currentRole = 'teacher';
+                hideFilters();
+            } else if (tab.id === 'tab-admins') {
+                currentRole = 'admin';
+                hideFilters();
+            }
             fetchAndRenderUsers();
         });
     });
@@ -24,8 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
         showAddUserModal();
     });
 
+    // Filter event listeners
+    setupFilterListeners();
+
     // Initial load
-    fetchAndRenderUsers();
+    showStudentFilters(); // Show filters for students by default
+    // Don't auto-load all users - wait for filters to be applied
 });
 
 console.log("Calling fetchAndRenderUsers")
@@ -361,4 +372,140 @@ function showAlert(message, type = 'success') {
     if (!alertContainer) return;
     alertContainer.innerHTML = `<div class="alert alert-${type}" style="background:${type==='success'?'#d4edda':'#f8d7da'};color:${type==='success'?'#155724':'#721c24'};padding:1rem;border-radius:6px;margin-bottom:1rem;">${message}</div>`;
     setTimeout(() => { alertContainer.innerHTML = ''; }, 3000);
-} 
+}
+
+// Filter functions
+function showStudentFilters() {
+    const filterControls = document.querySelector('.filter-controls');
+    filterControls.style.display = 'block';
+    loadClassOptions();
+}
+
+function hideFilters() {
+    const filterControls = document.querySelector('.filter-controls');
+    filterControls.style.display = 'none';
+}
+
+function setupFilterListeners() {
+    document.getElementById('classFilter').addEventListener('change', () => {
+        loadSectionOptions();
+        applyFilters();
+    });
+    
+    document.getElementById('sectionFilter').addEventListener('change', applyFilters);
+    document.getElementById('searchFilter').addEventListener('input', debounce(applyFilters, 300));
+    document.getElementById('clearFilters').addEventListener('click', clearFilters);
+}
+
+async function loadClassOptions() {
+    try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch('/api/teacher/classes', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        
+        const classFilter = document.getElementById('classFilter');
+        classFilter.innerHTML = '<option value="">All Classes</option>';
+        
+        if (data.classes && Array.isArray(data.classes)) {
+            data.classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls;
+                option.textContent = `Class ${cls}`;
+                classFilter.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Failed to load classes:', error);
+    }
+}
+
+async function loadSectionOptions() {
+    const selectedClass = document.getElementById('classFilter').value;
+    const sectionFilter = document.getElementById('sectionFilter');
+    
+    sectionFilter.innerHTML = '<option value="">All Sections</option>';
+    
+    if (!selectedClass) return;
+    
+    try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(`/api/teacher/sections/${selectedClass}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const sections = await response.json();
+        
+        if (Array.isArray(sections)) {
+            sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section;
+                option.textContent = `Section ${section}`;
+                sectionFilter.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Failed to load sections:', error);
+    }
+}
+
+async function applyFilters() {
+    const className = document.getElementById('classFilter').value;
+    const section = document.getElementById('sectionFilter').value;
+    const search = document.getElementById('searchFilter').value;
+    
+    const tbody = document.getElementById('user-table-body');
+    tbody.innerHTML = `<tr><td colspan="7">Loading...</td></tr>`;
+    
+    try {
+        const token = localStorage.getItem('auth_token');
+        const params = new URLSearchParams({ role: currentRole });
+        
+        if (className) params.append('class', className);
+        if (section) params.append('section', section);
+        if (search) params.append('search', search);
+        
+        const response = await fetch(`/api/admin/users?${params.toString()}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success || !Array.isArray(data.users) || data.users.length === 0) {
+            tbody.innerHTML = `<tr class="no-users"><td colspan="7">No users found matching the criteria.</td></tr>`;
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        data.users.forEach(user => {
+            tbody.appendChild(renderUserRow(user));
+        });
+        
+    } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="7">Failed to load users.</td></tr>`;
+    }
+}
+
+function clearFilters() {
+    document.getElementById('classFilter').value = '';
+    document.getElementById('sectionFilter').value = '';
+    document.getElementById('searchFilter').value = '';
+    loadSectionOptions(); // Reset sections
+    applyFilters();
+}
+
+// Debounce function for search input
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}

@@ -1,9 +1,9 @@
 name: Keep Alive - School Hours
 on:
   schedule:
-    # Ping every 10 minutes from 7 AM to 10 PM UTC
-    # Adjust timezone as needed - this is for UTC
-    - cron: '*/10 7-22 * * *'
+    # Ping every 10 minutes from 7 AM to 10 PM IST (1:30 AM to 4:30 PM UTC)
+    # IST is UTC+5:30, so 7 AM IST = 1:30 AM UTC, 10 PM IST = 4:30 PM UTC
+    - cron: '*/10 1-16 * * *'
   workflow_dispatch: # Allow manual trigger
 
 jobs:

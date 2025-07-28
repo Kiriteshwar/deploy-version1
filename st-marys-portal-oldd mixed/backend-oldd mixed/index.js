@@ -70,10 +70,25 @@ try {
 app.use(cors());
 app.use(express.json());
 
-// Dev logging middleware from server.js
+// Request logging middleware
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
+} else {
+    // Production logging with response size
+    app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 }
+
+// Add middleware to track large responses
+app.use((req, res, next) => {
+    const originalSend = res.send;
+    res.send = function(data) {
+        if (data && JSON.stringify(data).length > 100000) { // Log responses > 100KB
+            console.log(`Large response detected: ${req.method} ${req.url} - ${JSON.stringify(data).length} bytes`);
+        }
+        return originalSend.call(this, data);
+    };
+    next();
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);

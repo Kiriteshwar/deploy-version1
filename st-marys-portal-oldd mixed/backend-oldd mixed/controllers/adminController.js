@@ -461,13 +461,36 @@ export const updatePaymentBalance = asyncHandler(async (req, res) => {
 // --- USER MANAGEMENT ENDPOINTS ---
 
 // @desc    Get users by role
-// @route   GET /api/admin/users?role=student|teacher|admin
+// @route   GET /api/admin/users?role=student|teacher|admin&class=X&section=Y&search=name
 // @access  Private (Admin only)
 export const getUsers = asyncHandler(async (req, res) => {
-    const { role } = req.query;
+    const { role, class: className, section, search } = req.query;
     const query = {};
+    
     if (role) query.role = role;
-    const users = await User.find(query);
+    
+    // Add filters for students
+    if (role === 'student') {
+        if (className) query['studentInfo.class'] = className;
+        if (section) query['studentInfo.section'] = section;
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } },
+                { 'studentInfo.rollNumber': { $regex: search, $options: 'i' } }
+            ];
+        }
+    }
+    
+    // Add search for teachers and admins
+    if ((role === 'teacher' || role === 'admin') && search) {
+        query.$or = [
+            { name: { $regex: search, $options: 'i' } },
+            { email: { $regex: search, $options: 'i' } }
+        ];
+    }
+    
+    const users = await User.find(query).sort({ name: 1 });
     res.json({ success: true, users });
 });
 
