@@ -67,39 +67,90 @@
 
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #f3e7fe 0%, #e3f0ff 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            color: #222;
-            padding: 20px;
+            color: #2d3748;
+            padding: 0;
             position: relative;
+            font-family: 'Inter', 'Open Sans', sans-serif;
         }
 
+        /* Navigation Styles */
+        .main-nav {
+            width: 100%;
+            background: #1a365d;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            justify-content: center;
+        }
+        .nav-links li {
+            margin: 0;
+        }
+        .nav-link {
+            display: block;
+            padding: 15px 25px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: background-color 0.3s, color 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: #2b77ad;
+            border-bottom-color: #4299e1;
+        }
+        
         .bg-abstract {
             position: fixed;
             top: -120px;
             left: -120px;
             width: 420px;
             height: 420px;
-            background: radial-gradient(circle at 60% 40%, #7c3aed 0%, #38bdf8 100%);
-            opacity: 0.10;
+            background: radial-gradient(circle at 60% 40%, #2b77ad 0%, #4299e1 100%);
+            opacity: 0.05;
             z-index: 0;
             border-radius: 50%;
             filter: blur(12px);
         }
 
+        .main-content {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .welcome-section {
+            background: linear-gradient(135deg, #1a365d 0%, #2b77ad 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+            margin-bottom: 0;
+        }
+        
         .welcome-container {
             text-align: center;
-            max-width: 800px;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 28px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.13);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            margin: 40px 0 24px 0;
+            max-width: 1200px;
+            padding: 60px 20px;
+            background: #ffffff;
+            margin: 0;
             position: relative;
             z-index: 1;
             display: flex;
@@ -107,20 +158,37 @@
             align-items: center;
         }
 
+        .hero-title {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            color: #ffffff;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+        
         h1 {
-            font-size: 3.2em;
+            font-size: 2.8em;
             margin-bottom: 24px;
-            color: #7c3aed;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            text-shadow: 0 4px 16px rgba(124,58,237,0.10);
+            color: #1a365d;
+            font-weight: 700;
+            letter-spacing: -0.5px;
             animation: fadeInSection 1s cubic-bezier(.77,0,.18,1);
         }
 
+        .hero-subtitle {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            color: rgba(255,255,255,0.9);
+            font-weight: 400;
+            line-height: 1.6;
+        }
+        
         .subtitle {
             font-size: 1.2em;
             margin-bottom: 30px;
-            color: #6366f1;
+            color: #4a5568;
             font-weight: 500;
             animation: fadeInSection 1.2s cubic-bezier(.77,0,.18,1);
         }
@@ -135,75 +203,154 @@
         }
 
         .feature {
-            padding: 22px 18px 18px 18px;
-            background: #f6f7fb;
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(124,58,237,0.07);
-            transition: box-shadow 0.2s, transform 0.2s;
-            border: 1.5px solid #e3e8f0;
+            padding: 30px 24px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s, transform 0.3s;
+            border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            align-items: flex-start;
+            gap: 12px;
+            align-items: center;
+            text-align: center;
+            height: 100%;
         }
         .feature:hover {
-            box-shadow: 0 8px 32px 0 rgba(124,58,237,0.13);
-            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 25px rgba(26, 54, 93, 0.15);
+            transform: translateY(-5px);
         }
 
+        .feature-icon {
+            font-size: 2.5em;
+            color: #2b77ad;
+            margin-bottom: 16px;
+        }
+        
         .feature h3 {
-            color: #7c3aed;
-            margin-bottom: 8px;
-            font-size: 1.18em;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: #1a365d;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        
+        .feature p {
+            color: #4a5568;
+            line-height: 1.6;
+            font-size: 0.95em;
         }
 
+        .cta-button {
+            display: inline-block;
+            padding: 15px 35px;
+            background: #2b77ad;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            margin: 20px 10px;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(43, 119, 173, 0.3);
+        }
+        
+        .cta-button.secondary {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+        
+        .cta-button:hover {
+            background: #1a365d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 54, 93, 0.4);
+        }
+        
+        .cta-button.secondary:hover {
+            background: white;
+            color: #1a365d;
+        }
+        
         .login-btn {
             display: inline-block;
             padding: 15px 40px;
-            background: linear-gradient(90deg, #7c3aed 0%, #38bdf8 100%);
+            background: #2b77ad;
             color: white;
             text-decoration: none;
-            border-radius: 30px;
+            border-radius: 5px;
             font-size: 1.1em;
             transition: all 0.3s ease;
             margin-top: 30px;
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(25,118,210,0.08);
+            box-shadow: 0 3px 10px rgba(43, 119, 173, 0.3);
         }
 
         .login-btn:hover {
-            background: linear-gradient(90deg, #5b21b6 0%, #2563eb 100%);
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 8px 32px 0 rgba(124,58,237,0.13);
+            background: #1a365d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 54, 93, 0.4);
         }
 
         /* Footer styles */
         .footer {
             width: 100%;
-            background: #f6f7fb;
-            color: #6366f1;
-            text-align: center;
-            padding: 24px 0 12px 0;
-            font-size: 1em;
-            border-top: 1.5px solid #e3e8f0;
+            background: #1a365d;
+            color: #ffffff;
+            padding: 40px 0 20px 0;
             margin-top: auto;
         }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+        
+        .footer-section h3 {
+            color: #ffffff;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .footer-section p,
+        .footer-section li {
+            color: #cbd5e0;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-section a {
+            color: #cbd5e0;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-section a:hover {
+            color: #4299e1;
+        }
+        
         .footer .footer-links {
             margin-bottom: 8px;
         }
         .footer .footer-links a {
-            color: #7c3aed;
+            color: #cbd5e0;
             text-decoration: none;
             margin: 0 12px;
             font-weight: 500;
             transition: color 0.15s;
         }
         .footer .footer-links a:hover {
-            color: #2563eb;
+            color: #4299e1;
         }
 
         /* Help button styles */
@@ -392,18 +539,106 @@
         .carousel-arrow.left { left: 24px; }
         .carousel-arrow.right { right: 24px; }
         .carousel-arrow:hover { background: #5b21b6; }
+        /* Academic Section */
+        .academics-section {
+            padding: 80px 0;
+            background: #f8fafc;
+        }
+        
+        .academics-section h2 {
+            text-align: center;
+            color: #1a365d;
+            font-size: 2.5em;
+            margin-bottom: 50px;
+            font-weight: 700;
+        }
+        
+        .academics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .academic-program {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .academic-program:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(26, 54, 93, 0.15);
+        }
+        
+        .academic-program h3 {
+            color: #2b77ad;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .academic-program p {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        
         /* About section */
         .about-section {
-            margin: 56px auto 40px auto;
-            padding: 48px 36px;
-            background: linear-gradient(135deg, #fffbe6 0%, #f6f7fb 100%);
-            border-radius: 24px;
-            box-shadow: 0 4px 24px rgba(255, 193, 7, 0.08);
-            max-width: 900px;
+            padding: 80px 0;
+            background: #ffffff;
+        }
+        
+        .about-section h2 {
             text-align: center;
-            width: 100%;
-            border: 1.5px solid #ffe082;
-            animation: fadeInSection 1.3s cubic-bezier(.77,0,.18,1);
+            color: #1a365d;
+            font-size: 2.5em;
+            margin-bottom: 50px;
+            font-weight: 700;
+        }
+        
+        .about-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        
+        .about-text p {
+            color: #4a5568;
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 25px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid #2b77ad;
+        }
+        
+        .stat-item h3 {
+            color: #1a365d;
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .stat-item p {
+            color: #4a5568;
+            font-size: 0.9em;
+            font-weight: 500;
         }
         .about-section h2 {
             color: #7c3aed;
@@ -527,21 +762,83 @@
                 height: 100%;
             }
         }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                background: #1a365d;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                display: none;
+            }
+            
+            .hero-title {
+                font-size: 2.5em;
+            }
+            
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .academics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+        
         @media (max-width: 600px) {
             .header {
                 padding: 12px 10vw 12px 3vw;
             }
+            
+            .welcome-section {
+                padding: 60px 20px;
+            }
+            
             .welcome-container {
-                padding: 20px;
+                padding: 40px 20px;
             }
 
+            .hero-title {
+                font-size: 2em;
+            }
+            
             h1 {
+                font-size: 2em;
+            }
+            
+            .academics-section h2,
+            .about-section h2 {
                 font-size: 2em;
             }
 
             .features {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .cta-button {
+                display: block;
+                margin: 10px auto;
+                text-align: center;
+            }
+            
             .help-btn {
                 bottom: 16px;
                 right: 16px;
@@ -554,15 +851,8 @@
                 right: 8px;
                 padding: 18px 10px 16px 10px;
             }
-            .carousel-container {
-                min-height: 100px;
-                aspect-ratio: 16 / 9;
-            }
-            .carousel-img, .carousel-slide {
-                height: 100%;
-            }
-            .about-section, .interest-section {
-                padding: 16px 4vw;
+            .interest-section {
+                padding: 40px 20px;
             }
         }
     </style>
@@ -575,73 +865,120 @@
         </a>
         <a href="/login.html" class="login-link">Login</a>
     </div>
+    
+    <!-- Navigation Menu -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#about" class="nav-link">About Us</a></li>
+                <li><a href="#academics" class="nav-link">Academics</a></li>
+                <li><a href="#admissions" class="nav-link">Admissions</a></li>
+                <li><a href="#facilities" class="nav-link">Facilities</a></li>
+                <li><a href="#events" class="nav-link">Events</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    
     <div class="bg-abstract"></div>
-    <!-- Slideshow/Carousel -->
-    <div class="carousel-container">
-        <img src="images/ph1.jpg" class="carousel-bg-blur" id="carousel-blur-bg" alt="" aria-hidden="true" />
-        <div class="carousel-slide active">
-            <img src="images/ph1.jpg" alt="Annual Day & SSC Toppers" class="carousel-img">
-            <div class="carousel-gradient"></div>
-            <div class="carousel-caption">Annual Day & SSC Toppers</div>
+    
+    <!-- Hero Section -->
+    <section class="welcome-section" id="home">
+        <div class="main-content">
+            <h1 class="hero-title">Welcome to St. Mary's High School</h1>
+            <p class="hero-subtitle">Nurturing Excellence, Building Character, Inspiring Future Leaders</p>
+            <div>
+                <a href="#admissions" class="cta-button">Admissions Open</a>
+                <a href="#about" class="cta-button secondary">Learn More</a>
+            </div>
         </div>
-        <div class="carousel-slide">
-            <img src="images/ph2.jpg" alt="International Yoga Day" class="carousel-img">
-            <div class="carousel-gradient"></div>
-            <div class="carousel-caption">International Yoga Day</div>
-        </div>
-        <div class="carousel-slide">
-            <img src="images/ph3.jpg" alt="Admissions & Achievements" class="carousel-img">
-            <div class="carousel-gradient"></div>
-            <div class="carousel-caption">Admissions & Achievements</div>
-        </div>
-        <div class="carousel-slide">
-            <img src="images/ph4.jpg" alt="SSC Toppers" class="carousel-img">
-            <div class="carousel-gradient"></div>
-            <div class="carousel-caption">SSC Toppers</div>
-        </div>
-        <div class="carousel-slide">
-            <img src="images/ph5.jpg" alt="Monsoon Fest & Kids" class="carousel-img">
-            <div class="carousel-gradient"></div>
-            <div class="carousel-caption">Monsoon Fest & Kids</div>
-        </div>
-        <div class="carousel-dots">
-            <span class="carousel-dot active"></span>
-            <span class="carousel-dot"></span>
-            <span class="carousel-dot"></span>
-            <span class="carousel-dot"></span>
-            <span class="carousel-dot"></span>
-        </div>
-        <button class="carousel-arrow left" aria-label="Previous">&#8592;</button>
-        <button class="carousel-arrow right" aria-label="Next">&#8594;</button>
-    </div>
-    <div class="welcome-container">
-        <h1>Welcome to St. Mary's Portal</h1>
-        <p class="subtitle">Your gateway to seamless educational management</p>
+    </section>
+    
+    <!-- Quick Links Section -->
+    <section class="welcome-container" id="quicklinks">
+        <h1>Academic Excellence & Holistic Development</h1>
+        <p class="subtitle">Empowering students through comprehensive education and value-based learning</p>
         
         <div class="features">
             <div class="feature">
-                <h3><span>📚</span> Academic Management</h3>
-                <p>Access homework, attendance, and exam results all in one place</p>
+                <div class="feature-icon">🎓</div>
+                <h3>Academic Excellence</h3>
+                <p>Comprehensive curriculum with experienced faculty, modern teaching methodologies, and focus on conceptual learning</p>
             </div>
             <div class="feature">
-                <h3><span>📅</span> Real-time Updates</h3>
-                <p>Stay informed with instant notifications and announcements</p>
+                <div class="feature-icon">🌟</div>
+                <h3>Holistic Development</h3>
+                <p>Character building, leadership skills, sports, arts, and extracurricular activities for overall personality development</p>
             </div>
             <div class="feature">
-                <h3><span>📊</span> Performance Tracking</h3>
-                <p>Monitor academic progress with detailed analytics</p>
+                <div class="feature-icon">🏆</div>
+                <h3>Outstanding Results</h3>
+                <p>Consistent academic achievements, competitive exam success, and university placements with individual attention</p>
             </div>
             <div class="feature">
-                <h3><span>💬</span> Easy Communication</h3>
-                <p>Direct contact with teachers and administration</p>
+                <div class="feature-icon">🤝</div>
+                <h3>Community Values</h3>
+                <p>Strong moral foundation, community service, cultural diversity, and preparing responsible global citizens</p>
             </div>
         </div>
+    </section>
+    
+    <!-- Academics Section -->
+    <section class="academics-section" id="academics">
+        <div class="main-content">
+            <h2>Academic Programs</h2>
+            <div class="academics-grid">
+                <div class="academic-program">
+                    <h3>Primary School (1-5)</h3>
+                    <p>Foundation years focusing on basic literacy, numeracy, and character development with play-based learning.</p>
+                </div>
+                <div class="academic-program">
+                    <h3>Middle School (6-8)</h3>
+                    <p>Comprehensive curriculum building critical thinking, scientific temper, and creative expression.</p>
+                </div>
+                <div class="academic-program">
+                    <h3>Secondary School (9-10)</h3>
+                    <p>Rigorous academic preparation for board examinations with career guidance and skill development.</p>
+                </div>
+                <div class="academic-program">
+                    <h3>Senior Secondary (11-12)</h3>
+                    <p>Specialized streams in Science, Commerce, and Humanities for college preparation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <!-- About Section -->
-        <section class="about-section">
+    <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="main-content">
             <h2>About St. Mary's High School</h2>
-            <p>St. Mary's High School is dedicated to nurturing young minds and fostering academic excellence, character, and leadership. Our vibrant community offers a wide range of programs, events, and opportunities for students to grow and succeed in a supportive environment.</p>
-        </section>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>St. Mary's High School has been a beacon of educational excellence for over two decades, committed to nurturing young minds and fostering holistic development. Our institution stands as a testament to quality education, where tradition meets innovation.</p>
+                    <p>We believe in developing not just academically proficient students, but well-rounded individuals with strong moral values, leadership qualities, and a deep sense of social responsibility. Our dedicated faculty, modern infrastructure, and student-centric approach create an environment where every child can flourish.</p>
+                </div>
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <h3>20+</h3>
+                        <p>Years of Excellence</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>1500+</h3>
+                        <p>Students</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>95%</h3>
+                        <p>Success Rate</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>80+</h3>
+                        <p>Faculty Members</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
         <!-- Interested to Join Section -->
         <section class="interest-section">
@@ -653,28 +990,59 @@
                 <button type="submit">Submit</button>
             </form>
             <div id="interest-thankyou" class="interest-thankyou" style="display:none;">Thank you! Our team will reach you soon.</div>
-        </section>
-    </div>
-    <footer class="footer">
-        <div class="footer-links">
-            <a href="mailto:infostmarysscl@gmail.com">Contact</a>
-            <a href="#" onclick="document.querySelector('.help-btn').click();return false;">Help</a>
-            <a href="#">Privacy</a>
+    </section>
+    
+    <footer class="footer" id="contact">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>St. Mary's High School</h3>
+                <p>Committed to educational excellence and character development for over two decades.</p>
+                <p>Building tomorrow's leaders through quality education and strong values.</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#academics">Academics</a></li>
+                    <li><a href="#admissions">Admissions</a></li>
+                    <li><a href="/login.html">Student Portal</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contact Information</h3>
+                <p>📍 123 Education Street, City, State</p>
+                <p>📞 Phone: +91-12345-67890</p>
+                <p>✉️ Email: <a href="mailto:infostmarysscl@gmail.com">infostmarysscl@gmail.com</a></p>
+                <p>🕒 Office Hours: Mon-Fri 8:00 AM - 5:00 PM</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <p>Stay connected with our school community</p>
+                <div class="footer-links">
+                    <a href="#">Facebook</a>
+                    <a href="#">Twitter</a>
+                    <a href="#">Instagram</a>
+                </div>
+            </div>
         </div>
+        
         <div id="smhs-footer"
             style="
                 margin: 40px auto 0 auto;
                 padding: 18px 0 10px 0;
                 text-align: center;
                 max-width: 600px;
-                background: #f7f7f7;
+                background: rgba(255,255,255,0.1);
                 border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+                color: #cbd5e0;
             ">
-            <div style="font-size: 1.15rem; font-weight: bold; font-style: italic; color: #111;">
-            Made with <span style="color:#e25555;">&#10084;&#65039;</span> by SMHS
+            <div style="font-size: 1.15rem; font-weight: bold; font-style: italic;">
+            Made with <span style="color:#4299e1;">♥</span> by SMHS
             </div>
-            <div style="font-size: 1rem; font-weight: 400; color: #888; margin-top: 2px;">
+            <div style="font-size: 1rem; font-weight: 400; margin-top: 2px;">
                 &copy; 2025 St. Mary's High School. All rights reserved.
             </div>
         </div>
