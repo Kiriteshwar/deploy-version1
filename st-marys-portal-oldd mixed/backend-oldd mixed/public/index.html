@@ -20,31 +20,73 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 18px 40px 18px 32px;
-            background: #fff;
-            box-shadow: 0 2px 16px 0 rgba(120, 60, 200, 0.07);
+            padding: 25px 40px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            box-shadow: 0 4px 20px 0 rgba(26, 54, 93, 0.1);
             position: relative;
             z-index: 10;
+            border-bottom: 3px solid #1a365d;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1a365d 0%, #2b77ad 50%, #4299e1 100%);
+            z-index: 11;
         }
         .header .logo {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 18px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: rgba(26, 54, 93, 0.05);
+            transition: all 0.3s ease;
         }
+        
+        .header .logo:hover {
+            background: rgba(26, 54, 93, 0.1);
+            transform: translateY(-1px);
+        }
+        
         .header .logo-img {
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             object-fit: contain;
-            background: #f6f7fb;
-            border: 2px solid #e3e8f0;
-            box-shadow: 0 2px 8px rgba(25,118,210,0.08);
+            background: #f8fafc;
+            border: 3px solid #1a365d;
+            box-shadow: 0 4px 15px rgba(26, 54, 93, 0.2);
+            transition: transform 0.3s ease;
         }
+        
+        .header .logo-img:hover {
+            transform: scale(1.05);
+        }
+        
         .header .school-name {
-            font-size: 1.25em;
-            font-weight: 700;
-            color: #7c3aed;
+            font-size: 1.4em;
+            font-weight: 800;
+            color: #1a365d;
             letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(26, 54, 93, 0.1);
+            position: relative;
+        }
+        
+        .header .school-name::after {
+            content: 'Excellence in Education';
+            position: absolute;
+            top: 100%;
+            left: 0;
+            font-size: 0.6em;
+            font-weight: 500;
+            color: #2b77ad;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
         .header .login-link {
             padding: 10px 28px;
@@ -115,6 +157,16 @@
         .nav-link.active {
             background-color: #2b77ad;
             border-bottom-color: #4299e1;
+        }
+        
+        .mobile-nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 8px;
         }
         
         .bg-abstract {
@@ -747,6 +799,129 @@
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: none; }
         }
+        
+        /* Carousel styles */
+        .carousel-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(26, 54, 93, 0.15);
+            background: #fff;
+            aspect-ratio: 16 / 9;
+            min-height: 400px;
+        }
+        
+        .carousel-bg-blur {
+            position: absolute;
+            left: 0; top: 0; width: 100%; height: 100%;
+            z-index: 0;
+            filter: blur(15px) brightness(1.1) saturate(1.2);
+            object-fit: cover;
+            object-position: center;
+            pointer-events: none;
+            opacity: 0.4;
+            transition: opacity 0.5s;
+        }
+        
+        .carousel-slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 0; top: 0;
+            transition: opacity 0.5s;
+            opacity: 0;
+            z-index: 1;
+        }
+        
+        .carousel-slide.active {
+            display: flex;
+            opacity: 1;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .carousel-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        
+        .carousel-gradient {
+            position: absolute;
+            left: 0; bottom: 0; width: 100%; height: 50%;
+            background: linear-gradient(0deg, rgba(26,54,93,0.8) 0%, rgba(26,54,93,0.0) 100%);
+            z-index: 3;
+            pointer-events: none;
+        }
+        
+        .carousel-caption {
+            position: absolute;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.3em;
+            font-weight: 600;
+            z-index: 10;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            background: rgba(26, 54, 93, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .carousel-dots {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+        
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .carousel-dot.active {
+            background: #ffffff;
+        }
+        
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(26,54,93,0.7);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.5em;
+            cursor: pointer;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        
+        .carousel-arrow.left { left: 20px; }
+        .carousel-arrow.right { right: 20px; }
+        .carousel-arrow:hover { background: #1a365d; }
         @media (max-width: 1200px) {
             .carousel-container {
                 max-width: 98vw;
@@ -764,6 +939,10 @@
         }
         /* Responsive Design */
         @media (max-width: 768px) {
+            .mobile-nav-toggle {
+                display: block;
+            }
+            
             .nav-links {
                 flex-direction: column;
                 background: #1a365d;
@@ -773,6 +952,14 @@
                 right: 0;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                 display: none;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+            }
+            
+            .nav-links.show {
+                display: flex;
+                max-height: 400px;
             }
             
             .hero-title {
@@ -883,6 +1070,45 @@
     
     <div class="bg-abstract"></div>
     
+    <!-- Image Carousel -->
+    <div class="carousel-container">
+        <img src="images/ph1.jpg" class="carousel-bg-blur" id="carousel-blur-bg" alt="" aria-hidden="true" />
+        <div class="carousel-slide active">
+            <img src="images/ph1.jpg" alt="Annual Day & SSC Toppers" class="carousel-img">
+            <div class="carousel-gradient"></div>
+            <div class="carousel-caption">Annual Day & SSC Toppers</div>
+        </div>
+        <div class="carousel-slide">
+            <img src="images/ph2.jpg" alt="International Yoga Day" class="carousel-img">
+            <div class="carousel-gradient"></div>
+            <div class="carousel-caption">International Yoga Day</div>
+        </div>
+        <div class="carousel-slide">
+            <img src="images/ph3.jpg" alt="Admissions & Achievements" class="carousel-img">
+            <div class="carousel-gradient"></div>
+            <div class="carousel-caption">Admissions & Achievements</div>
+        </div>
+        <div class="carousel-slide">
+            <img src="images/ph4.jpg" alt="SSC Toppers" class="carousel-img">
+            <div class="carousel-gradient"></div>
+            <div class="carousel-caption">SSC Toppers</div>
+        </div>
+        <div class="carousel-slide">
+            <img src="images/ph5.jpg" alt="Monsoon Fest & Kids" class="carousel-img">
+            <div class="carousel-gradient"></div>
+            <div class="carousel-caption">Monsoon Fest & Kids</div>
+        </div>
+        <div class="carousel-dots">
+            <span class="carousel-dot active"></span>
+            <span class="carousel-dot"></span>
+            <span class="carousel-dot"></span>
+            <span class="carousel-dot"></span>
+            <span class="carousel-dot"></span>
+        </div>
+        <button class="carousel-arrow left" aria-label="Previous">&#8592;</button>
+        <button class="carousel-arrow right" aria-label="Next">&#8594;</button>
+    </div>
+    
     <!-- Hero Section -->
     <section class="welcome-section" id="home">
         <div class="main-content">
@@ -930,20 +1156,20 @@
             <h2>Academic Programs</h2>
             <div class="academics-grid">
                 <div class="academic-program">
-                    <h3>Primary School (1-5)</h3>
+                    <h3>Pre Primary School </h3>
                     <p>Foundation years focusing on basic literacy, numeracy, and character development with play-based learning.</p>
                 </div>
                 <div class="academic-program">
-                    <h3>Middle School (6-8)</h3>
+                    <h3>Primary School </h3>
+                    <p>Foundation years focusing on basic literacy, numeracy, and character development with play-based learning.</p>
+                </div>
+                <div class="academic-program">
+                    <h3>Middle School</h3>
                     <p>Comprehensive curriculum building critical thinking, scientific temper, and creative expression.</p>
                 </div>
                 <div class="academic-program">
-                    <h3>Secondary School (9-10)</h3>
+                    <h3>Secondary School </h3>
                     <p>Rigorous academic preparation for board examinations with career guidance and skill development.</p>
-                </div>
-                <div class="academic-program">
-                    <h3>Senior Secondary (11-12)</h3>
-                    <p>Specialized streams in Science, Commerce, and Humanities for college preparation.</p>
                 </div>
             </div>
         </div>
@@ -960,11 +1186,11 @@
                 </div>
                 <div class="stats-container">
                     <div class="stat-item">
-                        <h3>20+</h3>
+                        <h3>25+</h3>
                         <p>Years of Excellence</p>
                     </div>
                     <div class="stat-item">
-                        <h3>1500+</h3>
+                        <h3>1000+</h3>
                         <p>Students</p>
                     </div>
                     <div class="stat-item">
@@ -972,7 +1198,7 @@
                         <p>Success Rate</p>
                     </div>
                     <div class="stat-item">
-                        <h3>80+</h3>
+                        <h3>30+</h3>
                         <p>Faculty Members</p>
                     </div>
                 </div>
@@ -981,7 +1207,7 @@
     </section>
 
         <!-- Interested to Join Section -->
-        <section class="interest-section">
+        <section class="interest-section" id="admissions">
             <h2>Interested in Joining?</h2>
             <p>Fill out the form below and our team will reach out to you soon!</p>
             <form id="interest-form" class="interest-form">
@@ -992,11 +1218,56 @@
             <div id="interest-thankyou" class="interest-thankyou" style="display:none;">Thank you! Our team will reach you soon.</div>
     </section>
     
+    <!-- Facilities Section -->
+    <section class="facilities-section" id="facilities" style="padding: 80px 0; background: #f8fafc;">
+        <div class="main-content">
+            <h2 style="text-align: center; color: #1a365d; font-size: 2.5em; margin-bottom: 30px; font-weight: 700;">Our Facilities</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px;">
+                <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center;">
+                    <h3 style="color: #2b77ad; margin-bottom: 15px;">Modern Classrooms</h3>
+                    <p style="color: #4a5568;">Well-equipped smart classrooms with digital boards and audio-visual facilities.</p>
+                </div>
+                <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center;">
+                    <h3 style="color: #2b77ad; margin-bottom: 15px;">Science Labs</h3>
+                    <p style="color: #4a5568;">Fully equipped Physics, Chemistry, and Biology laboratories for hands-on learning.</p>
+                </div>
+                <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center;">
+                    <h3 style="color: #2b77ad; margin-bottom: 15px;">Library & Computer Lab</h3>
+                    <p style="color: #4a5568;">Extensive library with digital resources and modern computer laboratory.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Events Section -->
+    <section class="events-section" id="events" style="padding: 80px 0; background: #ffffff;">
+        <div class="main-content">
+            <h2 style="text-align: center; color: #1a365d; font-size: 2.5em; margin-bottom: 30px; font-weight: 700;">Recent Events</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px;">
+                <div style="background: #f8fafc; padding: 30px; border-radius: 10px; border-left: 4px solid #2b77ad;">
+                    <h3 style="color: #1a365d; margin-bottom: 15px;">Annual Sports Day</h3>
+                    <p style="color: #4a5568; margin-bottom: 10px;">March 15, 2024</p>
+                    <p style="color: #4a5568;">Students showcased their athletic talents in various sports competitions.</p>
+                </div>
+                <div style="background: #f8fafc; padding: 30px; border-radius: 10px; border-left: 4px solid #2b77ad;">
+                    <h3 style="color: #1a365d; margin-bottom: 15px;">Science Exhibition</h3>
+                    <p style="color: #4a5568; margin-bottom: 10px;">February 20, 2024</p>
+                    <p style="color: #4a5568;">Students presented innovative science projects and experiments.</p>
+                </div>
+                <div style="background: #f8fafc; padding: 30px; border-radius: 10px; border-left: 4px solid #2b77ad;">
+                    <h3 style="color: #1a365d; margin-bottom: 15px;">Cultural Program</h3>
+                    <p style="color: #4a5568; margin-bottom: 10px;">January 26, 2024</p>
+                    <p style="color: #4a5568;">Republic Day celebration with cultural performances and patriotic programs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
     <footer class="footer" id="contact">
         <div class="footer-content">
             <div class="footer-section">
                 <h3>St. Mary's High School</h3>
-                <p>Committed to educational excellence and character development for over two decades.</p>
+                <p>Committed to educational excellence and character development for over 25 years.</p>
                 <p>Building tomorrow's leaders through quality education and strong values.</p>
             </div>
             
@@ -1012,10 +1283,10 @@
             
             <div class="footer-section">
                 <h3>Contact Information</h3>
-                <p>📍 123 Education Street, City, State</p>
+                <p>📍 Warangal,Telangana</p>
                 <p>📞 Phone: +91-12345-67890</p>
                 <p>✉️ Email: <a href="mailto:infostmarysscl@gmail.com">infostmarysscl@gmail.com</a></p>
-                <p>🕒 Office Hours: Mon-Fri 8:00 AM - 5:00 PM</p>
+                <p>🕒 Office Hours: Mon-Sat 9:00 AM - 5:00 PM</p>
             </div>
             
             <div class="footer-section">
@@ -1040,7 +1311,7 @@
                 color: #cbd5e0;
             ">
             <div style="font-size: 1.15rem; font-weight: bold; font-style: italic;">
-            Made with <span style="color:#4299e1;">♥</span> by SMHS
+            Made with <span style="color:#e53e3e;">♥</span> by SMHS
             </div>
             <div style="font-size: 1rem; font-weight: 400; margin-top: 2px;">
                 &copy; 2025 St. Mary's High School. All rights reserved.
@@ -1132,6 +1403,83 @@
         if (e.key === 'Escape') {
             document.querySelector('.help-modal').classList.remove('active');
         }
+    });
+    
+    // Smooth scrolling navigation
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section[id]');
+        
+        // Smooth scrolling for navigation links
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                if (targetSection) {
+                    const offsetTop = targetSection.offsetTop - 80; // Account for sticky nav
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Highlight active navigation item on scroll
+        function highlightActiveNav() {
+            const scrollY = window.pageYOffset;
+            
+            sections.forEach(section => {
+                const sectionHeight = section.offsetHeight;
+                const sectionTop = section.offsetTop - 100;
+                const sectionId = section.getAttribute('id');
+                
+                if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${sectionId}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Listen for scroll events
+        window.addEventListener('scroll', highlightActiveNav);
+        
+        // Initial highlight
+        highlightActiveNav();
+    });
+    
+    // Mobile navigation toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create mobile menu toggle button
+        const navContainer = document.querySelector('.nav-container');
+        const navLinks = document.querySelector('.nav-links');
+        
+        const mobileToggle = document.createElement('button');
+        mobileToggle.classList.add('mobile-nav-toggle');
+        mobileToggle.innerHTML = '☰';
+        mobileToggle.setAttribute('aria-label', 'Toggle navigation');
+        
+        navContainer.insertBefore(mobileToggle, navLinks);
+        
+        // Toggle mobile menu
+        mobileToggle.addEventListener('click', function() {
+            navLinks.classList.toggle('show');
+            this.innerHTML = navLinks.classList.contains('show') ? '✕' : '☰';
+        });
+        
+        // Close mobile menu when clicking on a link
+        navLinks.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function() {
+                navLinks.classList.remove('show');
+                mobileToggle.innerHTML = '☰';
+            });
+        });
     });
     </script>
 </body>
