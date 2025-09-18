@@ -20,12 +20,12 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 25px 40px;
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            box-shadow: 0 4px 20px 0 rgba(26, 54, 93, 0.1);
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #1a365d 0%, #2b77ad 50%, #4299e1 100%);
+            box-shadow: 0 6px 30px 0 rgba(26, 54, 93, 0.3);
             position: relative;
             z-index: 10;
-            border-bottom: 3px solid #1a365d;
+            min-height: 120px;
         }
         
         .header::before {
@@ -34,47 +34,64 @@
             top: 0;
             left: 0;
             right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="75" cy="25" r="1" fill="%23ffffff" opacity="0.05"/><circle cx="25" cy="75" r="1" fill="%23ffffff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+            opacity: 0.3;
+            z-index: -1;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #1a365d 0%, #2b77ad 50%, #4299e1 100%);
+            background: linear-gradient(90deg, #ffd700 0%, #ff6b35 50%, #e53e3e 100%);
             z-index: 11;
         }
         .header .logo {
             display: flex;
             align-items: center;
-            gap: 18px;
-            padding: 8px 16px;
-            border-radius: 12px;
-            background: rgba(26, 54, 93, 0.05);
+            gap: 20px;
+            padding: 12px 20px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
         
         .header .logo:hover {
-            background: rgba(26, 54, 93, 0.1);
-            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
         }
         
         .header .logo-img {
-            width: 56px;
-            height: 56px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             object-fit: contain;
-            background: #f8fafc;
-            border: 3px solid #1a365d;
-            box-shadow: 0 4px 15px rgba(26, 54, 93, 0.2);
+            background: #ffffff;
+            border: 4px solid #ffffff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease;
         }
         
         .header .logo-img:hover {
-            transform: scale(1.05);
+            transform: scale(1.1) rotate(5deg);
         }
         
         .header .school-name {
-            font-size: 1.4em;
-            font-weight: 800;
-            color: #1a365d;
+            font-size: 1.6em;
+            font-weight: 900;
+            color: #ffffff;
             letter-spacing: 0.5px;
-            text-shadow: 0 2px 4px rgba(26, 54, 93, 0.1);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             position: relative;
+            line-height: 1.2;
         }
         
         .header .school-name::after {
@@ -82,29 +99,34 @@
             position: absolute;
             top: 100%;
             left: 0;
-            font-size: 0.6em;
-            font-weight: 500;
-            color: #2b77ad;
-            letter-spacing: 1px;
+            font-size: 0.55em;
+            font-weight: 600;
+            color: #ffd700;
+            letter-spacing: 2px;
             text-transform: uppercase;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            margin-top: 2px;
         }
         .header .login-link {
-            padding: 10px 28px;
-            background: linear-gradient(90deg, #7c3aed 0%, #38bdf8 100%);
-            color: #fff;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #ffd700 0%, #ff6b35 100%);
+            color: #1a365d;
             border: none;
-            border-radius: 24px;
-            font-size: 1em;
-            font-weight: 600;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 700;
             text-decoration: none;
-            box-shadow: 0 2px 8px rgba(25,118,210,0.08);
-            transition: background 0.2s, transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
             cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .header .login-link:hover {
-            background: linear-gradient(90deg, #5b21b6 0%, #2563eb 100%);
-            transform: translateY(-1px) scale(1.01);
-            box-shadow: 0 4px 16px 0 rgba(25,118,210,0.13);
+            background: linear-gradient(135deg, #ff6b35 0%, #e53e3e 100%);
+            color: #ffffff;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
         }
 
         body {
@@ -849,8 +871,10 @@
         .carousel-img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             object-position: center;
+            background: #f8fafc;
+            transition: transform 0.3s ease;
         }
         
         .carousel-gradient {
@@ -922,6 +946,74 @@
         .carousel-arrow.left { left: 20px; }
         .carousel-arrow.right { right: 20px; }
         .carousel-arrow:hover { background: #1a365d; }
+        
+        /* Consistent Card Styling */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e2e8f0;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 35px rgba(26, 54, 93, 0.15);
+        }
+        
+        .card h3 {
+            color: #2b77ad;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .card p {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .card-date {
+            color: #2b77ad;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .section-spacing {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            color: #1a365d;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: #4a5568;
+            font-size: 1.1em;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
         @media (max-width: 1200px) {
             .carousel-container {
                 max-width: 98vw;
@@ -1074,27 +1166,42 @@
     <div class="carousel-container">
         <img src="images/ph1.jpg" class="carousel-bg-blur" id="carousel-blur-bg" alt="" aria-hidden="true" />
         <div class="carousel-slide active">
-            <img src="images/ph1.jpg" alt="Annual Day & SSC Toppers" class="carousel-img">
+            <picture>
+                <source srcset="images/ph1.webp" type="image/webp">
+                <img src="images/ph1.jpg" alt="Annual Day & SSC Toppers" class="carousel-img" loading="lazy">
+            </picture>
             <div class="carousel-gradient"></div>
             <div class="carousel-caption">Annual Day & SSC Toppers</div>
         </div>
         <div class="carousel-slide">
-            <img src="images/ph2.jpg" alt="International Yoga Day" class="carousel-img">
+            <picture>
+                <source srcset="images/ph2.webp" type="image/webp">
+                <img src="images/ph2.jpg" alt="International Yoga Day" class="carousel-img" loading="lazy">
+            </picture>
             <div class="carousel-gradient"></div>
             <div class="carousel-caption">International Yoga Day</div>
         </div>
         <div class="carousel-slide">
-            <img src="images/ph3.jpg" alt="Admissions & Achievements" class="carousel-img">
+            <picture>
+                <source srcset="images/ph3.webp" type="image/webp">
+                <img src="images/ph3.jpg" alt="Admissions & Achievements" class="carousel-img" loading="lazy">
+            </picture>
             <div class="carousel-gradient"></div>
             <div class="carousel-caption">Admissions & Achievements</div>
         </div>
         <div class="carousel-slide">
-            <img src="images/ph4.jpg" alt="SSC Toppers" class="carousel-img">
+            <picture>
+                <source srcset="images/ph4.webp" type="image/webp">
+                <img src="images/ph4.jpg" alt="SSC Toppers" class="carousel-img" loading="lazy">
+            </picture>
             <div class="carousel-gradient"></div>
             <div class="carousel-caption">SSC Toppers</div>
         </div>
         <div class="carousel-slide">
-            <img src="images/ph5.jpg" alt="Monsoon Fest & Kids" class="carousel-img">
+            <picture>
+                <source srcset="images/ph5.webp" type="image/webp">
+                <img src="images/ph5.jpg" alt="Monsoon Fest & Kids" class="carousel-img" loading="lazy">
+            </picture>
             <div class="carousel-gradient"></div>
             <div class="carousel-caption">Monsoon Fest & Kids</div>
         </div>
@@ -1150,6 +1257,37 @@
         </div>
     </section>
     
+    <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="main-content">
+            <h2>About St. Mary's High School</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>St. Mary's High School has been a beacon of educational excellence for over 25 years, committed to nurturing young minds and fostering holistic development. Our institution stands as a testament to quality education, where tradition meets innovation.</p>
+                    <p>We believe in developing not just academically proficient students, but well-rounded individuals with strong moral values, leadership qualities, and a deep sense of social responsibility. Our dedicated faculty, modern infrastructure, and student-centric approach create an environment where every child can flourish.</p>
+                </div>
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <h3>25+</h3>
+                        <p>Years of Excellence</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>1000+</h3>
+                        <p>Students</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>95%</h3>
+                        <p>Success Rate</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>30+</h3>
+                        <p>Faculty Members</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
     <!-- Academics Section -->
     <section class="academics-section" id="academics">
         <div class="main-content">
@@ -1175,37 +1313,6 @@
         </div>
     </section>
 
-    <!-- About Section -->
-    <section class="about-section" id="about">
-        <div class="main-content">
-            <h2>About St. Mary's High School</h2>
-            <div class="about-content">
-                <div class="about-text">
-                    <p>St. Mary's High School has been a beacon of educational excellence for over two decades, committed to nurturing young minds and fostering holistic development. Our institution stands as a testament to quality education, where tradition meets innovation.</p>
-                    <p>We believe in developing not just academically proficient students, but well-rounded individuals with strong moral values, leadership qualities, and a deep sense of social responsibility. Our dedicated faculty, modern infrastructure, and student-centric approach create an environment where every child can flourish.</p>
-                </div>
-                <div class="stats-container">
-                    <div class="stat-item">
-                        <h3>25+</h3>
-                        <p>Years of Excellence</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>1000+</h3>
-                        <p>Students</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>95%</h3>
-                        <p>Success Rate</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>30+</h3>
-                        <p>Faculty Members</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
         <!-- Interested to Join Section -->
         <section class="interest-section" id="admissions">
             <h2>Interested in Joining?</h2>
@@ -1219,45 +1326,80 @@
     </section>
     
     <!-- Facilities Section -->
-    <section class="facilities-section" id="facilities" style="padding: 80px 0; background: #f8fafc;">
+    <section class="facilities-section section-spacing" id="facilities" style="background: #f8fafc;">
         <div class="main-content">
-            <h2 style="text-align: center; color: #1a365d; font-size: 2.5em; margin-bottom: 30px; font-weight: 700;">Our Facilities</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px;">
-                <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center;">
-                    <h3 style="color: #2b77ad; margin-bottom: 15px;">Modern Classrooms</h3>
-                    <p style="color: #4a5568;">Well-equipped smart classrooms with digital boards and audio-visual facilities.</p>
+            <h2 class="section-title">Our Facilities</h2>
+            <p class="section-subtitle">World-class infrastructure and modern facilities to support comprehensive learning</p>
+            <div class="card-grid">
+                <div class="card">
+                    <div>
+                        <div style="font-size: 2.5em; margin-bottom: 15px;">🏫</div>
+                        <h3>Modern Classrooms</h3>
+                        <p>Well-equipped smart classrooms with digital boards and audio-visual facilities for interactive learning.</p>
+                    </div>
                 </div>
-                <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center;">
-                    <h3 style="color: #2b77ad; margin-bottom: 15px;">Science Labs</h3>
-                    <p style="color: #4a5568;">Fully equipped Physics, Chemistry, and Biology laboratories for hands-on learning.</p>
+                <div class="card">
+                    <div>
+                        <div style="font-size: 2.5em; margin-bottom: 15px;">🔬</div>
+                        <h3>Science Labs</h3>
+                        <p>Fully equipped Physics, Chemistry, and Biology laboratories for hands-on practical learning experiences.</p>
+                    </div>
                 </div>
-                <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center;">
-                    <h3 style="color: #2b77ad; margin-bottom: 15px;">Library & Computer Lab</h3>
-                    <p style="color: #4a5568;">Extensive library with digital resources and modern computer laboratory.</p>
+                <div class="card">
+                    <div>
+                        <div style="font-size: 2.5em; margin-bottom: 15px;">📚</div>
+                        <h3>Library & Computer Lab</h3>
+                        <p>Extensive library with digital resources and modern computer laboratory with high-speed internet.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div>
+                        <div style="font-size: 2.5em; margin-bottom: 15px;">🏃</div>
+                        <h3>Sports Complex</h3>
+                        <p>Well-maintained sports grounds and indoor facilities for various games and physical activities.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
     
     <!-- Events Section -->
-    <section class="events-section" id="events" style="padding: 80px 0; background: #ffffff;">
+    <section class="events-section section-spacing" id="events" style="background: #ffffff;">
         <div class="main-content">
-            <h2 style="text-align: center; color: #1a365d; font-size: 2.5em; margin-bottom: 30px; font-weight: 700;">Recent Events</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px;">
-                <div style="background: #f8fafc; padding: 30px; border-radius: 10px; border-left: 4px solid #2b77ad;">
-                    <h3 style="color: #1a365d; margin-bottom: 15px;">Annual Sports Day</h3>
-                    <p style="color: #4a5568; margin-bottom: 10px;">March 15, 2024</p>
-                    <p style="color: #4a5568;">Students showcased their athletic talents in various sports competitions.</p>
+            <h2 class="section-title">Recent Events</h2>
+            <p class="section-subtitle">Celebrating achievements and memorable moments in our school community</p>
+            <div class="card-grid">
+                <div class="card">
+                    <div>
+                        <div style="font-size: 2.5em; margin-bottom: 15px;">🏆</div>
+                        <h3>Annual Sports Day</h3>
+                        <p class="card-date">March 15, 2024</p>
+                        <p>Students showcased their athletic talents in various sports competitions, promoting fitness and teamwork.</p>
+                    </div>
                 </div>
-                <div style="background: #f8fafc; padding: 30px; border-radius: 10px; border-left: 4px solid #2b77ad;">
-                    <h3 style="color: #1a365d; margin-bottom: 15px;">Science Exhibition</h3>
-                    <p style="color: #4a5568; margin-bottom: 10px;">February 20, 2024</p>
-                    <p style="color: #4a5568;">Students presented innovative science projects and experiments.</p>
+                <div class="card">
+                    <div>
+                        <div style="font-size: 2.5em; margin-bottom: 15px;">🔬</div>
+                        <h3>Science Exhibition</h3>
+                        <p class="card-date">February 20, 2024</p>
+                        <p>Students presented innovative science projects and experiments, demonstrating creativity and scientific thinking.</p>
+                    </div>
                 </div>
-                <div style="background: #f8fafc; padding: 30px; border-radius: 10px; border-left: 4px solid #2b77ad;">
-                    <h3 style="color: #1a365d; margin-bottom: 15px;">Cultural Program</h3>
-                    <p style="color: #4a5568; margin-bottom: 10px;">January 26, 2024</p>
-                    <p style="color: #4a5568;">Republic Day celebration with cultural performances and patriotic programs.</p>
+                <div class="card">
+                    <div>
+                        <div style="font-size: 2.5em; margin-bottom: 15px;">🎭</div>
+                        <h3>Cultural Program</h3>
+                        <p class="card-date">January 26, 2024</p>
+                        <p>Republic Day celebration with cultural performances and patriotic programs celebrating our national heritage.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div>
+                        <div style="font-size: 2.5em; margin-bottom: 15px;">📚</div>
+                        <h3>Book Fair</h3>
+                        <p class="card-date">December 10, 2023</p>
+                        <p>Annual book fair promoting reading culture with diverse collection of educational and recreational books.</p>
+                    </div>
                 </div>
             </div>
         </div>
