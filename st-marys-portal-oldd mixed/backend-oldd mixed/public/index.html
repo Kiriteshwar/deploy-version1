@@ -73,11 +73,12 @@
             width: 64px;
             height: 64px;
             border-radius: 50%;
-            object-fit: contain;
+            object-fit: cover;
             background: #ffffff;
             border: 4px solid #ffffff;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease;
+            display: block;
         }
         
         .header .logo-img:hover {
@@ -269,7 +270,7 @@
 
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 28px;
             margin: 36px 0 24px 0;
             text-align: left;
@@ -544,11 +545,12 @@
         .carousel-img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
             object-position: center;
-            border-radius: 0 0 32px 32px;
+            border-radius: 0;
             background: linear-gradient(135deg, #f3e7fe 0%, #e3f0ff 100%);
             z-index: 2;
+            display: block;
         }
         .carousel-gradient {
             position: absolute;
@@ -629,7 +631,7 @@
         
         .academics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 30px;
             margin-top: 40px;
         }
@@ -950,7 +952,7 @@
         /* Consistent Card Styling */
         .card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 30px;
             margin-top: 40px;
         }
@@ -1030,6 +1032,20 @@
             }
         }
         /* Responsive Design */
+        @media (max-width: 1024px) {
+            .features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .academics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
         @media (max-width: 768px) {
             .mobile-nav-toggle {
                 display: block;
@@ -1067,7 +1083,15 @@
                 grid-template-columns: 1fr 1fr;
             }
             
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
             .academics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-grid {
                 grid-template-columns: 1fr;
             }
             
@@ -1470,6 +1494,29 @@
         <p>For urgent issues, please contact the school office directly.</p>
     </div>
     <script>
+    // Image error handling
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add error handling for all images
+        const images = document.querySelectorAll('img');
+        images.forEach(function(img) {
+            img.addEventListener('error', function() {
+                console.error('Failed to load image:', this.src);
+                // Set a fallback background or hide the image
+                this.style.display = 'block';
+                this.style.backgroundColor = '#f0f0f0';
+                this.style.color = '#666';
+                this.style.textAlign = 'center';
+                this.style.lineHeight = this.offsetHeight + 'px';
+                this.alt = this.alt || 'Image not available';
+            });
+            
+            img.addEventListener('load', function() {
+                console.log('Image loaded successfully:', this.src);
+                this.style.display = 'block';
+            });
+        });
+    });
+    
     // Carousel logic with blurred background sync
     document.addEventListener('DOMContentLoaded', function() {
         const slides = document.querySelectorAll('.carousel-slide');
