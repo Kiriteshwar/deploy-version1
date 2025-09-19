@@ -45,6 +45,18 @@ Add this template INSIDE the `<div class="card-grid">` section:
 - 🎉 - Celebration
 - 📚 - Academic Event
 - 🔬 - Science Fair
+| Event Type | Emoji | Example |
+|------------|-------|---------|
+| Cultural Festival | 🎭 | Diwali, Holi, Christmas |
+| Sports Day | 🏆 | Annual Sports, Olympics |
+| Science Fair | 🔬 | Science Exhibition |
+| Art & Craft | 🎨 | Art Competition |
+| Music Concert | 🎵 | Annual Concert |
+| Graduation | 🎓 | Farewell Ceremony |
+| Prize Distribution | 🏅 | Achievement Day |
+| Independence Day | 🇮🇳 | Patriotic Program |
+| Teachers Day | 👩‍🏫 | Teacher Appreciation |
+| Environmental Day | 🌱 | Tree Plantation |
 
 ### Step 4: Example - Adding a "Diwali Festival" Event:
 
