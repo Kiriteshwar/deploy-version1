@@ -275,6 +275,7 @@
             margin: 36px 0 24px 0;
             text-align: left;
             width: 100%;
+            align-items: stretch;
         }
 
         .feature {
@@ -290,6 +291,7 @@
             align-items: center;
             text-align: center;
             height: 100%;
+            min-height: 280px;
         }
         .feature:hover {
             box-shadow: 0 8px 25px rgba(26, 54, 93, 0.15);
@@ -634,6 +636,7 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 30px;
             margin-top: 40px;
+            align-items: stretch;
         }
         
         .academic-program {
@@ -643,6 +646,10 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             text-align: center;
             transition: transform 0.3s, box-shadow 0.3s;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .academic-program:hover {
@@ -732,7 +739,7 @@
         }
         /* Interest form section */
         .interest-section {
-            margin: 40px auto 0 auto;
+            margin: 40px auto 40px auto;
             padding: 48px 36px;
             background: linear-gradient(135deg, #f6f7fb 0%, #fffbe6 100%);
             border-radius: 24px;
@@ -955,6 +962,7 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 30px;
             margin-top: 40px;
+            align-items: stretch;
         }
         
         .card {
@@ -965,7 +973,7 @@
             text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: 1px solid #e2e8f0;
-            min-height: 200px;
+            min-height: 280px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -1163,7 +1171,7 @@
 <body>
     <div class="header">
         <a href="/" class="logo" style="text-decoration:none;display:flex;align-items:center;gap:14px;">
-            <img src="images/logo.jpg" alt="St. Mary's High School Logo" class="logo-img">
+            <img src="images/logo.jpg" alt="St. Mary's High School Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.marginLeft='0';">
             <span class="school-name">St. Mary's High School</span>
         </a>
         <a href="/login.html" class="login-link">Login</a>
@@ -1188,44 +1196,29 @@
     
     <!-- Image Carousel -->
     <div class="carousel-container">
-        <img src="images/ph1.jpg" class="carousel-bg-blur" id="carousel-blur-bg" alt="" aria-hidden="true" />
+        <img src="images/ph1.jpg" class="carousel-bg-blur" id="carousel-blur-bg" alt="" aria-hidden="true" onerror="this.style.display='none';" />
         <div class="carousel-slide active">
-            <picture>
-                <source srcset="images/ph1.webp" type="image/webp">
-                <img src="images/ph1.jpg" alt="Annual Day & SSC Toppers" class="carousel-img" loading="lazy">
-            </picture>
+            <img src="images/ph1.jpg" alt="Annual Day & SSC Toppers" class="carousel-img" loading="eager" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkFubnVhbCBEYXkgJmFtcDsgU1NDIFRvcHBlcnM8L3RleHQ+Cjwvc3ZnPg=='; this.onerror=null;">
             <div class="carousel-gradient"></div>
             <div class="carousel-caption">Annual Day & SSC Toppers</div>
         </div>
         <div class="carousel-slide">
-            <picture>
-                <source srcset="images/ph2.webp" type="image/webp">
-                <img src="images/ph2.jpg" alt="International Yoga Day" class="carousel-img" loading="lazy">
-            </picture>
+            <img src="images/ph2.jpg" alt="International Yoga Day" class="carousel-img" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkludGVybmF0aW9uYWwgWW9nYSBEYXk8L3RleHQ+Cjwvc3ZnPg=='; this.onerror=null;">
             <div class="carousel-gradient"></div>
             <div class="carousel-caption">International Yoga Day</div>
         </div>
         <div class="carousel-slide">
-            <picture>
-                <source srcset="images/ph3.webp" type="image/webp">
-                <img src="images/ph3.jpg" alt="Admissions & Achievements" class="carousel-img" loading="lazy">
-            </picture>
+            <img src="images/ph3.jpg" alt="Admissions & Achievements" class="carousel-img" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkFkbWlzc2lvbnMgJmFtcDsgQWNoaWV2ZW1lbnRzPC90ZXh0Pgo8L3N2Zz4='; this.onerror=null;">
             <div class="carousel-gradient"></div>
             <div class="carousel-caption">Admissions & Achievements</div>
         </div>
         <div class="carousel-slide">
-            <picture>
-                <source srcset="images/ph4.webp" type="image/webp">
-                <img src="images/ph4.jpg" alt="SSC Toppers" class="carousel-img" loading="lazy">
-            </picture>
+            <img src="images/ph4.jpg" alt="SSC Toppers" class="carousel-img" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlNTQyBUb3BwZXJzPC90ZXh0Pgo8L3N2Zz4='; this.onerror=null;">
             <div class="carousel-gradient"></div>
             <div class="carousel-caption">SSC Toppers</div>
         </div>
         <div class="carousel-slide">
-            <picture>
-                <source srcset="images/ph5.webp" type="image/webp">
-                <img src="images/ph5.jpg" alt="Monsoon Fest & Kids" class="carousel-img" loading="lazy">
-            </picture>
+            <img src="images/ph5.jpg" alt="Monsoon Fest & Kids" class="carousel-img" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1vbnNvb24gRmVzdCAmYW1wOyBLaWRzPC90ZXh0Pgo8L3N2Zz4='; this.onerror=null;">
             <div class="carousel-gradient"></div>
             <div class="carousel-caption">Monsoon Fest & Kids</div>
         </div>
@@ -1494,25 +1487,17 @@
         <p>For urgent issues, please contact the school office directly.</p>
     </div>
     <script>
-    // Image error handling
+    // Force image display and handle loading
     document.addEventListener('DOMContentLoaded', function() {
-        // Add error handling for all images
+        // Force all images to display as block
         const images = document.querySelectorAll('img');
         images.forEach(function(img) {
-            img.addEventListener('error', function() {
-                console.error('Failed to load image:', this.src);
-                // Set a fallback background or hide the image
-                this.style.display = 'block';
-                this.style.backgroundColor = '#f0f0f0';
-                this.style.color = '#666';
-                this.style.textAlign = 'center';
-                this.style.lineHeight = this.offsetHeight + 'px';
-                this.alt = this.alt || 'Image not available';
-            });
+            img.style.display = 'block';
             
+            // Add load event listener
             img.addEventListener('load', function() {
-                console.log('Image loaded successfully:', this.src);
-                this.style.display = 'block';
+                this.style.opacity = '1';
+                console.log('Image loaded:', this.src);
             });
         });
     });
