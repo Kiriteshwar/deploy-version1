@@ -691,6 +691,98 @@
       background-color: #f8f9fa;
       text-align: center;
     }
+    
+    /* Auto-send toggle styles */
+    .absentee-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: flex-end;
+    }
+
+    .auto-send-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid #e9ecef;
+    }
+
+    .toggle-label {
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-switch .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.3s;
+      border-radius: 28px;
+    }
+
+    .toggle-switch .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    .toggle-switch input:checked + .slider {
+      background-color: #28a745;
+    }
+
+    .toggle-switch input:focus + .slider {
+      box-shadow: 0 0 1px #28a745;
+    }
+
+    .toggle-switch input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .toggle-status {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .toggle-status.enabled {
+      color: #28a745;
+      background-color: #d4edda;
+    }
+
+    .toggle-status.disabled {
+      color: #dc3545;
+      background-color: #f8d7da;
+    }
   </style>
 </head>
 <script src="js/timetable-data.js"></script>
@@ -721,7 +813,18 @@
             <p class="count-number" id="absentees-count">0</p>
             <p class="count-label">Students Absent</p>
           </div>
-          <div>
+          <div class="absentee-controls">
+            <!-- Auto-send toggle -->
+            <div class="auto-send-toggle">
+              <label class="toggle-label" for="auto-send-checkbox">Auto-Send:</label>
+              <label class="toggle-switch">
+                <input type="checkbox" id="auto-send-checkbox" checked>
+                <span class="slider"></span>
+              </label>
+              <span class="toggle-status" id="auto-send-status">Enabled</span>
+            </div>
+            
+            <!-- Send messages button -->
             <button id="send-absent-messages" class="send-messages-btn" disabled>
               <i class="fas fa-paper-plane"></i>
               Send Absent Messages
@@ -967,10 +1070,24 @@
         sendAbsentMessages();
       });
       
+      // Auto-send toggle functionality
+      const autoSendCheckbox = document.getElementById('auto-send-checkbox');
+      const autoSendStatus = document.getElementById('auto-send-status');
+      
+      // Load initial auto-send status
+      fetchAutoSendStatus();
+      
+      // Handle auto-send toggle changes
+      autoSendCheckbox.addEventListener('change', function() {
+        const enabled = this.checked;
+        toggleAutoSend(enabled);
+      });
+      
       // Set a global refresh interval (every 5 minutes)
       setInterval(() => {
         fetchTeacherAttendance();
         fetchAbsenteesCount();
+        fetchAutoSendStatus(); // Also refresh auto-send status
       }, 300000); // 300000 ms = 5 minutes
       
       function fetchClasses() {
@@ -1721,7 +1838,100 @@
           });
         });
       }
+      
+      // Function to fetch auto-send status
+      function fetchAutoSendStatus() {
+        fetch('/api/attendance/auto-send-status', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to get auto-send status');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Update UI based on current status
+          const checkbox = document.getElementById('auto-send-checkbox');
+          const statusElement = document.getElementById('auto-send-status');
+          
+          checkbox.checked = data.autoSendEnabled;
+          
+          if (data.autoSendEnabled) {
+            statusElement.textContent = 'Enabled';
+            statusElement.className = 'toggle-status enabled';
+          } else {
+            statusElement.textContent = 'Disabled';
+            statusElement.className = 'toggle-status disabled';
+          }
+          
+          console.log('Auto-send status:', data);
+        })
+        .catch(error => {
+          console.error('Error fetching auto-send status:', error);
+        });
+      }
+      
+      // Function to toggle auto-send setting
+      function toggleAutoSend(enabled) {
+        const statusElement = document.getElementById('auto-send-status');
+        
+        // Show loading state
+        statusElement.textContent = 'Updating...';
+        statusElement.className = 'toggle-status';
+        
+        fetch('/api/attendance/auto-send-toggle', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ enabled: enabled })
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to toggle auto-send');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Update UI based on new status
+          if (data.autoSendEnabled) {
+            statusElement.textContent = 'Enabled';
+            statusElement.className = 'toggle-status enabled';
+          } else {
+            statusElement.textContent = 'Disabled';
+            statusElement.className = 'toggle-status disabled';
+          }
+          
+          console.log('Auto-send toggled:', data.message);
+          
+          // Show brief notification
+          const message = enabled ? 
+            'Auto-send ENABLED - Messages will be sent automatically when all classes mark Period 2 attendance' :
+            'Auto-send DISABLED - Only manual send will work';
+          
+          // You could replace this alert with a nicer notification
+          alert(message);
+        })
+        .catch(error => {
+          console.error('Error toggling auto-send:', error);
+          
+          // Revert checkbox state on error
+          const checkbox = document.getElementById('auto-send-checkbox');
+          checkbox.checked = !enabled;
+          
+          statusElement.textContent = 'Error';
+          statusElement.className = 'toggle-status';
+          
+          alert('Failed to update auto-send setting. Please try again.');
+        });
+      }
     });
   </script>
 </body>
-</html> 
+</html>
