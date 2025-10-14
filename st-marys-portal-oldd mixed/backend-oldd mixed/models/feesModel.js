@@ -99,6 +99,10 @@ const feePaymentSchema = new mongoose.Schema({
                 action: String,
                 at: Date
             }]
+        },
+        balanceAfterPayment: {
+            type: Number,
+            default: 0
         }
     }],
     totalPaid: {
@@ -287,9 +291,20 @@ feePaymentSchema.statics.addPayment = async function(paymentData) {
     });
 
     if (!feePayment) {
+        // For new payment record, balance after payment = totalToBePaid - first payment amount
+        if (paymentData.payment) {
+            paymentData.payment.balanceAfterPayment = paymentData.totalToBePaid - paymentData.payment.amount;
+        }
         return this.create(paymentData);
     }
 
+    // Calculate balance after this payment
+    const currentTotalPaid = feePayment.payments.reduce((sum, p) => sum + p.amount, 0);
+    const balanceAfterPayment = paymentData.totalToBePaid - (currentTotalPaid + paymentData.payment.amount);
+    
+    // Add balance to payment record
+    paymentData.payment.balanceAfterPayment = balanceAfterPayment;
+    
     feePayment.payments.push(paymentData.payment);
     return feePayment.save();
 };

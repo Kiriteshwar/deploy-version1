@@ -1345,8 +1345,9 @@
                 docPDF.text(`Transaction ID: ${pay.transactionId || '-'}`, 22, y);
                 y += 8;
 
-                // Use pre-calculated balance from the payment record
-                const balanceText = 'Balance Due: Rs.' + formatAmount(doc.balance || 0);
+                // Use balance at the time of payment instead of current balance
+                const balanceAtPayment = pay.balanceAfterPayment !== undefined ? pay.balanceAfterPayment : (doc.balance || 0);
+                const balanceText = 'Balance Due: Rs.' + formatAmount(balanceAtPayment);
                 docPDF.setCharSpace(0); // Remove any extra character spacing
                 docPDF.text(balanceText, 22, y);
                 y += 8;
