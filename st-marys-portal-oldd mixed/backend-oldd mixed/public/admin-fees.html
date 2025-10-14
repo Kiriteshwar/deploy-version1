@@ -1260,16 +1260,6 @@
             }
         }
 
-        function viewReceipt(doc, paymentIndex) {
-            const payment = doc.payments[paymentIndex];
-            generateReceiptPDF(doc, payment, true);
-        }
-
-        function downloadReceipt(doc, paymentIndex) {
-            const payment = doc.payments[paymentIndex];
-            generateReceiptPDF(doc, payment, false);
-        }
-
         function generateReceiptPDF(doc, pay, openInNewWindow = false) {
             try {
                 const student = getStudentInfoFromPage();
@@ -1310,7 +1300,6 @@
                 docPDF.setFontSize(10);
                 docPDF.text('Hasanparthy, Dist: Hanamkonda, Telangana - 506371', 55, 28);
                 docPDF.text('Phone: +91-9999999999 | Email: infostmarysscl@gmail.com', 55, 35);
-                docPDF.text('AFFILIATION NO: 530XXX | SCHOOL CODE: SMHS001', 55, 42);
 
                 // Receipt Title with background
                 docPDF.setFillColor(successColor[0], successColor[1], successColor[2]);
@@ -1391,11 +1380,12 @@
                 docPDF.setFont('helvetica', 'bold');
                 docPDF.setFontSize(18);
                 docPDF.setTextColor(255, 255, 255);
-                docPDF.text('AMOUNT PAID', 20, y + 5);
+                docPDF.text('AMOUNT PAID', 35, y + 10);
                 docPDF.setFontSize(24);
                 const amountValue = Number(pay.amount) || 0;
-                const amountPaidText = `₹${amountValue.toLocaleString('en-IN')}`;
-                docPDF.text(amountPaidText, 185, y + 12, { align: 'right' });
+                const amountPaidText = `Rs.${amountValue.toLocaleString('en-IN')}`;
+                docPDF.setCharSpace(0); // Remove any extra character spacing
+                docPDF.text(amountPaidText, 175, y+10,{ align: 'right' });
 
                 // Balance information
                 y += 35;
@@ -1404,7 +1394,7 @@
                 let balanceLabel;
                 if (pay.balanceAfterPayment !== undefined && pay.balanceAfterPayment !== null) {
                     balanceAtPayment = pay.balanceAfterPayment;
-                    balanceLabel = 'Balance Due After Payment:';
+                    balanceLabel = 'Balance Due:';
                 } else {
                     balanceAtPayment = doc.balance || 0;
                     balanceLabel = 'Current Balance Due:';
@@ -1423,8 +1413,9 @@
                     docPDF.setTextColor(successColor[0], successColor[1], successColor[2]);
                 }
                 const balanceValue = Number(balanceAtPayment) || 0;
-                const balanceText = `₹${balanceValue.toLocaleString('en-IN')}`;
-                docPDF.text(balanceText, 185, y + 3, { align: 'right' });
+                const balanceText = `Rs.${balanceValue.toLocaleString('en-IN')}`;
+                docPDF.setCharSpace(0); // Remove any extra character spacing
+                docPDF.text(balanceText, 175, y+3,{ align: 'right' });
                 
                 if (balanceAtPayment <= 0) {
                     docPDF.setTextColor(successColor[0], successColor[1], successColor[2]);
@@ -1450,6 +1441,8 @@
                     y += 20;
                 }
 
+                // Remove watermark as requested
+
                 // Footer
                 const footerY = 265;
                 docPDF.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -1472,7 +1465,7 @@
                 docPDF.setFontSize(6);
                 docPDF.setTextColor(200, 200, 200);
                 const securityCode = `Security Code: ${pay.receipt?.number || 'TEMP'}-${Date.now().toString().slice(-6)}`;
-                docPDF.text(securityCode, 185, footerY - 10, { align: 'right' });
+                docPDF.text(securityCode, 190, footerY - 9, { align: 'right' });
 
                 // Output
                 if (openInNewWindow) {
@@ -1483,8 +1476,16 @@
                 }
             } catch (error) {
                 console.error('Error generating PDF:', error);
-                showToast('error', 'Error', 'Failed to generate receipt. Please try again.');
+                alert('Failed to generate receipt. Please try again.');
             }
+        }
+
+        function viewReceipt(doc, pay) {
+            generateReceiptPDF(doc, pay, true);
+        }
+
+        function downloadReceipt(doc, pay) {
+            generateReceiptPDF(doc, pay, false);
         }
 
         function formatAmount(num) {
