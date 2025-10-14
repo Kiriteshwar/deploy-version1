@@ -1346,8 +1346,16 @@
                 y += 8;
 
                 // Use balance at the time of payment instead of current balance
-                const balanceAtPayment = pay.balanceAfterPayment !== undefined ? pay.balanceAfterPayment : (doc.balance || 0);
-                const balanceText = 'Balance Due: Rs.' + formatAmount(balanceAtPayment);
+                let balanceAtPayment;
+                let balanceLabel;
+                if (pay.balanceAfterPayment !== undefined && pay.balanceAfterPayment !== null) {
+                    balanceAtPayment = pay.balanceAfterPayment;
+                    balanceLabel = 'Balance Due: Rs.';
+                } else {
+                    balanceAtPayment = doc.balance || 0;
+                    balanceLabel = 'Current Balance Due: Rs.';
+                }
+                const balanceText = balanceLabel + formatAmount(balanceAtPayment);
                 docPDF.setCharSpace(0); // Remove any extra character spacing
                 docPDF.text(balanceText, 22, y);
                 y += 8;
@@ -1392,7 +1400,10 @@
         }
 
         function formatAmount(num) {
-            return num?.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+            if (num === null || num === undefined || isNaN(num)) {
+                return '0';
+            }
+            return Number(num).toLocaleString('en-IN', { maximumFractionDigits: 2 });
         }
 
         function formatDateTime(dateStr) {

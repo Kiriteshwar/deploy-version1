@@ -394,7 +394,10 @@
             }
         }
         function formatAmount(num) {
-            return num?.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+            if (num === null || num === undefined || isNaN(num)) {
+                return '0';
+            }
+            return Number(num).toLocaleString('en-IN', { maximumFractionDigits: 2 });
         }
 
         function formatDateTime(dateStr) {
@@ -458,7 +461,6 @@
                 docPDF.setFontSize(10);
                 docPDF.text('Hasanparthy, Dist: Hanamkonda, Telangana - 506371', 55, 28);
                 docPDF.text('Phone: +91-9999999999 | Email: infostmarysscl@gmail.com', 55, 35);
-                docPDF.text('AFFILIATION NO: 530XXX | SCHOOL CODE: SMHS001', 55, 42);
 
                 // Receipt Title with background
                 docPDF.setFillColor(successColor[0], successColor[1], successColor[2]);
@@ -541,11 +543,21 @@
                 docPDF.setTextColor(255, 255, 255);
                 docPDF.text('AMOUNT PAID', 20, y + 5);
                 docPDF.setFontSize(24);
-                docPDF.text(`₹ ${formatAmount(pay.amount)}`, 195, y + 12, { align: 'right' });
+                const amountPaidText = `₹${formatAmount(pay.amount) || pay.amount || '0'}`;
+                docPDF.text(amountPaidText, 190, y + 12, { align: 'right' });
 
                 // Balance information
                 y += 35;
-                const balanceAtPayment = pay.balanceAfterPayment !== undefined ? pay.balanceAfterPayment : (doc.balance || 0);
+                // Use balance at payment time if available, otherwise use current balance
+                let balanceAtPayment;
+                let balanceLabel;
+                if (pay.balanceAfterPayment !== undefined && pay.balanceAfterPayment !== null) {
+                    balanceAtPayment = pay.balanceAfterPayment;
+                    balanceLabel = 'Balance Due:';
+                } else {
+                    balanceAtPayment = doc.balance || 0;
+                    balanceLabel = 'Current Balance Due:';
+                }
                 
                 docPDF.setFillColor(backgroundColor[0], backgroundColor[1], backgroundColor[2]);
                 docPDF.roundedRect(15, y - 5, 180, 20, 2, 2, 'F');
@@ -553,13 +565,14 @@
                 docPDF.setFont('helvetica', 'bold');
                 docPDF.setFontSize(12);
                 docPDF.setTextColor(0, 0, 0);
-                docPDF.text('Balance Due After Payment:', 20, y + 3);
+                docPDF.text(balanceLabel, 20, y + 3);
                 if (balanceAtPayment > 0) {
                     docPDF.setTextColor(220, 53, 69);
                 } else {
                     docPDF.setTextColor(successColor[0], successColor[1], successColor[2]);
                 }
-                docPDF.text(`₹ ${formatAmount(balanceAtPayment)}`, 195, y + 3, { align: 'right' });
+                const balanceText = `₹${formatAmount(balanceAtPayment)}`;
+                docPDF.text(balanceText, 190, y + 3, { align: 'right' });
                 
                 if (balanceAtPayment <= 0) {
                     docPDF.setTextColor(successColor[0], successColor[1], successColor[2]);
@@ -587,27 +600,33 @@
 
                 // PAID Watermark (Diagonal)
                 docPDF.setFont('helvetica', 'bold');
-                docPDF.setFontSize(50);
-                docPDF.setTextColor(0, 123, 255, 0.1);
-                docPDF.text('PAID', 105, y + 30, { align: 'center', angle: -25 });
+                docPDF.setFontSize(45);
+                docPDF.setTextColor(220, 235, 255); // Light blue color
+                docPDF.text('PAID', 105, 200, { align: 'center', angle: -30 });
 
                 // Footer
-                const footerY = 270;
+                const footerY = 265;
                 docPDF.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-                docPDF.rect(0, footerY - 5, 210, 30, 'F');
+                docPDF.rect(0, footerY, 210, 32, 'F');
                 
                 docPDF.setFont('helvetica', 'normal');
                 docPDF.setFontSize(9);
                 docPDF.setTextColor(255, 255, 255);
-                docPDF.text('This is a computer-generated receipt and does not require a signature.', 15, footerY + 3);
-                docPDF.text('For any queries, please contact the school office during working hours.', 15, footerY + 10);
-                docPDF.text(`Generated on: ${formatDateTime(new Date())}`, 15, footerY + 17);
-                docPDF.text('Thank you for your payment!', 195, footerY + 17, { align: 'right' });
+                docPDF.text('This is a computer-generated receipt and does not require a signature.', 15, footerY + 8);
+                docPDF.text('For any queries, please contact the school office during working hours.', 15, footerY + 15);
+                docPDF.text(`Generated on: ${formatDateTime(new Date())}`, 15, footerY + 22);
+                
+                // Thank you message - properly positioned
+                docPDF.setFont('helvetica', 'bold');
+                docPDF.setFontSize(10);
+                docPDF.text('Thank you for your payment!', 195, footerY + 22, { align: 'right' });
 
                 // Security features
+                docPDF.setFont('helvetica', 'normal');
                 docPDF.setFontSize(6);
                 docPDF.setTextColor(200, 200, 200);
-                docPDF.text(`Security Code: ${pay.receipt?.number || 'TEMP'}-${Date.now().toString().slice(-6)}`, 195, footerY - 10, { align: 'right' });
+                const securityCode = `Security Code: ${pay.receipt?.number || 'TEMP'}-${Date.now().toString().slice(-6)}`;
+                docPDF.text(securityCode, 190, footerY - 10, { align: 'right' });
 
                 // Output
                 if (openInNewWindow) {
