@@ -543,8 +543,9 @@
                 docPDF.setTextColor(255, 255, 255);
                 docPDF.text('AMOUNT PAID', 20, y + 5);
                 docPDF.setFontSize(24);
-                const amountPaidText = `₹${formatAmount(pay.amount) || pay.amount || '0'}`;
-                docPDF.text(amountPaidText, 190, y + 12, { align: 'right' });
+                const amountValue = Number(pay.amount) || 0;
+                const amountPaidText = `₹${amountValue.toLocaleString('en-IN')}`;
+                docPDF.text(amountPaidText, 185, y + 12, { align: 'right' });
 
                 // Balance information
                 y += 35;
@@ -571,8 +572,9 @@
                 } else {
                     docPDF.setTextColor(successColor[0], successColor[1], successColor[2]);
                 }
-                const balanceText = `₹${formatAmount(balanceAtPayment)}`;
-                docPDF.text(balanceText, 190, y + 3, { align: 'right' });
+                const balanceValue = Number(balanceAtPayment) || 0;
+                const balanceText = `₹${balanceValue.toLocaleString('en-IN')}`;
+                docPDF.text(balanceText, 185, y + 3, { align: 'right' });
                 
                 if (balanceAtPayment <= 0) {
                     docPDF.setTextColor(successColor[0], successColor[1], successColor[2]);
@@ -598,11 +600,7 @@
                     y += 20;
                 }
 
-                // PAID Watermark (Diagonal)
-                docPDF.setFont('helvetica', 'bold');
-                docPDF.setFontSize(45);
-                docPDF.setTextColor(220, 235, 255); // Light blue color
-                docPDF.text('PAID', 105, 200, { align: 'center', angle: -30 });
+                // Remove watermark as requested
 
                 // Footer
                 const footerY = 265;
