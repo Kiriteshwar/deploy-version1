@@ -1,27 +1,51 @@
 import asyncHandler from 'express-async-handler';
+import axios from 'axios';
 import Attendance from '../models/attendanceModel.js';
 import User from '../models/userModel.js';
 import Student from '../models/studentModel.js';
 
 // Helper: Send WhatsApp message using MockAPI
 async function sendWhatsAppMessage(phone, message, studentName = 'Unknown Student') {
+    console.log(`[WhatsApp] Starting to send message to ${phone} for ${studentName}`);
     try {
         // Use MockAPI for testing with essential data only
-        const axios = (await import('axios')).default;
-        const response = await axios.post('https://68eeacaab06cc802829b0af9.mockapi.io/messages', {
+        const payload = {
             studentName: studentName,
             guardianPhone: phone,
             message: message,
             timestamp: new Date().toISOString(),
             status: 'sent'
+        };
+        
+        console.log(`[WhatsApp] Payload to send:`, JSON.stringify(payload, null, 2));
+        console.log(`[WhatsApp] Making POST request to MockAPI...`);
+        
+        const response = await axios.post('https://68eeacaab06cc802829b0af9.mockapi.io/messages', payload, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
-        console.log(`[WhatsApp] Message sent to ${phone} for ${studentName}: ${response.data.id}`);
+        
+        console.log(`[WhatsApp] SUCCESS! Response status: ${response.status}`);
+        console.log(`[WhatsApp] Response data:`, JSON.stringify(response.data, null, 2));
+        console.log(`[WhatsApp] Message sent to ${phone} for ${studentName}: ID ${response.data.id}`);
+        
         return response.data;
     } catch (error) {
-        console.error(`[WhatsApp] Failed to send to ${phone}:`, error.message);
+        console.error(`[WhatsApp] ERROR sending to ${phone}:`, error.message);
+        console.error(`[WhatsApp] Full error:`, error);
+        
         // Still log to console as fallback
-        console.log(`[WhatsApp] Fallback - Sending to ${phone}: ${message}`);
-        return { studentName, guardianPhone: phone, message, status: 'failed' };
+        console.log(`[WhatsApp] Fallback - Would send to ${phone}: ${message}`);
+        
+        // Return error data but don't throw
+        return { 
+            studentName, 
+            guardianPhone: phone, 
+            message, 
+            status: 'failed',
+            error: error.message 
+        };
     }
 }
 
