@@ -51,29 +51,67 @@ async function sendWhatsAppMessage(phone, message, studentName = 'Unknown Studen
 
 // Helper: Check if all classes have marked attendance for a period
 async function allClassesMarkedAttendance(period, date) {
-    // Get all classes/sections
-    const users = await User.find({ role: 'student' }).distinct('studentInfo.class');
-    const sections = await User.find({ role: 'student' }).distinct('studentInfo.section');
-    const classes = users.filter(Boolean);
-    const allSections = sections.filter(Boolean);
-    // For each class-section, check if at least one attendance record exists for this period/date
-    for (const className of classes) {
-        for (const section of allSections) {
+    try {
+        console.log(`[Auto-Send] Checking if all classes marked attendance for period ${period}`);
+        
+        // Get all unique class-section combinations that actually exist in the system
+        const classSectionCombos = await User.aggregate([
+            { $match: { role: 'student' } },
+            { 
+                $group: {
+                    _id: {
+                        class: '$studentInfo.class',
+                        section: '$studentInfo.section'
+                    }
+                }
+            },
+            { 
+                $match: {
+                    '_id.class': { $ne: null },
+                    '_id.section': { $ne: null }
+                }
+            }
+        ]);
+        
+        console.log(`[Auto-Send] Found ${classSectionCombos.length} class-section combinations:`, 
+            classSectionCombos.map(c => `${c._id.class}-${c._id.section}`));
+        
+        // If no class-section combinations found, return true (no classes to check)
+        if (classSectionCombos.length === 0) {
+            console.log('[Auto-Send] No class-section combinations found, returning true');
+            return true;
+        }
+        
+        // For each actual class-section combination, check if attendance exists for this period/date
+        for (const combo of classSectionCombos) {
+            const className = combo._id.class;
+            const sectionName = combo._id.section;
+            
             const exists = await Attendance.exists({
                 class: className,
-                section: section,
+                section: sectionName,
                 period: period,
                 date: {
-                    $gte: new Date(date.setHours(0,0,0,0)),
-                    $lt: new Date(date.setHours(23,59,59,999))
+                    $gte: new Date(new Date(date).setHours(0,0,0,0)),
+                    $lt: new Date(new Date(date).setHours(23,59,59,999))
                 }
             });
+            
+            console.log(`[Auto-Send] Checking ${className}-${sectionName}, period ${period}:`, exists ? 'MARKED' : 'NOT MARKED');
+            
             if (!exists) {
+                console.log(`[Auto-Send] Missing attendance for ${className}-${sectionName}, period ${period}`);
                 return false;
             }
         }
+        
+        console.log('[Auto-Send] All class-section combinations have marked attendance for period', period);
+        return true;
+        
+    } catch (error) {
+        console.error('[Auto-Send] Error in allClassesMarkedAttendance:', error);
+        return false;
     }
-    return true;
 }
 
 // @desc    Check for existing attendance
@@ -326,27 +364,56 @@ export const markAttendance = asyncHandler(async (req, res) => {
         
         // After marking attendance for this class/period, check if all classes have marked period 2
         if (parseInt(period) === 2) {
-            const allMarked = await allClassesMarkedAttendance(2, new Date(date));
-            if (allMarked) {
-                // Get all absentees for period 2 today
-                const absentees = await Attendance.find({
-                    period: 2,
-                    date: {
-                        $gte: new Date(date.setHours(0,0,0,0)),
-                        $lt: new Date(date.setHours(23,59,59,999))
-                    },
-                    status: 'Absent'
-                }).populate('student');
-                for (const record of absentees) {
-                    let studentName = record.student?.name || 'Student';
-                    let guardianPhone = record.student?.studentInfo?.guardianPhone || record.student?.phone;
-                    if (guardianPhone) {
-                        const message = `Dear Parent, your child ${studentName} was marked absent for today.`;
-                        // const message = `Dear Parent,Please note ${studentName} was absent today.Thank you.`;
-                        await sendWhatsAppMessage(guardianPhone, message, studentName);
+            console.log('[Auto-Send] Period 2 attendance marked, checking if all classes completed...');
+            
+            try {
+                const allMarked = await allClassesMarkedAttendance(2, new Date(date));
+                
+                if (allMarked) {
+                    console.log('[Auto-Send] All classes have marked period 2 attendance! Starting auto-send process...');
+                    
+                    // Get all absentees for period 2 today
+                    const absentees = await Attendance.find({
+                        period: 2,
+                        date: {
+                            $gte: new Date(new Date(date).setHours(0,0,0,0)),
+                            $lt: new Date(new Date(date).setHours(23,59,59,999))
+                        },
+                        status: 'Absent'
+                    }).populate('student');
+                    
+                    console.log(`[Auto-Send] Found ${absentees.length} absent students for period 2`);
+                    
+                    let successCount = 0;
+                    let failureCount = 0;
+                    
+                    for (const record of absentees) {
+                        let studentName = record.student?.name || 'Student';
+                        let guardianPhone = record.student?.studentInfo?.guardianPhone || record.student?.phone;
+                        if (guardianPhone) {
+                            const message = `Dear Parent, your child ${studentName} was marked absent for period 2 today.`;
+                            try {
+                                await sendWhatsAppMessage(guardianPhone, message, studentName);
+                                successCount++;
+                                console.log(`[Auto-Send] Message sent to parent of ${studentName}`);
+                            } catch (error) {
+                                failureCount++;
+                                console.error(`[Auto-Send] Failed to send message for ${studentName}:`, error.message);
+                            }
+                        } else {
+                            console.log(`[Auto-Send] No phone number for ${studentName}, skipping`);
+                        }
                     }
+                    
+                    console.log(`[Auto-Send] Auto-send completed: ${successCount} sent, ${failureCount} failed`);
+                } else {
+                    console.log('[Auto-Send] Not all classes have marked period 2 attendance yet, auto-send not triggered');
                 }
+            } catch (error) {
+                console.error('[Auto-Send] Error during auto-send process:', error);
             }
+        } else {
+            console.log(`[Auto-Send] Period ${period} marked, auto-send only works for period 2`);
         }
 
     } catch (error) {
