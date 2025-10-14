@@ -1592,37 +1592,28 @@
 
       // Function to fetch student absentees count
       function fetchAbsenteesCount() {
-        const today = new Date();
-        const dateStr = today.toISOString().split('T')[0];
-        
-        // Get today's attendance records and count absentees
-        fetch(`/api/attendance/class/all/all?date=${dateStr}`, {
-          method: 'GET',
+        // Use the test WhatsApp API to get period 2 absentees count
+        fetch('/api/attendance/test-whatsapp-period2', {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           }
         })
         .then(response => {
-          // If API doesn't exist, use a simple approach
           if (!response.ok) {
-            // Fallback: just show 0 for now, this will be updated when attendance is marked
-            updateAbsenteesCount(0);
-            return;
+            throw new Error('Failed to get absentees data');
           }
           return response.json();
         })
         .then(data => {
-          if (data) {
-            const absentCount = data.filter(record => record.status === 'Absent').length;
-            updateAbsenteesCount(absentCount);
-          } else {
-            updateAbsenteesCount(0);
-          }
+          // Update count display based on total absentees found
+          const count = data.total || 0;
+          updateAbsenteesCount(count);
+          console.log(`Found ${count} absentees for period 2`);
         })
         .catch(error => {
-          console.log('Using fallback method for absentees count');
-          // Fallback: estimate based on typical school data
+          console.error('Error fetching absentees count:', error);
           updateAbsenteesCount(0);
         });
       }
@@ -1668,9 +1659,18 @@
           return response.json();
         })
         .then(data => {
-          // Show success message
-          alert(`Messages sent successfully to ${data.sent} parent(s)!`);
-          console.log('Sent to:', data.details);
+          // Show success message with detailed info
+          const successCount = data.sent || 0;
+          if (successCount > 0) {
+            const names = data.details?.map(d => d.studentName).join(', ') || 'students';
+            alert(`Messages sent successfully to ${successCount} parent(s)!\n\nStudents: ${names}`);
+          } else {
+            alert('No absent students found for period 2 today.');
+          }
+          
+          console.log('Message sending results:', data);
+          // Update the count after sending
+          fetchAbsenteesCount();
         })
         .catch(error => {
           console.error('Error sending messages:', error);

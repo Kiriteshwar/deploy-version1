@@ -3,11 +3,26 @@ import Attendance from '../models/attendanceModel.js';
 import User from '../models/userModel.js';
 import Student from '../models/studentModel.js';
 
-// Helper: Send WhatsApp message (placeholder)
-async function sendWhatsAppMessage(phone, message) {
-    // TODO: Replace with actual WhatsApp API integration
-    console.log(`[WhatsApp] Sending to ${phone}: ${message}`);
-    // Example: await axios.post('https://api.whatsapp.com/send', { phone, message });
+// Helper: Send WhatsApp message using MockAPI
+async function sendWhatsAppMessage(phone, message, studentName = 'Unknown Student') {
+    try {
+        // Use MockAPI for testing with essential data only
+        const axios = (await import('axios')).default;
+        const response = await axios.post('https://68eeacaab06cc802829b0af9.mockapi.io/messages', {
+            studentName: studentName,
+            guardianPhone: phone,
+            message: message,
+            timestamp: new Date().toISOString(),
+            status: 'sent'
+        });
+        console.log(`[WhatsApp] Message sent to ${phone} for ${studentName}: ${response.data.id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`[WhatsApp] Failed to send to ${phone}:`, error.message);
+        // Still log to console as fallback
+        console.log(`[WhatsApp] Fallback - Sending to ${phone}: ${message}`);
+        return { studentName, guardianPhone: phone, message, status: 'failed' };
+    }
 }
 
 // Helper: Check if all classes have marked attendance for a period
@@ -304,7 +319,7 @@ export const markAttendance = asyncHandler(async (req, res) => {
                     if (guardianPhone) {
                         const message = `Dear Parent, your child ${studentName} was marked absent for today.`;
                         // const message = `Dear Parent,Please note ${studentName} was absent today.Thank you.`;
-                        await sendWhatsAppMessage(guardianPhone, message);
+                        await sendWhatsAppMessage(guardianPhone, message, studentName);
                     }
                 }
             }
@@ -511,20 +526,48 @@ export const testWhatsAppPeriod2 = asyncHandler(async (req, res) => {
     const start = new Date(Date.UTC(utcYear, utcMonth, utcDate, 0, 0, 0));
     const end = new Date(Date.UTC(utcYear, utcMonth, utcDate + 1, 0, 0, 0));
 
+    // Get absentees for period 2 today
     const absentees = await Attendance.find({
         period: 2,
         date: { $gte: start, $lt: end },
         status: 'Absent'
     }).populate('student');
+    
     let results = [];
+    let successCount = 0;
+    let failureCount = 0;
+    
     for (const record of absentees) {
         let studentName = record.student?.name || 'Student';
         let guardianPhone = record.student?.studentInfo?.guardianPhone || record.student?.phone;
         if (guardianPhone) {
             const message = `Dear Parent, your child ${studentName} was marked absent for period 2 today.`;
-            await sendWhatsAppMessage(guardianPhone, message);
-            results.push({ studentName, guardianPhone });
+            try {
+                const result = await sendWhatsAppMessage(guardianPhone, message, studentName);
+                results.push({ 
+                    studentName, 
+                    guardianPhone, 
+                    status: result.status || 'sent',
+                    messageId: result.id
+                });
+                successCount++;
+            } catch (error) {
+                results.push({ 
+                    studentName, 
+                    guardianPhone, 
+                    status: 'failed',
+                    error: error.message
+                });
+                failureCount++;
+            }
         }
     }
-    res.json({ sent: results.length, details: results });
+    
+    res.json({ 
+        sent: successCount,
+        failed: failureCount,
+        total: absentees.length,
+        details: results,
+        timestamp: new Date().toISOString()
+    });
 });
