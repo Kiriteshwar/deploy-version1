@@ -17,13 +17,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        // Load teacher's data
+        // Load teacher's data for Create New Homework section
         await loadTeacherData();
     
-        // Event Listeners
+        // Event Listeners for Create New Homework
         document.getElementById('classSelect').addEventListener('change', loadSections);
         document.getElementById('homeworkForm').addEventListener('submit', submitHomework);
-        await populateClassFilterDropdown();
+        
+        // Initialize filter dropdowns for Manage Homework (when that tab becomes active)
+        console.log('Homework page initialized successfully');
     } catch (error) {
         console.error('Initialization error:', error);
         showToast('Failed to initialize: ' + error.message, 'error');
@@ -55,20 +57,34 @@ async function loadTeacherData() {
         const data = await response.json();
         console.log('Received teacher data:', data);
         
-        // Populate class select
+        // Populate class select for Create New Homework
         const classSelect = document.getElementById('classSelect');
-        classSelect.innerHTML = '<option value="">Select Class</option>';
-        
-        if (data.classes && Array.isArray(data.classes)) {
-            data.classes.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls;
-                option.textContent = `Class ${cls}`;
-                classSelect.appendChild(option);
-            });
-        } else {
-            console.error('Invalid classes data:', data);
-            throw new Error('Invalid teacher data received');
+        if (classSelect) {
+            classSelect.innerHTML = '<option value="">Select Class</option>';
+            
+            if (data.classes && Array.isArray(data.classes)) {
+                // Sort classes naturally (1, 2, 10 instead of 1, 10, 2)
+                const sortedClasses = data.classes.sort((a, b) => {
+                    const aNum = parseInt(a.match(/\d+/)?.[0] || a);
+                    const bNum = parseInt(b.match(/\d+/)?.[0] || b);
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return aNum - bNum;
+                    }
+                    return a.localeCompare(b);
+                });
+                
+                sortedClasses.forEach(cls => {
+                    const option = document.createElement('option');
+                    option.value = cls;
+                    option.textContent = `Class ${cls}`;
+                    classSelect.appendChild(option);
+                });
+                
+                console.log('Loaded classes for Create New Homework:', sortedClasses);
+            } else {
+                console.error('Invalid classes data:', data);
+                throw new Error('Invalid teacher data received');
+            }
         }
 
     } catch (error) {
@@ -82,7 +98,17 @@ async function loadTeacherData() {
 
 async function loadSections() {
     const classValue = document.getElementById('classSelect').value;
-    if (!classValue) return;
+    const sectionSelect = document.getElementById('sectionSelect');
+    
+    // Clear sections dropdown
+    if (sectionSelect) {
+        sectionSelect.innerHTML = '<option value="">Select Section</option>';
+    }
+    
+    if (!classValue) {
+        console.log('No class selected, sections dropdown cleared');
+        return;
+    }
 
     try {
         showLoading();
@@ -108,19 +134,21 @@ async function loadSections() {
         const sections = await response.json();
         console.log('Received sections:', sections);
         
-        const sectionSelect = document.getElementById('sectionSelect');
-        sectionSelect.innerHTML = '<option value="">Select Section</option>';
-        
-        if (Array.isArray(sections)) {
+        if (Array.isArray(sections) && sections.length > 0) {
+            // Sort sections alphabetically
+            sections.sort();
+            
             sections.forEach(section => {
                 const option = document.createElement('option');
                 option.value = section;
                 option.textContent = section;
                 sectionSelect.appendChild(option);
             });
+            
+            console.log(`Loaded ${sections.length} sections for class ${classValue}:`, sections);
         } else {
-            console.error('Invalid sections data:', sections);
-            throw new Error('Invalid sections data received');
+            console.warn('No sections found for class:', classValue);
+            showToast(`No sections found for Class ${classValue}`, 'warning');
         }
 
     } catch (error) {
@@ -259,6 +287,8 @@ function showToast(message, type = 'info') {
         toastIcon.className = 'toast-icon fas fa-check-circle';
     } else if (type === 'error') {
         toastIcon.className = 'toast-icon fas fa-exclamation-circle';
+    } else if (type === 'warning') {
+        toastIcon.className = 'toast-icon fas fa-exclamation-triangle';
     } else {
         toastIcon.className = 'toast-icon fas fa-info-circle';
     }
@@ -268,111 +298,112 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// Add this function to fetch all classes for the filter dropdown
-async function populateClassFilterDropdown() {
-    const token = localStorage.getItem('auth_token');
-    const classFilter = document.getElementById('filterClass');
-    classFilter.innerHTML = '<option value="">All Classes</option>';
+// Function to populate the manage homework filter dropdowns
+async function populateManageHomeworkFilters() {
     try {
+        const token = localStorage.getItem('auth_token');
+        const classFilter = document.getElementById('filterClass');
+        
+        if (!classFilter) {
+            console.log('Filter class dropdown not found - probably not on manage tab');
+            return;
+        }
+        
+        console.log('Populating manage homework filters...');
+        classFilter.innerHTML = '<option value="">All Classes</option>';
+        
+        // Fetch all available classes using the same API as create homework
         const response = await fetch('/api/teacher/classes', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!response.ok) throw new Error('Failed to fetch classes');
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch classes for filters');
+        }
+        
         const data = await response.json();
+        
         if (data.classes && Array.isArray(data.classes)) {
-            data.classes.forEach(cls => {
+            // Sort classes naturally
+            const sortedClasses = data.classes.sort((a, b) => {
+                const aNum = parseInt(a.match(/\d+/)?.[0] || a);
+                const bNum = parseInt(b.match(/\d+/)?.[0] || b);
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return aNum - bNum;
+                }
+                return a.localeCompare(b);
+            });
+            
+            sortedClasses.forEach(cls => {
                 const option = document.createElement('option');
                 option.value = cls;
                 option.textContent = `Class ${cls}`;
                 classFilter.appendChild(option);
             });
+            
+            console.log('Loaded classes for manage homework filters:', sortedClasses);
         }
+        
+        // Set up change event to load sections for the selected class
+        classFilter.addEventListener('change', async function() {
+            await loadSectionsForFilter(this.value);
+        });
+        
     } catch (err) {
-        console.error('Error loading class filter:', err);
+        console.error('Error loading manage homework filters:', err);
+        showToast('Failed to load filter options', 'error');
     }
 }
 
-// Update the function that renders the homework table in Manage Homework
-// This should be called after both all classes and all homework are loaded
-async function renderManageHomeworkTable() {
-    const token = localStorage.getItem('auth_token');
-    const classFilter = document.getElementById('filterClass');
+// Function to load sections for the manage homework filter
+async function loadSectionsForFilter(classValue) {
     const sectionFilter = document.getElementById('filterSection');
-    const statusFilter = document.getElementById('filterStatus');
-    const tableBody = document.getElementById('homeworkTableBody');
-    tableBody.innerHTML = '';
-
-    // Fetch all classes
-    let allClasses = [];
+    
+    if (!sectionFilter) {
+        console.log('Section filter dropdown not found');
+        return;
+    }
+    
+    // Clear sections dropdown
+    sectionFilter.innerHTML = '<option value="">All Sections</option>';
+    
+    if (!classValue) {
+        console.log('No class selected for filter, sections cleared');
+        return;
+    }
+    
     try {
-        const response = await fetch('/api/teacher/classes', {
+        console.log('Loading sections for filter, class:', classValue);
+        
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(`/api/teacher/sections/${classValue}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (response.ok) {
-            const data = await response.json();
-            allClasses = data.classes || [];
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch sections for filter');
         }
-    } catch (err) {
-        console.error('Error fetching all classes:', err);
-    }
-
-    // Fetch all homework
-    let allHomework = [];
-    try {
-        const response = await fetch('/api/homework/all', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.ok) {
-            allHomework = await response.json();
-        }
-    } catch (err) {
-        console.error('Error fetching all homework:', err);
-    }
-
-    // Filter by selected class if needed
-    let filteredClasses = allClasses;
-    if (classFilter.value) {
-        filteredClasses = filteredClasses.filter(cls => cls === classFilter.value);
-    }
-
-    // For each class, show homework or 'No submissions yet'
-    filteredClasses.forEach(cls => {
-        // Filter homework for this class and by section/status if needed
-        let homeworkForClass = allHomework.filter(hw => hw.class === cls);
-        if (sectionFilter.value) {
-            homeworkForClass = homeworkForClass.filter(hw => hw.section === sectionFilter.value);
-        }
-        if (statusFilter.value && statusFilter.value !== 'All') {
-            homeworkForClass = homeworkForClass.filter(hw => (hw.status || '').toLowerCase() === statusFilter.value.toLowerCase());
-        }
-        if (homeworkForClass.length === 0) {
-            tableBody.innerHTML += `
-                <tr>
-                    <td colspan="7" style="text-align:center;color:#888;">No submissions yet for <b>${cls}</b></td>
-                </tr>
-            `;
-        } else {
-            homeworkForClass.forEach(hw => {
-                // Render each homework row as before (reuse your existing code here)
-                // Example:
-                tableBody.innerHTML += `
-                    <tr>
-                        <td><input type="checkbox" data-id="${hw._id}"></td>
-                        <td>${hw.title}</td>
-                        <td>${hw.class}${hw.section ? '-' + hw.section : ''}</td>
-                        <td>${new Date(hw.expiryDate).toLocaleDateString()}</td>
-                        <td>${hw.status || ''}</td>
-                        <td><a href="#" class="view-link">View</a></td>
-                        <td><button class="btn btn-danger-outline">Delete</button></td>
-                    </tr>
-                `;
+        
+        const sections = await response.json();
+        
+        if (Array.isArray(sections) && sections.length > 0) {
+            sections.sort(); // Sort alphabetically
+            
+            sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section;
+                option.textContent = section;
+                sectionFilter.appendChild(option);
             });
+            
+            console.log(`Loaded ${sections.length} sections for filter:`, sections);
+        } else {
+            console.warn('No sections found for class in filter:', classValue);
         }
-    });
+        
+    } catch (error) {
+        console.error('Error loading sections for filter:', error);
+        showToast('Failed to load sections for filter', 'error');
+    }
 }
 
-// Call renderManageHomeworkTable() after loading the page or changing filters
-document.getElementById('filterClass').addEventListener('change', renderManageHomeworkTable);
-document.getElementById('filterSection').addEventListener('change', renderManageHomeworkTable);
-document.getElementById('filterStatus').addEventListener('change', renderManageHomeworkTable);
-document.addEventListener('DOMContentLoaded', renderManageHomeworkTable); 

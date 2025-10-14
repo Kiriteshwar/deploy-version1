@@ -407,8 +407,11 @@
                     const tabId = this.getAttribute('data-tab');
                     document.getElementById(`${tabId}-tab`).classList.add('active');
                     
-                    // If manage tab is activated, load homework data
+                    // If manage tab is activated, load homework data and initialize filters
                     if (tabId === 'manage') {
+                        // First populate the filter dropdowns
+                        populateManageHomeworkFilters();
+                        // Then load homework data
                         loadTeacherHomework();
                     }
                 });
@@ -456,9 +459,8 @@
             document.getElementById('clearFilters').addEventListener('click', clearFilters);
             
             // Set up change events to update sections dropdown only (but not apply filters yet)
-            document.getElementById('filterClass').addEventListener('change', function() {
-                updateSectionsDropdown();
-            });
+            // Note: This is now handled in populateManageHomeworkFilters() in homework.js
+            // The filter change listeners are set up when the manage tab is activated
         });
         
         // Function to load teacher's homework
@@ -499,94 +501,30 @@
             }
         }
         
-        // Function to populate filter options
+        // Function to populate filter options (simplified - now uses external functions)
         function populateFilterOptions(homeworkList) {
             // Store homework list for later use
             window.allHomework = homeworkList;
             
-            console.log('Populating filter options with', homeworkList.length, 'homework items');
+            console.log('Storing', homeworkList.length, 'homework items for filtering');
             
-            const classes = new Set();
-            const sections = new Map(); // Use a map to track sections by class
-            
-            homeworkList.forEach(hw => {
-                if (hw.class) {
-                    console.log(`Adding class ${hw.class} from homework: ${hw.title}`);
-                classes.add(hw.class);
-                
-                // Store sections by class
-                if (!sections.has(hw.class)) {
-                    sections.set(hw.class, new Set());
-                }
-                    if (hw.section) {
-                sections.get(hw.class).add(hw.section);
-                    }
-                } else {
-                    console.warn(`Homework missing class information:`, hw.title);
-                }
-            });
-            
-            const filterClass = document.getElementById('filterClass');
-            filterClass.innerHTML = '<option value="">All Classes</option>';
-            
-            // Convert to array and sort
-            const sortedClasses = Array.from(classes).sort((a, b) => {
-                // Try to extract numeric parts for natural sorting
-                const aNum = parseInt(a.match(/\d+/)?.[0] || a);
-                const bNum = parseInt(b.match(/\d+/)?.[0] || b);
-                
-                if (!isNaN(aNum) && !isNaN(bNum)) {
-                    return aNum - bNum;
-                }
-                
-                // Fall back to string comparison
-                return a.localeCompare(b);
-            });
-            
-            console.log('Sorted classes for dropdown:', sortedClasses);
-            
-            sortedClasses.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls;
-                option.textContent = `Class ${cls}`;
-                filterClass.appendChild(option);
-            });
-            
-            // Store sections map for later use
-            window.sectionsByClass = sections;
-            
-            // Update sections dropdown
-            updateSectionsDropdown();
-            
-            // Add change event listener to class filter
-            filterClass.removeEventListener('change', updateSectionsDropdown);
-            filterClass.addEventListener('change', updateSectionsDropdown);
+            // Note: Filter dropdowns are now populated by populateManageHomeworkFilters()
+            // This function is called from the tab switching logic
         }
         
         // Function to update sections dropdown based on selected class
+        // Note: This is now handled by loadSectionsForFilter() in homework.js
         function updateSectionsDropdown() {
             const filterClass = document.getElementById('filterClass');
-            const filterSection = document.getElementById('filterSection');
-            const selectedClass = filterClass.value;
+            const selectedClass = filterClass ? filterClass.value : '';
             
-            // Clear current options
-            filterSection.innerHTML = '<option value="">All Sections</option>';
+            console.log('updateSectionsDropdown called for class:', selectedClass);
             
-            if (!selectedClass) {
-                // If no class is selected, don't show any specific sections
-                return;
-            }
-            
-            // If we have a selected class and we have sections data
-            if (window.sectionsByClass && window.sectionsByClass.has(selectedClass)) {
-                // Show only sections for the selected class
-                const classSections = window.sectionsByClass.get(selectedClass);
-                classSections.forEach(section => {
-                    const option = document.createElement('option');
-                    option.value = section;
-                    option.textContent = section;
-                    filterSection.appendChild(option);
-                });
+            // Call the function from homework.js that handles this properly
+            if (typeof loadSectionsForFilter === 'function') {
+                loadSectionsForFilter(selectedClass);
+            } else {
+                console.warn('loadSectionsForFilter function not available');
             }
         }
         
