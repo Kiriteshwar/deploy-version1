@@ -1498,55 +1498,160 @@
                     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                     
                     if (isMobile) {
-                        // For mobile, create a blob and show inline
-                        const pdfBlob = docPDF.output('blob');
-                        const pdfUrl = URL.createObjectURL(pdfBlob);
-                        
-                        // Create modal to display PDF
-                        const modal = document.createElement('div');
-                        modal.style.cssText = `
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background: rgba(0,0,0,0.9);
-                            z-index: 10000;
-                            display: flex;
-                            flex-direction: column;
-                            padding: 10px;
-                        `;
-                        
-                        const closeBtn = document.createElement('button');
-                        closeBtn.innerHTML = '✕ Close';
-                        closeBtn.style.cssText = `
-                            background: #dc3545;
-                            color: white;
-                            border: none;
-                            padding: 12px 20px;
-                            border-radius: 6px;
-                            font-size: 16px;
-                            cursor: pointer;
-                            margin-bottom: 10px;
-                            align-self: flex-end;
-                        `;
-                        closeBtn.onclick = () => {
-                            document.body.removeChild(modal);
-                            URL.revokeObjectURL(pdfUrl);
-                        };
-                        
-                        const iframe = document.createElement('iframe');
-                        iframe.src = pdfUrl;
-                        iframe.style.cssText = `
-                            flex: 1;
-                            border: none;
-                            background: white;
-                            border-radius: 6px;
-                        `;
-                        
-                        modal.appendChild(closeBtn);
-                        modal.appendChild(iframe);
-                        document.body.appendChild(modal);
+                        // For mobile, try different approaches based on browser capabilities
+                        try {
+                            // First try: Use data URL approach for better mobile compatibility
+                            const pdfDataUrl = docPDF.output('dataurlstring');
+                            
+                            // Create modal to display PDF
+                            const modal = document.createElement('div');
+                            modal.style.cssText = `
+                                position: fixed;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                background: rgba(0,0,0,0.95);
+                                z-index: 10000;
+                                display: flex;
+                                flex-direction: column;
+                                padding: 10px;
+                                box-sizing: border-box;
+                            `;
+                            
+                            // Header with buttons
+                            const header = document.createElement('div');
+                            header.style.cssText = `
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                margin-bottom: 10px;
+                                gap: 10px;
+                            `;
+                            
+                            const title = document.createElement('span');
+                            title.innerHTML = 'Receipt Preview';
+                            title.style.cssText = `
+                                color: white;
+                                font-size: 16px;
+                                font-weight: bold;
+                            `;
+                            
+                            const buttonContainer = document.createElement('div');
+                            buttonContainer.style.cssText = `
+                                display: flex;
+                                gap: 8px;
+                            `;
+                            
+                            const downloadBtn = document.createElement('button');
+                            downloadBtn.innerHTML = '⬇ Download';
+                            downloadBtn.style.cssText = `
+                                background: #28a745;
+                                color: white;
+                                border: none;
+                                padding: 10px 16px;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                cursor: pointer;
+                            `;
+                            downloadBtn.onclick = () => {
+                                const filename = `St_Marys_Receipt_${pay.receipt?.number || Date.now()}_${student.name?.replace(/\s+/g, '_') || 'Student'}.pdf`;
+                                docPDF.save(filename);
+                            };
+                            
+                            const closeBtn = document.createElement('button');
+                            closeBtn.innerHTML = '✕ Close';
+                            closeBtn.style.cssText = `
+                                background: #dc3545;
+                                color: white;
+                                border: none;
+                                padding: 10px 16px;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                cursor: pointer;
+                            `;
+                            closeBtn.onclick = () => {
+                                document.body.removeChild(modal);
+                            };
+                            
+                            buttonContainer.appendChild(downloadBtn);
+                            buttonContainer.appendChild(closeBtn);
+                            header.appendChild(title);
+                            header.appendChild(buttonContainer);
+                            
+                            // Try iframe first
+                            const iframe = document.createElement('iframe');
+                            iframe.src = pdfDataUrl;
+                            iframe.style.cssText = `
+                                flex: 1;
+                                border: none;
+                                background: white;
+                                border-radius: 6px;
+                                min-height: 400px;
+                            `;
+                            
+                            // Fallback message if iframe fails
+                            const fallbackDiv = document.createElement('div');
+                            fallbackDiv.style.cssText = `
+                                flex: 1;
+                                background: white;
+                                border-radius: 6px;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                align-items: center;
+                                padding: 20px;
+                                text-align: center;
+                                display: none;
+                            `;
+                            fallbackDiv.innerHTML = `
+                                <div style="font-size: 48px; margin-bottom: 20px;">📄</div>
+                                <h3 style="margin-bottom: 10px;">PDF Preview Not Available</h3>
+                                <p style="margin-bottom: 20px; color: #666;">Your browser doesn't support inline PDF viewing.</p>
+                                <button onclick="this.parentElement.parentElement.querySelector('button').click()" 
+                                        style="background: #007bff; color: white; border: none; padding: 12px 24px; 
+                                               border-radius: 6px; font-size: 16px; cursor: pointer;">
+                                    Download PDF Instead
+                                </button>
+                            `;
+                            
+                            // Check if iframe loads successfully
+                            iframe.onload = () => {
+                                // PDF loaded successfully
+                                console.log('PDF loaded in iframe');
+                            };
+                            
+                            iframe.onerror = () => {
+                                // Fallback: show download option
+                                iframe.style.display = 'none';
+                                fallbackDiv.style.display = 'flex';
+                            };
+                            
+                            // Timeout fallback
+                            setTimeout(() => {
+                                try {
+                                    if (!iframe.contentDocument || !iframe.contentDocument.body.innerHTML) {
+                                        iframe.style.display = 'none';
+                                        fallbackDiv.style.display = 'flex';
+                                    }
+                                } catch (e) {
+                                    iframe.style.display = 'none';
+                                    fallbackDiv.style.display = 'flex';
+                                }
+                            }, 3000);
+                            
+                            modal.appendChild(header);
+                            modal.appendChild(iframe);
+                            modal.appendChild(fallbackDiv);
+                            document.body.appendChild(modal);
+                            
+                        } catch (error) {
+                            console.error('Mobile PDF preview error:', error);
+                            // Ultimate fallback: just download
+                            alert('PDF preview not available on your device. The PDF will be downloaded instead.');
+                            const filename = `St_Marys_Receipt_${pay.receipt?.number || Date.now()}_${student.name?.replace(/\s+/g, '_') || 'Student'}.pdf`;
+                            docPDF.save(filename);
+                        }
                     } else {
                         // For desktop, use new window
                         docPDF.output('dataurlnewwindow');
