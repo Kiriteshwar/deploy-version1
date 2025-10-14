@@ -1242,10 +1242,10 @@
                                 <td>₹${pay.amount || '-'}</td>
                                 <td>${pay.paymentMode || '-'}</td>
                                 <td>
-                                    <button onclick='viewReceipt(${JSON.stringify(doc)}, ${idx})' class="view-receipt-link">
+                                    <button onclick='viewReceipt(${JSON.stringify(doc)}, ${JSON.stringify(pay)})' class="view-receipt-link">
                                         <i class="fas fa-eye"></i> View Receipt
                                     </button>
-                                    <button onclick='downloadReceipt(${JSON.stringify(doc)}, ${idx})' class="download-btn">
+                                    <button onclick='downloadReceipt(${JSON.stringify(doc)}, ${JSON.stringify(pay)})' class="download-btn">
                                         <i class="fas fa-download"></i> Download Receipt
                                     </button>
                                 </td>
@@ -1275,7 +1275,12 @@
 
         function generateReceiptPDF(doc, pay, openInNewWindow = false) {
             try {
+                console.log('Receipt Debug - doc:', doc);
+                console.log('Receipt Debug - pay:', pay);
+                
                 const student = getStudentInfoFromPage();
+                console.log('Receipt Debug - student from page:', student);
+                
                 const docPDF = new window.jspdf.jsPDF();
                 
                 // Modern color scheme
@@ -1331,11 +1336,16 @@
                 docPDF.setFontSize(11);
                 docPDF.setTextColor(0, 0, 0);
                 
-                if (pay.receipt && pay.receipt.number) {
-                    docPDF.text(`Receipt No: ${pay.receipt.number}`, 20, y + 3);
-                }
-                docPDF.text(`Date: ${formatDateTime(pay.paymentDate).split(' ')[0]}`, 130, y + 3);
-                docPDF.text(`Time: ${formatDateTime(pay.paymentDate).split(' ')[1]}`, 130, y + 10);
+                // Receipt details with better fallbacks
+                const receiptNo = pay.receipt?.number || 'N/A';
+                const paymentDate = pay.paymentDate || new Date();
+                const dateStr = formatDateTime(paymentDate);
+                const datePart = dateStr.split(' ')[0] || '-';
+                const timePart = dateStr.split(' ')[1] || '-';
+                
+                docPDF.text(`Receipt No: ${receiptNo}`, 20, y + 3);
+                docPDF.text(`Date: ${datePart}`, 130, y + 3);
+                docPDF.text(`Time: ${timePart}`, 130, y + 10);
                 docPDF.text(`Academic Year: ${new Date().getFullYear()}-${new Date().getFullYear() + 1}`, 20, y + 10);
 
                 // Student Information Section
@@ -1350,12 +1360,13 @@
                 docPDF.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
                 docPDF.setLineWidth(0.5);
                 
+                const paymentMode = pay.paymentMode || pay.mode;
                 const studentData = [
                     ['Student Name', student.name || doc.studentName || doc.student?.name || 'N/A'],
                     ['Class & Section', `${student.class || doc.class || 'N/A'} - ${student.section || doc.section || 'N/A'}`],
                     ['Roll Number', student.rollNumber || doc.rollNumber || doc.student?.rollNumber || 'N/A'],
-                    ['Payment Mode', pay.paymentMode || 'N/A'],
-                    ['Transaction ID', pay.transactionId || 'N/A']
+                    ['Payment Mode', paymentMode],
+                    ['Transaction ID', pay.transactionId || pay.id || 'N/A']
                 ];
                 
                 docPDF.setFont('helvetica', 'normal');
