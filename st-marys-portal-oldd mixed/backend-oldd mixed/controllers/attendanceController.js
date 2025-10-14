@@ -4,9 +4,68 @@ import Attendance from '../models/attendanceModel.js';
 import User from '../models/userModel.js';
 import Student from '../models/studentModel.js';
 
-// Helper: Send WhatsApp message using MockAPI
-async function sendWhatsAppMessage(phone, message, studentName = 'Unknown Student') {
+// Global setting to enable/disable auto-send (can be moved to database later)
+let AUTO_SEND_ENABLED = true;
+
+// Track which dates have already had auto-send triggered to prevent duplicates
+const autoSendTriggered = new Set();
+
+// Track which students have already received messages today to prevent duplicates
+const messagesAlreadySent = new Map(); // Map: 'YYYY-MM-DD' -> Set of student IDs
+
+// Helper function to get today's date key
+function getTodayKey() {
+    return new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+}
+
+// Helper function to check if message already sent to student today
+function hasMessageBeenSent(studentId) {
+    const today = getTodayKey();
+    if (!messagesAlreadySent.has(today)) {
+        messagesAlreadySent.set(today, new Set());
+    }
+    return messagesAlreadySent.get(today).has(studentId.toString());
+}
+
+// Helper function to mark message as sent to student
+function markMessageSent(studentId, studentName) {
+    const today = getTodayKey();
+    if (!messagesAlreadySent.has(today)) {
+        messagesAlreadySent.set(today, new Set());
+    }
+    messagesAlreadySent.get(today).add(studentId.toString());
+    console.log(`[Duplicate-Prevention] Marked message sent for ${studentName} (${studentId}) on ${today}`);
+}
+
+// Helper function to check if auto-send already happened today
+function hasAutoSendTriggeredToday() {
+    const today = getTodayKey();
+    return autoSendTriggered.has(today);
+}
+
+// Helper function to mark auto-send as triggered for today
+function markAutoSendTriggered() {
+    const today = getTodayKey();
+    autoSendTriggered.add(today);
+    console.log(`[Auto-Send] Marked auto-send as completed for ${today}`);
+}
+
+// Helper: Send WhatsApp message using MockAPI with duplicate prevention
+async function sendWhatsAppMessage(phone, message, studentName = 'Unknown Student', studentId = null, skipDuplicateCheck = false) {
     console.log(`[WhatsApp] Starting to send message to ${phone} for ${studentName}`);
+    
+    // Check for duplicates unless explicitly skipped
+    if (!skipDuplicateCheck && studentId && hasMessageBeenSent(studentId)) {
+        console.log(`[Duplicate-Prevention] Message already sent to ${studentName} today, skipping`);
+        return {
+            studentName,
+            guardianPhone: phone,
+            message,
+            status: 'duplicate_prevented',
+            note: 'Message already sent today'
+        };
+    }
+    
     try {
         // Use MockAPI for testing with essential data only
         const payload = {
@@ -29,6 +88,11 @@ async function sendWhatsAppMessage(phone, message, studentName = 'Unknown Studen
         console.log(`[WhatsApp] SUCCESS! Response status: ${response.status}`);
         console.log(`[WhatsApp] Response data:`, JSON.stringify(response.data, null, 2));
         console.log(`[WhatsApp] Message sent to ${phone} for ${studentName}: ID ${response.data.id}`);
+        
+        // Mark message as sent to prevent duplicates
+        if (studentId) {
+            markMessageSent(studentId, studentName);
+        }
         
         return response.data;
     } catch (error) {
@@ -364,13 +428,28 @@ export const markAttendance = asyncHandler(async (req, res) => {
         
         // After marking attendance for this class/period, check if all classes have marked period 2
         if (parseInt(period) === 2) {
-            console.log('[Auto-Send] Period 2 attendance marked, checking if all classes completed...');
+            console.log('[Auto-Send] Period 2 attendance marked, checking auto-send conditions...');
+            
+            // Check if auto-send is enabled
+            if (!AUTO_SEND_ENABLED) {
+                console.log('[Auto-Send] Auto-send is DISABLED, skipping auto-send process');
+                return; // Exit early if auto-send is disabled
+            }
+            
+            // Check if auto-send already triggered today
+            if (hasAutoSendTriggeredToday()) {
+                console.log('[Auto-Send] Auto-send already triggered today, skipping to prevent duplicates');
+                return; // Exit early if already triggered today
+            }
             
             try {
                 const allMarked = await allClassesMarkedAttendance(2, new Date(date));
                 
                 if (allMarked) {
                     console.log('[Auto-Send] All classes have marked period 2 attendance! Starting auto-send process...');
+                    
+                    // Mark auto-send as triggered to prevent multiple executions
+                    markAutoSendTriggered();
                     
                     // Get all absentees for period 2 today
                     const absentees = await Attendance.find({
@@ -386,26 +465,34 @@ export const markAttendance = asyncHandler(async (req, res) => {
                     
                     let successCount = 0;
                     let failureCount = 0;
+                    let duplicateCount = 0;
                     
                     for (const record of absentees) {
                         let studentName = record.student?.name || 'Student';
+                        let studentId = record.student?._id;
                         let guardianPhone = record.student?.studentInfo?.guardianPhone || record.student?.phone;
-                        if (guardianPhone) {
+                        
+                        if (guardianPhone && studentId) {
                             const message = `Dear Parent, your child ${studentName} was marked absent for period 2 today.`;
                             try {
-                                await sendWhatsAppMessage(guardianPhone, message, studentName);
-                                successCount++;
-                                console.log(`[Auto-Send] Message sent to parent of ${studentName}`);
+                                const result = await sendWhatsAppMessage(guardianPhone, message, studentName, studentId);
+                                if (result.status === 'duplicate_prevented') {
+                                    duplicateCount++;
+                                    console.log(`[Auto-Send] Duplicate prevented for ${studentName}`);
+                                } else {
+                                    successCount++;
+                                    console.log(`[Auto-Send] Message sent to parent of ${studentName}`);
+                                }
                             } catch (error) {
                                 failureCount++;
                                 console.error(`[Auto-Send] Failed to send message for ${studentName}:`, error.message);
                             }
                         } else {
-                            console.log(`[Auto-Send] No phone number for ${studentName}, skipping`);
+                            console.log(`[Auto-Send] No phone number or student ID for ${studentName}, skipping`);
                         }
                     }
                     
-                    console.log(`[Auto-Send] Auto-send completed: ${successCount} sent, ${failureCount} failed`);
+                    console.log(`[Auto-Send] Auto-send completed: ${successCount} sent, ${failureCount} failed, ${duplicateCount} duplicates prevented`);
                 } else {
                     console.log('[Auto-Send] Not all classes have marked period 2 attendance yet, auto-send not triggered');
                 }
@@ -630,18 +717,25 @@ export const testWhatsAppPeriod2 = asyncHandler(async (req, res) => {
     
     for (const record of absentees) {
         let studentName = record.student?.name || 'Student';
+        let studentId = record.student?._id;
         let guardianPhone = record.student?.studentInfo?.guardianPhone || record.student?.phone;
-        if (guardianPhone) {
+        if (guardianPhone && studentId) {
             const message = `Dear Parent, your child ${studentName} was marked absent for period 2 today.`;
             try {
-                const result = await sendWhatsAppMessage(guardianPhone, message, studentName);
+                const result = await sendWhatsAppMessage(guardianPhone, message, studentName, studentId);
                 results.push({ 
                     studentName, 
                     guardianPhone, 
                     status: result.status || 'sent',
-                    messageId: result.id
+                    messageId: result.id,
+                    note: result.note || null
                 });
-                successCount++;
+                if (result.status === 'duplicate_prevented') {
+                    // Count duplicates as neither success nor failure, just info
+                    console.log(`[Manual-Send] Duplicate prevented for ${studentName}`);
+                } else {
+                    successCount++;
+                }
             } catch (error) {
                 results.push({ 
                     studentName, 
@@ -651,6 +745,8 @@ export const testWhatsAppPeriod2 = asyncHandler(async (req, res) => {
                 });
                 failureCount++;
             }
+        } else {
+            console.log(`[Manual-Send] No phone number or student ID for ${studentName}, skipping`);
         }
     }
     
@@ -659,6 +755,44 @@ export const testWhatsAppPeriod2 = asyncHandler(async (req, res) => {
         failed: failureCount,
         total: absentees.length,
         details: results,
+        timestamp: new Date().toISOString()
+    });
+});
+
+// @desc    Get auto-send status
+// @route   GET /api/attendance/auto-send-status
+// @access  Private (Admin only)
+export const getAutoSendStatus = asyncHandler(async (req, res) => {
+    const today = getTodayKey();
+    res.json({
+        autoSendEnabled: AUTO_SEND_ENABLED,
+        autoSendTriggeredToday: hasAutoSendTriggeredToday(),
+        messagesAlreadySentToday: messagesAlreadySent.get(today)?.size || 0,
+        date: today,
+        timestamp: new Date().toISOString()
+    });
+});
+
+// @desc    Enable/disable auto-send
+// @route   POST /api/attendance/auto-send-toggle
+// @access  Private (Admin only)
+export const toggleAutoSend = asyncHandler(async (req, res) => {
+    const { enabled } = req.body;
+    
+    if (typeof enabled !== 'boolean') {
+        return res.status(400).json({
+            error: 'Invalid input',
+            message: 'enabled field must be a boolean (true or false)'
+        });
+    }
+    
+    AUTO_SEND_ENABLED = enabled;
+    console.log(`[Auto-Send] Admin ${enabled ? 'ENABLED' : 'DISABLED'} auto-send functionality`);
+    
+    res.json({
+        success: true,
+        autoSendEnabled: AUTO_SEND_ENABLED,
+        message: `Auto-send is now ${AUTO_SEND_ENABLED ? 'ENABLED' : 'DISABLED'}`,
         timestamp: new Date().toISOString()
     });
 });
