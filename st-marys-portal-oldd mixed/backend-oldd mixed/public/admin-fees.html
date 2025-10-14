@@ -1260,6 +1260,19 @@
             }
         }
 
+        function formatAmount(num) {
+            if (num === null || num === undefined || isNaN(num)) {
+                return '0';
+            }
+            return Number(num).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+        }
+
         function generateReceiptPDF(doc, pay, openInNewWindow = false) {
             try {
                 const student = getStudentInfoFromPage();
@@ -1489,18 +1502,6 @@
             generateReceiptPDF(doc, pay, false);
         }
 
-        function formatAmount(num) {
-            if (num === null || num === undefined || isNaN(num)) {
-                return '0';
-            }
-            return Number(num).toLocaleString('en-IN', { maximumFractionDigits: 2 });
-        }
-
-        function formatDateTime(dateStr) {
-            if (!dateStr) return '-';
-            const d = new Date(dateStr);
-            return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
-        }
 
         function getStudentInfoFromPage() {
             const infoDiv = document.getElementById('student-info');
