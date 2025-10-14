@@ -1141,7 +1141,7 @@
                     summaryBox.innerHTML = renderPaymentSummary({
                         totalPaid: paymentRecord.totalPaid || 0,
                         balance: paymentRecord.balance || 0,
-                        dueDate: paymentRecord.dueDate,
+                        dueDate: data.feeStructure.dueDate || paymentRecord.dueDate, // Use current fee structure due date
                         status: paymentRecord.status || 'pending'
                     });
                     document.getElementById('fee-structure').appendChild(summaryBox);

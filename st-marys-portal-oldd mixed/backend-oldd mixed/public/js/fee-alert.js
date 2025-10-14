@@ -16,7 +16,7 @@ async function checkOverdueFees() {
         const data = await response.json();
         const latestPayment = data.payments && data.payments[0];
         
-        if (latestPayment && latestPayment.status === 'overdue' && latestPayment.balance > 0) {
+        if (latestPayment && latestPayment.balance > 0) {
             // Create alert if it doesn't exist
             if (!document.getElementById('fee-alert')) {
                 const alertDiv = document.createElement('div');
@@ -39,7 +39,7 @@ async function checkOverdueFees() {
                 `;
                 
                 const message = document.createElement('span');
-                message.innerHTML = `⚠️ Your fee payment of ₹${latestPayment.balance} is overdue! Please pay immediately.`;
+                message.innerHTML = `⚠️ You have a pending fee balance of ₹${latestPayment.balance}. Please clear your dues.`;
                 
                 const closeBtn = document.createElement('button');
                 closeBtn.innerHTML = '×';
