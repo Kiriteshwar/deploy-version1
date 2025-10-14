@@ -567,7 +567,7 @@
                 docPDF.setFont('helvetica', 'bold');
                 docPDF.setFontSize(12);
                 docPDF.setTextColor(0, 0, 0);
-                docPDF.text(balanceLabel, 20, y + 3);
+                docPDF.text(balanceLabel, 35, y + 3);
                 if (balanceAtPayment > 0) {
                     docPDF.setTextColor(220, 53, 69);
                 } else {
@@ -580,7 +580,8 @@
                 
                 if (balanceAtPayment <= 0) {
                     docPDF.setTextColor(successColor[0], successColor[1], successColor[2]);
-                    docPDF.text('✓ FULLY PAID', 20, y + 12);
+                    docPDF.setCharSpace(0); // Remove any extra character spacing
+                    docPDF.text('FULLY PAID', 35, y + 12);
                 }
 
                 // Status and Due Date
@@ -619,7 +620,7 @@
                 // Thank you message - properly positioned
                 docPDF.setFont('helvetica', 'bold');
                 docPDF.setFontSize(10);
-                docPDF.text('Thank you for your payment!', 195, footerY + 22, { align: 'right' });
+                docPDF.text('Thank you for your payment!', 195, footerY + 18, { align: 'right' });
 
                 // Security features
                 docPDF.setFont('helvetica', 'normal');
