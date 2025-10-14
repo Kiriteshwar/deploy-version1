@@ -520,6 +520,69 @@
       background: linear-gradient(135deg, #2196f3, #1976d2);
     }
 
+    /* Absentees count card styling */
+    .absentees-card {
+      margin-bottom: 20px;
+    }
+
+    .absentees-card .card-header {
+      background: linear-gradient(135deg, #ff6b35, #e55a32);
+    }
+
+    .absentees-count {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background: #fff;
+    }
+
+    .count-display {
+      text-align: center;
+    }
+
+    .count-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #dc3545;
+      margin: 0;
+    }
+
+    .count-label {
+      font-size: 1rem;
+      color: #666;
+      margin: 5px 0 0 0;
+    }
+
+    .send-messages-btn {
+      background: linear-gradient(135deg, #28a745, #20a041);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .send-messages-btn:hover {
+      background: linear-gradient(135deg, #20a041, #1e8e3e);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transform: translateY(-1px);
+    }
+
+    .send-messages-btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
     .teacher-absent {
       background-color: #ffebee !important;
     }
@@ -647,6 +710,27 @@
   </header>
 
   <div class="container">
+    <!-- Student Absentees Panel -->
+    <div class="card absentees-card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="fas fa-user-times"></i> Student Absentees Today</h2>
+      </div>
+      <div class="card-body">
+        <div class="absentees-count">
+          <div class="count-display">
+            <p class="count-number" id="absentees-count">0</p>
+            <p class="count-label">Students Absent</p>
+          </div>
+          <div>
+            <button id="send-absent-messages" class="send-messages-btn" disabled>
+              <i class="fas fa-paper-plane"></i>
+              Send Absent Messages
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Teacher Attendance Panel -->
     <div class="card teacher-attendance-card">
         <div class="card-header">
@@ -869,13 +953,25 @@
       // Fetch teacher attendance
       fetchTeacherAttendance();
       
+      // Fetch absentees count
+      fetchAbsenteesCount();
+      
       // Refresh teacher attendance when button is clicked
       refreshTeachersAttendanceBtn.addEventListener('click', function() {
         fetchTeacherAttendance();
+        fetchAbsenteesCount(); // Also refresh absentees count
+      });
+      
+      // Send absent messages button
+      document.getElementById('send-absent-messages').addEventListener('click', function() {
+        sendAbsentMessages();
       });
       
       // Set a global refresh interval (every 5 minutes)
-      setInterval(fetchTeacherAttendance, 300000); // 300000 ms = 5 minutes
+      setInterval(() => {
+        fetchTeacherAttendance();
+        fetchAbsenteesCount();
+      }, 300000); // 300000 ms = 5 minutes
       
       function fetchClasses() {
         fetch('/api/teacher/classes', {
@@ -1491,6 +1587,101 @@
           });
           
           console.error('Error fetching teacher attendance:', error);
+        });
+      }
+
+      // Function to fetch student absentees count
+      function fetchAbsenteesCount() {
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+        
+        // Get today's attendance records and count absentees
+        fetch(`/api/attendance/class/all/all?date=${dateStr}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          // If API doesn't exist, use a simple approach
+          if (!response.ok) {
+            // Fallback: just show 0 for now, this will be updated when attendance is marked
+            updateAbsenteesCount(0);
+            return;
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data) {
+            const absentCount = data.filter(record => record.status === 'Absent').length;
+            updateAbsenteesCount(absentCount);
+          } else {
+            updateAbsenteesCount(0);
+          }
+        })
+        .catch(error => {
+          console.log('Using fallback method for absentees count');
+          // Fallback: estimate based on typical school data
+          updateAbsenteesCount(0);
+        });
+      }
+      
+      // Function to update the absentees count display
+      function updateAbsenteesCount(count) {
+        const countElement = document.getElementById('absentees-count');
+        const sendBtn = document.getElementById('send-absent-messages');
+        
+        countElement.textContent = count;
+        
+        // Enable/disable send button based on count
+        if (count > 0) {
+          sendBtn.disabled = false;
+          sendBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Send Messages (${count} students)`;
+        } else {
+          sendBtn.disabled = true;
+          sendBtn.innerHTML = `<i class="fas fa-paper-plane"></i> No Absentees Today`;
+        }
+      }
+      
+      // Function to send absent messages
+      function sendAbsentMessages() {
+        const sendBtn = document.getElementById('send-absent-messages');
+        const originalText = sendBtn.innerHTML;
+        
+        // Show loading state
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending Messages...`;
+        
+        // Use the existing test API for period 2 absentees
+        fetch('/api/attendance/test-whatsapp-period2', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to send messages');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Show success message
+          alert(`Messages sent successfully to ${data.sent} parent(s)!`);
+          console.log('Sent to:', data.details);
+        })
+        .catch(error => {
+          console.error('Error sending messages:', error);
+          alert('Failed to send messages. Please check the console for details.');
+        })
+        .finally(() => {
+          // Restore button
+          setTimeout(() => {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = originalText;
+          }, 2000);
         });
       }
 

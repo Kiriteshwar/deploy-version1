@@ -284,7 +284,7 @@ export const markAttendance = asyncHandler(async (req, res) => {
             records: attendanceRecords.length,
             warnings: studentUpdateErrors.length > 0 ? studentUpdateErrors : undefined
         });
-
+        
         // After marking attendance for this class/period, check if all classes have marked period 2
         if (parseInt(period) === 2) {
             const allMarked = await allClassesMarkedAttendance(2, new Date(date));
@@ -302,7 +302,8 @@ export const markAttendance = asyncHandler(async (req, res) => {
                     let studentName = record.student?.name || 'Student';
                     let guardianPhone = record.student?.studentInfo?.guardianPhone || record.student?.phone;
                     if (guardianPhone) {
-                        const message = `Dear Parent, your child ${studentName} was marked absent for period 2 today.`;
+                        const message = `Dear Parent, your child ${studentName} was marked absent for today.`;
+                        // const message = `Dear Parent,Please note ${studentName} was absent today.Thank you.`;
                         await sendWhatsAppMessage(guardianPhone, message);
                     }
                 }
