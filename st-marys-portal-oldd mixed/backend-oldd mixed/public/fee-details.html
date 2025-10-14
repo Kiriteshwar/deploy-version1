@@ -629,9 +629,65 @@
                 const securityCode = `Security Code: ${pay.receipt?.number || 'TEMP'}-${Date.now().toString().slice(-6)}`;
                 docPDF.text(securityCode, 190, footerY - 9, { align: 'right' });
 
-                // Output
+                // Output - mobile-friendly approach
                 if (openInNewWindow) {
-                    docPDF.output('dataurlnewwindow');
+                    // Check if mobile device
+                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    
+                    if (isMobile) {
+                        // For mobile, create a blob and show inline
+                        const pdfBlob = docPDF.output('blob');
+                        const pdfUrl = URL.createObjectURL(pdfBlob);
+                        
+                        // Create modal to display PDF
+                        const modal = document.createElement('div');
+                        modal.style.cssText = `
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background: rgba(0,0,0,0.9);
+                            z-index: 10000;
+                            display: flex;
+                            flex-direction: column;
+                            padding: 10px;
+                        `;
+                        
+                        const closeBtn = document.createElement('button');
+                        closeBtn.innerHTML = '✕ Close';
+                        closeBtn.style.cssText = `
+                            background: #dc3545;
+                            color: white;
+                            border: none;
+                            padding: 12px 20px;
+                            border-radius: 6px;
+                            font-size: 16px;
+                            cursor: pointer;
+                            margin-bottom: 10px;
+                            align-self: flex-end;
+                        `;
+                        closeBtn.onclick = () => {
+                            document.body.removeChild(modal);
+                            URL.revokeObjectURL(pdfUrl);
+                        };
+                        
+                        const iframe = document.createElement('iframe');
+                        iframe.src = pdfUrl;
+                        iframe.style.cssText = `
+                            flex: 1;
+                            border: none;
+                            background: white;
+                            border-radius: 6px;
+                        `;
+                        
+                        modal.appendChild(closeBtn);
+                        modal.appendChild(iframe);
+                        document.body.appendChild(modal);
+                    } else {
+                        // For desktop, use new window
+                        docPDF.output('dataurlnewwindow');
+                    }
                 } else {
                     const filename = `St_Marys_Receipt_${pay.receipt?.number || Date.now()}_${student.name?.replace(/\s+/g, '_') || 'Student'}.pdf`;
                     docPDF.save(filename);
