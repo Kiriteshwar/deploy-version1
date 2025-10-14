@@ -912,7 +912,7 @@
                 if (section) queryParams.append('section', section);
                 if (search) queryParams.append('search', search);
 
-                const response = await fetch(`/api/fees/admin/students?${queryParams.toString()}`, {
+                const response = await fetch(`/api/admin/fees/students?${queryParams.toString()}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                     }
@@ -1019,24 +1019,26 @@
             let totalFee = 0;
 
             if (feeStructure) {
-                // Calculate total fee from all components
-                const feeComponents = {
-                    tuitionFee: feeStructure.tuitionFee || 0,
-                    libraryFee: feeStructure.libraryFee || 0,
-                    laboratoryFee: feeStructure.laboratoryFee || 0,
-                    transportFee: feeStructure.transportFee || 0,
-                    computerFee: feeStructure.computerFee || 0,
-                    examFee: feeStructure.examFee || 0
-                };
+                // Dynamically get all fee components from the fee structure
+                const excludeFields = ['_id', '__v', 'class', 'academicYear', 'totalFee', 'dueDate', 'createdAt', 'updatedAt'];
+                const feeComponents = {};
+                
+                // Extract all fee components dynamically
+                Object.keys(feeStructure).forEach(key => {
+                    if (!excludeFields.includes(key) && typeof feeStructure[key] === 'number' && key.toLowerCase().includes('fee')) {
+                        feeComponents[key] = feeStructure[key] || 0;
+                    }
+                });
 
-                // Calculate total fee
-                totalFee = Object.values(feeComponents).reduce((sum, fee) => sum + (fee || 0), 0);
+                // Use totalFee from backend if available, otherwise calculate from components
+                totalFee = feeStructure.totalFee || Object.values(feeComponents).reduce((sum, fee) => sum + (fee || 0), 0);
 
                 // Display individual fee components
                 Object.entries(feeComponents).forEach(([key, value]) => {
+                    // Convert camelCase to readable format
                     const feeLabel = key.replace(/([A-Z])/g, ' $1')
                                       .replace(/^./, str => str.toUpperCase())
-                                      .replace('Fee', ' Fee');
+                                      .replace(/Fee$/, ' Fee'); // Only replace 'Fee' at the end
                     
                     feeRows += `<tr>
                         <td class="label">${feeLabel}</td>
@@ -1109,7 +1111,7 @@
 
         async function viewStudent(studentId) {
             try {
-                const response = await fetch(`/api/fees/admin/student/${studentId}`, {
+                const response = await fetch(`/api/admin/fees/student/${studentId}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                     }
@@ -1146,7 +1148,20 @@
                 } else if (data.feeStructure) {
                     // If no payment records yet, show summary with initial balance
                     const summaryBox = document.createElement('div');
-                    const totalToBePaid = data.feeStructure.totalFee - (data.student.discount || 0);
+                    // Use totalFee from fee structure (calculated on backend) or calculate from components
+                    let totalFee = data.feeStructure.totalFee;
+                    if (!totalFee) {
+                        // Fallback: calculate from components if totalFee is missing
+                        const excludeFields = ['_id', '__v', 'class', 'academicYear', 'totalFee', 'dueDate', 'createdAt', 'updatedAt'];
+                        const feeComponents = {};
+                        Object.keys(data.feeStructure).forEach(key => {
+                            if (!excludeFields.includes(key) && typeof data.feeStructure[key] === 'number' && key.toLowerCase().includes('fee')) {
+                                feeComponents[key] = data.feeStructure[key] || 0;
+                            }
+                        });
+                        totalFee = Object.values(feeComponents).reduce((sum, fee) => sum + (fee || 0), 0);
+                    }
+                    const totalToBePaid = totalFee - (data.student.discount || 0);
                     summaryBox.innerHTML = renderPaymentSummary({ 
                         totalPaid: 0, 
                         balance: totalToBePaid, 
@@ -1180,7 +1195,7 @@
 
         async function viewPaymentHistory(studentId) {
             try {
-                const response = await fetch(`/api/fees/admin/student/${studentId}`, {
+                const response = await fetch(`/api/admin/fees/student/${studentId}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                     }
@@ -1223,8 +1238,9 @@
                             const row = tbody.insertRow();
                             row.innerHTML = `
                                 <td>${pay.paymentDate ? new Date(pay.paymentDate).toLocaleDateString() : '-'}</td>
-                                <td>${pay.paymentMode || '-'}</td>
+                                <td>${pay.receipt?.number || 'N/A'}</td>
                                 <td>₹${pay.amount || '-'}</td>
+                                <td>${pay.paymentMode || '-'}</td>
                                 <td>
                                     <button onclick='viewReceipt(${JSON.stringify(doc)}, ${idx})' class="view-receipt-link">
                                         <i class="fas fa-eye"></i> View Receipt
@@ -1423,7 +1439,7 @@
             submitBtn.classList.add('btn-loading');
 
             try {
-                const response = await fetch(`/api/fees/admin/pay/${currentStudentId}`, {
+                const response = await fetch(`/api/admin/fees/pay/${currentStudentId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1493,7 +1509,7 @@
             submitBtn.classList.add('btn-loading');
 
             try {
-                const response = await fetch(`/api/fees/admin/discount/${currentStudentId}`, {
+                const response = await fetch(`/api/admin/fees/discount/${currentStudentId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
