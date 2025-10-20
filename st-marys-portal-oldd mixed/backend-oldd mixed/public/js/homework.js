@@ -47,10 +47,23 @@ async function loadTeacherData() {
         });
 
         console.log('Teacher data response status:', response.status);
+        console.log('Token exists:', !!token);
+        console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'null');
         
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Server response:', errorText);
+            
+            // If unauthorized, redirect to login
+            if (response.status === 401 || response.status === 403) {
+                showToast('Session expired. Please login again.', 'error');
+                setTimeout(() => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                }, 2000);
+                return;
+            }
+            
             throw new Error(`Failed to fetch teacher data: ${response.status} ${response.statusText}`);
         }
 

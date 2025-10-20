@@ -75,16 +75,36 @@ async function loadTeacherData() {
     try {
         showLoading();
         
+        const token = localStorage.getItem('auth_token');
+        console.log('Token exists:', !!token);
+        console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'null');
+        
         // Fetch classes
         const classResponse = await fetch('/api/teacher/classes', {
+            method: 'GET',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             }
         });
 
+        console.log('Response status:', classResponse.status);
+        
         if (!classResponse.ok) {
-            console.error('Server response:', await classResponse.text());
-            throw new Error('Failed to fetch teacher data');
+            const errorText = await classResponse.text();
+            console.error('Server response:', errorText);
+            
+            // If unauthorized, redirect to login
+            if (classResponse.status === 401 || classResponse.status === 403) {
+                showToast('Session expired. Please login again.', 'error');
+                setTimeout(() => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                }, 2000);
+                return;
+            }
+            
+            throw new Error(`Failed to fetch teacher data: ${errorText}`);
         }
 
         const classData = await classResponse.json();
