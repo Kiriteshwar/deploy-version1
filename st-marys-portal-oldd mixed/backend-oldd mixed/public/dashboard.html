@@ -277,6 +277,12 @@
 </head>
 
 <body>
+  <!-- Loading overlay to prevent interaction during authentication -->
+  <div id="authLoadingOverlay" class="auth-loading-overlay">
+    <div class="auth-loading-spinner"></div>
+    <div class="auth-loading-text">Verifying authentication...</div>
+  </div>
+  
   <div class="dashboard-wrapper">
     <header class="dashboard-header" style="display: flex; align-items: center; justify-content: space-between;">
       <h2 style="margin: 0 1.5rem 0 0; font-weight: bold;">Welcome, <span id="user-name"

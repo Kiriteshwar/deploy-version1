@@ -282,10 +282,17 @@ window.onload = () => {
         if (picCollapsed) picCollapsed.src = picUrl;
         const picLarge = document.getElementById("profile-pic");
         if (picLarge) picLarge.src = picUrl;
+        
+        // Remove loading overlay after profile is loaded
+        const overlay = document.getElementById('authLoadingOverlay');
+        if (overlay) overlay.style.display = 'none';
     })
     .catch(error => {
         console.error('Error fetching profile:', error);
         alert('Failed to load user profile data');
+        // Remove loading overlay even on error
+        const overlay = document.getElementById('authLoadingOverlay');
+        if (overlay) overlay.style.display = 'none';
     });
 
     // Attach event listeners to cards
