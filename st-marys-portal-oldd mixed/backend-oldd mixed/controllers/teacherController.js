@@ -180,6 +180,8 @@ export const getTeacherClasses = async (req, res) => {
             console.log('Using default subjects list');
         }
         
+        console.log("📚 allClasses before sorting:", allClasses);
+
         // Sort classes naturally (e.g., 1, 2, 10 instead of 1, 10, 2)
         allClasses.sort((a, b) => {
             const aNum = parseInt(a.match(/\d+/)?.[0] || a);
