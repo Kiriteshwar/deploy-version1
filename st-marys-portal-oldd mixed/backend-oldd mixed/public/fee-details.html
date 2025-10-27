@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
             padding: 0;
             background: #f5f7fa;
         }
+
         header {
             background: #007bff;
             color: white;
@@ -23,6 +25,7 @@
             z-index: 100;
             margin: 0;
         }
+
         .header-content {
             display: flex;
             justify-content: space-between;
@@ -31,13 +34,16 @@
             margin: 0 auto;
             padding: 0 1.5rem;
         }
+
         .header-left {
             flex: 1;
         }
+
         .header-title {
             flex: 2;
             text-align: center;
         }
+
         .header-title h1 {
             font-size: 1.7rem;
             font-weight: 700;
@@ -49,6 +55,7 @@
             gap: 0.5rem;
             letter-spacing: 1px;
         }
+
         .back-button {
             display: inline-flex;
             align-items: center;
@@ -59,13 +66,16 @@
             padding: 0.5rem 1rem;
             border-radius: 4px;
         }
+
         .back-button:hover {
             background-color: rgba(255, 255, 255, 0.1);
             opacity: 1;
         }
+
         .back-button i {
             margin-right: 0.5rem;
         }
+
         .fee-container {
             max-width: 900px;
             margin: 40px auto 0 auto;
@@ -74,96 +84,117 @@
             background: none;
             box-shadow: none;
         }
+
         .dashboard-section {
             margin-bottom: 28px;
         }
+
         .dashboard-section h3 {
             color: #007BFF;
             margin-bottom: 15px;
             font-size: 1.15rem;
             font-weight: 700;
         }
+
         .dashboard-info {
             background-color: #fff;
             padding: 22px 28px;
             margin: 0 0 0 0;
             border-radius: 12px;
             border: 1px solid #e9ecef;
-            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+            box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
         }
+
         .dashboard-info p {
             margin: 8px 0;
             font-size: 1.08rem;
         }
+
         .dashboard-info strong {
             color: #222;
             font-weight: 600;
             min-width: 110px;
             display: inline-block;
         }
+
         .dashboard-info em {
             color: #888;
         }
+
         /* Improved fee structure table */
         #fee-structure-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 5px;
         }
-        #fee-structure-table th, #fee-structure-table td {
+
+        #fee-structure-table th,
+        #fee-structure-table td {
             padding: 10px 14px;
             border-bottom: 1px solid #f0f0f0;
             font-size: 1.08rem;
         }
+
         #fee-structure-table th {
             background: #f8f9fa;
             color: #007BFF;
             font-weight: 700;
             text-align: left;
         }
+
         #fee-structure-table td.label {
             color: #222;
             font-weight: 600;
         }
+
         #fee-structure-table td.value {
             color: #333;
         }
+
         #fee-structure-table tr:last-child td {
             font-weight: 700;
             color: #007BFF;
         }
+
         .payment-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
         }
+
         .payment-table th,
         .payment-table td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #dee2e6;
         }
+
         .payment-table th {
             background-color: #f8f9fa;
             font-weight: 600;
         }
+
         .payment-status {
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.9em;
         }
+
         .status-paid {
             background-color: #d4edda;
             color: #155724;
         }
+
         .status-pending {
             background-color: #fff3cd;
             color: #856404;
         }
+
         .status-overdue {
             background-color: #f8d7da;
             color: #721c24;
         }
+
         .dashboard-btn {
             background-color: #007BFF;
             color: white;
@@ -175,9 +206,11 @@
             margin-top: 20px;
             transition: background 0.2s;
         }
+
         .dashboard-btn:hover {
             background-color: #0056b3;
         }
+
         .receipt-modal {
             display: none;
             position: fixed;
@@ -185,20 +218,22 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0, 0, 0, 0.4);
             z-index: 2000;
             align-items: center;
             justify-content: center;
         }
+
         .receipt-modal-content {
             background: #fff;
             border-radius: 10px;
             padding: 30px 30px 20px 30px;
             max-width: 480px;
             width: 95vw;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
             position: relative;
         }
+
         .close-receipt-modal {
             position: absolute;
             top: 12px;
@@ -207,11 +242,13 @@
             color: #888;
             cursor: pointer;
         }
+
         .receipt-actions {
             display: flex;
             gap: 10px;
             align-items: center;
         }
+
         .view-receipt-link {
             background: #007bff;
             color: #fff;
@@ -224,6 +261,7 @@
             display: inline-block;
             vertical-align: middle;
         }
+
         .download-btn {
             background: #007bff;
             color: #fff;
@@ -236,21 +274,23 @@
             display: inline-block;
             vertical-align: middle;
         }
+
         .download-btn:hover {
             background: #0056b3;
             color: #fff;
-            box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
             transform: translateY(-1px) scale(1.03);
         }
 
         .view-receipt-link:hover {
             background: #0056b3;
             color: #fff;
-            box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
             transform: translateY(-1px) scale(1.03);
         }
     </style>
 </head>
+
 <body>
     <header>
         <div class="header-content">
@@ -307,21 +347,61 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="js/fee-alert.js"></script>
     <script>
-        // Add this at the top of your <script> block, after jsPDF is loaded
-        // NOTE: You must place NotoSans-Regular.ttf in public/fonts/ and use the correct path below
-        window.addEventListener('DOMContentLoaded', async () => {
-            if (window.jspdf && window.jspdf.jsPDF) {
-                const fontUrl = '/fonts/NotoSans-Regular.ttf';
-                const fontName = 'NotoSans';
-                const fontStyle = 'normal';
-                const jsPDF = window.jspdf.jsPDF;
-                const response = await fetch(fontUrl);
-                const fontData = await response.arrayBuffer();
-                jsPDF.API.events.push(['addFonts', function() {
-                    this.addFileToVFS('NotoSans-Regular.ttf', btoa(String.fromCharCode.apply(null, new Uint8Array(fontData))));
-                    this.addFont('NotoSans-Regular.ttf', fontName, fontStyle);
-                }]);
+        // Global font loading - Load once and reuse
+        let customFontLoaded = false;
+        let fontLoadingPromise = null;
+
+        // Load custom font once globally
+        async function loadCustomFont() {
+            if (customFontLoaded) {
+                return Promise.resolve();
             }
+
+            if (fontLoadingPromise) {
+                return fontLoadingPromise;
+            }
+
+            fontLoadingPromise = new Promise(async (resolve, reject) => {
+                try {
+                    if (!window.jspdf || !window.jspdf.jsPDF) {
+                        throw new Error('jsPDF not loaded');
+                    }
+
+                    const fontUrl = '/fonts/NotoSans-Regular.ttf';
+                    const fontName = 'NotoSans';
+                    const fontStyle = 'normal';
+
+                    console.log('Loading custom font...');
+                    const response = await fetch(fontUrl);
+
+                    if (!response.ok) {
+                        throw new Error(`Font loading failed: ${response.status}`);
+                    }
+
+                    const fontData = await response.arrayBuffer();
+                    const fontBase64 = btoa(String.fromCharCode(...new Uint8Array(fontData)));
+
+                    // Add font to jsPDF's virtual file system ONCE
+                    const jsPDF = window.jspdf.jsPDF;
+                    jsPDF.API.addFileToVFS('NotoSans-Regular.ttf', fontBase64);
+                    jsPDF.API.addFont('NotoSans-Regular.ttf', fontName, fontStyle);
+
+                    customFontLoaded = true;
+                    console.log('Custom font loaded successfully');
+                    resolve();
+                } catch (error) {
+                    console.warn('Custom font loading failed, will use default fonts:', error);
+                    customFontLoaded = false; // Allow fallback to default fonts
+                    resolve(); // Don't reject, just continue with default fonts
+                }
+            });
+
+            return fontLoadingPromise;
+        }
+
+        // Load font when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCustomFont();
         });
         // Fetch and display fee details
         async function loadFeeDetails() {
@@ -382,7 +462,7 @@
                 `;
                 document.getElementById('fee-summary').innerHTML = '';
                 document.getElementById('fee-summary').appendChild(summaryBox);
-                 if (status === 'overdue') {
+                if (status === 'overdue') {
                     document.getElementById('fee-summary').innerHTML += `<div style="margin-top:16px;"><div style='background:#ffdddd;color:#a00;padding:18px 24px;font-size:1.25em;border-radius:8px;font-weight:bold;border:2px solid #f99;text-align:center;box-shadow:0 2px 8px #fbb;'>⚠️ Your fee is overdue! Please pay immediately.</div></div>`;
                 }
             } catch (error) {
@@ -421,11 +501,35 @@
             return { name, class: className, section, rollNumber };
         }
 
-        function generateReceiptPDF(doc, pay, openInNewWindow = false) {
+        async function generateReceiptPDF(doc, pay, openInNewWindow = false) {
             try {
+                // Ensure custom font is loaded first
+                await loadCustomFont();
+
                 const student = getStudentInfoFromPage();
                 const docPDF = new window.jspdf.jsPDF();
-                
+
+                // Helper function to set font with fallback
+                const setCustomFont = (style = 'normal') => {
+                    try {
+                        if (customFontLoaded) {
+                            docPDF.setFont('NotoSans', style);
+                            return true;
+                        } else {
+                            docPDF.setFont('helvetica', style);
+                            return false;
+                        }
+                    } catch (fontError) {
+                        console.warn('Font setting failed, using helvetica:', fontError);
+                        docPDF.setFont('helvetica', style);
+                        return false;
+                    }
+                };
+
+                // Set initial font
+                const usingCustomFont = setCustomFont('normal');
+                console.log(usingCustomFont ? 'Using custom NotoSans font' : 'Using default helvetica font');
+
                 // Modern color scheme
                 const primaryColor = [0, 123, 255]; // Blue
                 const secondaryColor = [108, 117, 125]; // Gray
@@ -436,7 +540,7 @@
                 // Modern header background
                 docPDF.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
                 docPDF.rect(0, 0, 210, 50, 'F');
-                
+
                 // White content area with shadow effect
                 docPDF.setFillColor(255, 255, 255);
                 docPDF.rect(10, 45, 190, 240, 'F');
@@ -450,14 +554,14 @@
                 } catch (logoError) {
                     console.warn('Logo not found, continuing without logo');
                 }
-                
+
                 // School Name and Header Info
-                docPDF.setFont('helvetica', 'bold');
+                setCustomFont('bold');
                 docPDF.setFontSize(24);
                 docPDF.setTextColor(255, 255, 255);
                 docPDF.text("St. Mary's High School", 55, 20);
-                
-                docPDF.setFont('helvetica', 'normal');
+
+                setCustomFont('normal');
                 docPDF.setFontSize(10);
                 docPDF.text('Hasanparthy, Dist: Hanamkonda, Telangana - 506371', 55, 28);
                 docPDF.text('Phone: +91-9999999999 | Email: infostmarysscl@gmail.com', 55, 35);
@@ -465,7 +569,7 @@
                 // Receipt Title with background
                 docPDF.setFillColor(successColor[0], successColor[1], successColor[2]);
                 docPDF.roundedRect(15, 55, 180, 15, 3, 3, 'F');
-                docPDF.setFont('helvetica', 'bold');
+                setCustomFont('bold');
                 docPDF.setFontSize(16);
                 docPDF.setTextColor(255, 255, 255);
                 docPDF.text('OFFICIAL FEE PAYMENT RECEIPT', 105, 65, { align: 'center' });
@@ -474,11 +578,11 @@
                 let y = 85;
                 docPDF.setFillColor(backgroundColor[0], backgroundColor[1], backgroundColor[2]);
                 docPDF.roundedRect(15, y - 5, 180, 20, 2, 2, 'F');
-                
-                docPDF.setFont('helvetica', 'bold');
+
+                setCustomFont('bold');
                 docPDF.setFontSize(11);
                 docPDF.setTextColor(0, 0, 0);
-                
+
                 if (pay.receipt && pay.receipt.number) {
                     docPDF.text(`Receipt No: ${pay.receipt.number}`, 20, y + 3);
                 }
@@ -488,16 +592,16 @@
 
                 // Student Information Section
                 y = 115;
-                docPDF.setFont('helvetica', 'bold');
+                setCustomFont('bold');
                 docPDF.setFontSize(14);
                 docPDF.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
                 docPDF.text('STUDENT INFORMATION', 20, y);
-                
+
                 // Student info table
                 y += 8;
                 docPDF.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
                 docPDF.setLineWidth(0.5);
-                
+
                 const studentData = [
                     ['Student Name', student.name || doc.studentName || doc.student?.name || 'N/A'],
                     ['Class & Section', `${student.class || doc.class || 'N/A'} - ${student.section || doc.section || 'N/A'}`],
@@ -505,11 +609,11 @@
                     ['Payment Mode', pay.paymentMode || 'N/A'],
                     ['Transaction ID', pay.transactionId || 'N/A']
                 ];
-                
-                docPDF.setFont('helvetica', 'normal');
+
+                setCustomFont('normal');
                 docPDF.setFontSize(10);
                 docPDF.setTextColor(0, 0, 0);
-                
+
                 studentData.forEach((row, index) => {
                     const rowY = y + (index * 12);
                     if (index % 2 === 0) {
@@ -519,16 +623,16 @@
                     }
                     docPDF.rect(15, rowY - 2, 180, 12, 'F');
                     docPDF.rect(15, rowY - 2, 180, 12, 'S');
-                    
-                    docPDF.setFont('helvetica', 'bold');
+
+                    setCustomFont('bold');
                     docPDF.text(row[0], 20, rowY + 6);
-                    docPDF.setFont('helvetica', 'normal');
+                    setCustomFont('normal');
                     docPDF.text(row[1], 100, rowY + 6);
                 });
 
                 // Payment Details Section
                 y += 80;
-                docPDF.setFont('helvetica', 'bold');
+                setCustomFont('bold');
                 docPDF.setFontSize(14);
                 docPDF.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
                 docPDF.text('PAYMENT DETAILS', 20, y);
@@ -537,8 +641,8 @@
                 y += 12;
                 docPDF.setFillColor(successColor[0], successColor[1], successColor[2]);
                 docPDF.roundedRect(15, y - 5, 180, 25, 3, 3, 'F');
-                
-                docPDF.setFont('helvetica', 'bold');
+
+                setCustomFont('bold');
                 docPDF.setFontSize(18);
                 docPDF.setTextColor(255, 255, 255);
                 docPDF.text('AMOUNT PAID', 35, y + 10);
@@ -546,7 +650,7 @@
                 const amountValue = Number(pay.amount) || 0;
                 const amountPaidText = `Rs.${amountValue.toLocaleString('en-IN')}`;
                 docPDF.setCharSpace(0); // Remove any extra character spacing
-                docPDF.text(amountPaidText, 175, y+10,{ align: 'right' });
+                docPDF.text(amountPaidText, 175, y + 10, { align: 'right' });
 
                 // Balance information
                 y += 35;
@@ -560,11 +664,11 @@
                     balanceAtPayment = doc.balance || 0;
                     balanceLabel = 'Current Balance Due:';
                 }
-                
+
                 docPDF.setFillColor(backgroundColor[0], backgroundColor[1], backgroundColor[2]);
                 docPDF.roundedRect(15, y - 5, 180, 20, 2, 2, 'F');
-                
-                docPDF.setFont('helvetica', 'bold');
+
+                setCustomFont('bold');
                 docPDF.setFontSize(12);
                 docPDF.setTextColor(0, 0, 0);
                 docPDF.text(balanceLabel, 35, y + 3);
@@ -576,8 +680,8 @@
                 const balanceValue = Number(balanceAtPayment) || 0;
                 const balanceText = `Rs.${balanceValue.toLocaleString('en-IN')}`;
                 docPDF.setCharSpace(0); // Remove any extra character spacing
-                docPDF.text(balanceText, 175, y+3,{ align: 'right' });
-                
+                docPDF.text(balanceText, 175, y + 3, { align: 'right' });
+
                 if (balanceAtPayment <= 0) {
                     docPDF.setTextColor(successColor[0], successColor[1], successColor[2]);
                     docPDF.setCharSpace(0); // Remove any extra character spacing
@@ -587,7 +691,7 @@
                 // Status and Due Date
                 y += 25;
                 if (doc.dueDate) {
-                    docPDF.setFont('helvetica', 'normal');
+                    setCustomFont('normal');
                     docPDF.setFontSize(10);
                     docPDF.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
                     docPDF.text(`Fee Due Date: ${formatDateTime(doc.dueDate).split(' ')[0]}`, 20, y);
@@ -596,7 +700,7 @@
                 if (doc.status === 'overdue' && balanceAtPayment > 0) {
                     docPDF.setFillColor(220, 53, 69);
                     docPDF.roundedRect(15, y + 5, 180, 15, 2, 2, 'F');
-                    docPDF.setFont('helvetica', 'bold');
+                    setCustomFont('bold');
                     docPDF.setFontSize(12);
                     docPDF.setTextColor(255, 255, 255);
                     docPDF.text('⚠ OVERDUE - Please clear remaining balance immediately', 20, y + 13);
@@ -609,189 +713,80 @@
                 const footerY = 265;
                 docPDF.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
                 docPDF.rect(0, footerY, 210, 32, 'F');
-                
-                docPDF.setFont('helvetica', 'normal');
+
+                setCustomFont('normal');
                 docPDF.setFontSize(9);
                 docPDF.setTextColor(255, 255, 255);
                 docPDF.text('This is a computer-generated receipt and does not require a signature.', 15, footerY + 8);
                 docPDF.text('For any queries, please contact the school office during working hours.', 15, footerY + 15);
                 docPDF.text(`Generated on: ${formatDateTime(new Date())}`, 15, footerY + 22);
-                
+
                 // Thank you message - properly positioned
-                docPDF.setFont('helvetica', 'bold');
+                setCustomFont('bold');
                 docPDF.setFontSize(10);
                 docPDF.text('Thank you for your payment!', 195, footerY + 18, { align: 'right' });
 
                 // Security features
-                docPDF.setFont('helvetica', 'normal');
+                setCustomFont('normal');
                 docPDF.setFontSize(6);
                 docPDF.setTextColor(200, 200, 200);
                 const securityCode = `Security Code: ${pay.receipt?.number || 'TEMP'}-${Date.now().toString().slice(-6)}`;
                 docPDF.text(securityCode, 190, footerY - 9, { align: 'right' });
 
-                // Output - mobile-friendly approach
+                // Professional PDF viewing approach
                 if (openInNewWindow) {
-                    // Check if mobile device
+                    // Check device and browser capabilities
                     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                    
+                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
                     if (isMobile) {
-                        // For mobile, try different approaches based on browser capabilities
+                        // Professional mobile PDF handling
                         try {
-                            // First try: Use data URL approach for better mobile compatibility
-                            const pdfDataUrl = docPDF.output('dataurlstring');
-                            
-                            // Create modal to display PDF
-                            const modal = document.createElement('div');
-                            modal.style.cssText = `
-                                position: fixed;
-                                top: 0;
-                                left: 0;
-                                width: 100%;
-                                height: 100%;
-                                background: rgba(0,0,0,0.95);
-                                z-index: 10000;
-                                display: flex;
-                                flex-direction: column;
-                                padding: 10px;
-                                box-sizing: border-box;
-                            `;
-                            
-                            // Header with buttons
-                            const header = document.createElement('div');
-                            header.style.cssText = `
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                                margin-bottom: 10px;
-                                gap: 10px;
-                            `;
-                            
-                            const title = document.createElement('span');
-                            title.innerHTML = 'Receipt Preview';
-                            title.style.cssText = `
-                                color: white;
-                                font-size: 16px;
-                                font-weight: bold;
-                            `;
-                            
-                            const buttonContainer = document.createElement('div');
-                            buttonContainer.style.cssText = `
-                                display: flex;
-                                gap: 8px;
-                            `;
-                            
-                            const downloadBtn = document.createElement('button');
-                            downloadBtn.innerHTML = '⬇ Download';
-                            downloadBtn.style.cssText = `
-                                background: #28a745;
-                                color: white;
-                                border: none;
-                                padding: 10px 16px;
-                                border-radius: 6px;
-                                font-size: 14px;
-                                cursor: pointer;
-                            `;
-                            downloadBtn.onclick = () => {
-                                const filename = `St_Marys_Receipt_${pay.receipt?.number || Date.now()}_${student.name?.replace(/\s+/g, '_') || 'Student'}.pdf`;
-                                docPDF.save(filename);
-                            };
-                            
-                            const closeBtn = document.createElement('button');
-                            closeBtn.innerHTML = '✕ Close';
-                            closeBtn.style.cssText = `
-                                background: #dc3545;
-                                color: white;
-                                border: none;
-                                padding: 10px 16px;
-                                border-radius: 6px;
-                                font-size: 14px;
-                                cursor: pointer;
-                            `;
-                            closeBtn.onclick = () => {
-                                document.body.removeChild(modal);
-                            };
-                            
-                            buttonContainer.appendChild(downloadBtn);
-                            buttonContainer.appendChild(closeBtn);
-                            header.appendChild(title);
-                            header.appendChild(buttonContainer);
-                            
-                            // Try iframe first
-                            const iframe = document.createElement('iframe');
-                            iframe.src = pdfDataUrl;
-                            iframe.style.cssText = `
-                                flex: 1;
-                                border: none;
-                                background: white;
-                                border-radius: 6px;
-                                min-height: 400px;
-                            `;
-                            
-                            // Fallback message if iframe fails
-                            const fallbackDiv = document.createElement('div');
-                            fallbackDiv.style.cssText = `
-                                flex: 1;
-                                background: white;
-                                border-radius: 6px;
-                                display: flex;
-                                flex-direction: column;
-                                justify-content: center;
-                                align-items: center;
-                                padding: 20px;
-                                text-align: center;
-                                display: none;
-                            `;
-                            fallbackDiv.innerHTML = `
-                                <div style="font-size: 48px; margin-bottom: 20px;">📄</div>
-                                <h3 style="margin-bottom: 10px;">PDF Preview Not Available</h3>
-                                <p style="margin-bottom: 20px; color: #666;">Your browser doesn't support inline PDF viewing.</p>
-                                <button onclick="this.parentElement.parentElement.querySelector('button').click()" 
-                                        style="background: #007bff; color: white; border: none; padding: 12px 24px; 
-                                               border-radius: 6px; font-size: 16px; cursor: pointer;">
-                                    Download PDF Instead
-                                </button>
-                            `;
-                            
-                            // Check if iframe loads successfully
-                            iframe.onload = () => {
-                                // PDF loaded successfully
-                                console.log('PDF loaded in iframe');
-                            };
-                            
-                            iframe.onerror = () => {
-                                // Fallback: show download option
-                                iframe.style.display = 'none';
-                                fallbackDiv.style.display = 'flex';
-                            };
-                            
-                            // Timeout fallback
-                            setTimeout(() => {
-                                try {
-                                    if (!iframe.contentDocument || !iframe.contentDocument.body.innerHTML) {
-                                        iframe.style.display = 'none';
-                                        fallbackDiv.style.display = 'flex';
-                                    }
-                                } catch (e) {
-                                    iframe.style.display = 'none';
-                                    fallbackDiv.style.display = 'flex';
+                            // Create blob for better compatibility
+                            const pdfBlob = docPDF.output('blob');
+                            const pdfUrl = URL.createObjectURL(pdfBlob);
+                            const filename = `St_Marys_Receipt_${pay.receipt?.number || Date.now()}_${student.name?.replace(/\s+/g, '_') || 'Student'}.pdf`;
+
+                            if (isIOS) {
+                                // iOS handles PDFs well in new windows
+                                const newWindow = window.open(pdfUrl, '_blank');
+                                if (!newWindow) {
+                                    // Fallback to download if popup blocked
+                                    this.downloadPDFBlob(pdfBlob, filename);
                                 }
-                            }, 3000);
-                            
-                            modal.appendChild(header);
-                            modal.appendChild(iframe);
-                            modal.appendChild(fallbackDiv);
-                            document.body.appendChild(modal);
-                            
+                            } else {
+                                // Android and other mobile - show optimized modal
+                                this.showMobilePDFModal(pdfUrl, pdfBlob, filename);
+                            }
+
+                            // Cleanup URL after some time
+                            setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
+
                         } catch (error) {
-                            console.error('Mobile PDF preview error:', error);
-                            // Ultimate fallback: just download
-                            alert('PDF preview not available on your device. The PDF will be downloaded instead.');
+                            console.error('Mobile PDF error:', error);
+                            // Ultimate fallback - direct download
                             const filename = `St_Marys_Receipt_${pay.receipt?.number || Date.now()}_${student.name?.replace(/\s+/g, '_') || 'Student'}.pdf`;
                             docPDF.save(filename);
                         }
                     } else {
-                        // For desktop, use new window
-                        docPDF.output('dataurlnewwindow');
+                        // Desktop - professional approach
+                        try {
+                            const pdfBlob = docPDF.output('blob');
+                            const pdfUrl = URL.createObjectURL(pdfBlob);
+                            const newWindow = window.open(pdfUrl, '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
+
+                            if (!newWindow) {
+                                // Fallback if popup blocked
+                                const filename = `St_Marys_Receipt_${pay.receipt?.number || Date.now()}_${student.name?.replace(/\s+/g, '_') || 'Student'}.pdf`;
+                                docPDF.save(filename);
+                            }
+
+                            // Cleanup URL after some time
+                            setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
+                        } catch (error) {
+                            console.error('Desktop PDF error:', error);
+                            docPDF.output('dataurlnewwindow'); // Fallback to original method
+                        }
                     }
                 } else {
                     const filename = `St_Marys_Receipt_${pay.receipt?.number || Date.now()}_${student.name?.replace(/\s+/g, '_') || 'Student'}.pdf`;
@@ -801,6 +796,164 @@
                 console.error('Error generating PDF:', error);
                 alert('Failed to generate receipt. Please try again.');
             }
+        }
+
+        // Helper function to download PDF blob
+        function downloadPDFBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        // Helper function to show mobile PDF modal
+        function showMobilePDFModal(pdfUrl, pdfBlob, filename) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.95);
+                z-index: 10000;
+                display: flex;
+                flex-direction: column;
+                padding: 10px;
+                box-sizing: border-box;
+            `;
+
+            // Header with buttons
+            const header = document.createElement('div');
+            header.style.cssText = `
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+                gap: 10px;
+                flex-shrink: 0;
+            `;
+
+            const title = document.createElement('span');
+            title.innerHTML = 'Receipt Preview';
+            title.style.cssText = `
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+            `;
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = `
+                display: flex;
+                gap: 8px;
+            `;
+
+            const downloadBtn = document.createElement('button');
+            downloadBtn.innerHTML = '⬇ Download';
+            downloadBtn.style.cssText = `
+                background: #28a745;
+                color: white;
+                border: none;
+                padding: 10px 16px;
+                border-radius: 6px;
+                font-size: 14px;
+                cursor: pointer;
+            `;
+            downloadBtn.onclick = () => {
+                downloadPDFBlob(pdfBlob, filename);
+            };
+
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '✕ Close';
+            closeBtn.style.cssText = `
+                background: #dc3545;
+                color: white;
+                border: none;
+                padding: 10px 16px;
+                border-radius: 6px;
+                font-size: 14px;
+                cursor: pointer;
+            `;
+            closeBtn.onclick = () => {
+                document.body.removeChild(modal);
+            };
+
+            buttonContainer.appendChild(downloadBtn);
+            buttonContainer.appendChild(closeBtn);
+            header.appendChild(title);
+            header.appendChild(buttonContainer);
+
+            // Try iframe with better error handling
+            const iframe = document.createElement('iframe');
+            iframe.src = pdfUrl;
+            iframe.style.cssText = `
+                flex: 1;
+                border: none;
+                background: white;
+                border-radius: 6px;
+                min-height: 400px;
+            `;
+
+            // Fallback message
+            const fallbackDiv = document.createElement('div');
+            fallbackDiv.style.cssText = `
+                flex: 1;
+                background: white;
+                border-radius: 6px;
+                display: none;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                text-align: center;
+            `;
+            fallbackDiv.innerHTML = `
+                <div style="font-size: 48px; margin-bottom: 20px;">📄</div>
+                <h3 style="margin-bottom: 10px; color: #333;">PDF Preview Not Available</h3>
+                <p style="margin-bottom: 20px; color: #666;">Your browser doesn't support inline PDF viewing on mobile.</p>
+                <button onclick="this.parentElement.parentElement.querySelector('button').click()" 
+                        style="background: #28a745; color: white; border: none; padding: 12px 24px; 
+                               border-radius: 6px; font-size: 16px; cursor: pointer;">
+                    Download PDF Instead
+                </button>
+            `;
+
+            // Better error handling for mobile
+            let iframeLoaded = false;
+
+            iframe.onload = () => {
+                iframeLoaded = true;
+                console.log('PDF loaded successfully in iframe');
+            };
+
+            iframe.onerror = () => {
+                iframe.style.display = 'none';
+                fallbackDiv.style.display = 'flex';
+            };
+
+            // Timeout fallback for mobile browsers that don't support PDF viewing
+            setTimeout(() => {
+                if (!iframeLoaded) {
+                    iframe.style.display = 'none';
+                    fallbackDiv.style.display = 'flex';
+                }
+            }, 2000);
+
+            modal.appendChild(header);
+            modal.appendChild(iframe);
+            modal.appendChild(fallbackDiv);
+            document.body.appendChild(modal);
+
+            // Close modal on background click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
         }
 
         function viewReceipt(doc, pay) {
@@ -855,4 +1008,5 @@
         document.addEventListener('DOMContentLoaded', loadFeeDetails);
     </script>
 </body>
+
 </html>
