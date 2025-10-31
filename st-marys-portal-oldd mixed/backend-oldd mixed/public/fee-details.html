@@ -403,6 +403,25 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadCustomFont();
         });
+
+        // Static fee structure based on class
+        const staticFeeStructure = {
+            'X': { totalFee: 50000},
+            'IX': { totalFee: 40000},
+            'VIII': { totalFee: 35000},
+            'VII': { totalFee: 33000},
+            'VI': { totalFee: 31000},
+            'V': { totalFee: 29000},
+            'IV': { totalFee: 28000},
+            'III': { totalFee: 26000},
+            'II': { totalFee: 24000},
+            'I': { totalFee: 22000},
+            'U.K.G': { totalFee: 20000},
+            'L.K.G': { totalFee: 18000},
+            'Nursery': { totalFee: 17000},
+            
+        };
+
         // Fetch and display fee details
         async function loadFeeDetails() {
             const errorDiv = document.getElementById('error-message');
@@ -428,8 +447,6 @@
                 }
                 const data = await response.json();
                 console.log('Raw API Response:', data);
-                console.log('Fee Structure:', data.feeStructure);
-                console.log('Payments:', data.payments);
 
                 // Display student info
                 document.getElementById('student-info').innerHTML = `
@@ -437,12 +454,17 @@
                     <p><strong>Class:</strong> ${data.student.class}-${data.student.section}</p>
                     <p><strong>Roll Number:</strong> ${data.student.rollNumber}</p>
                 `;
+                
+                // Get student class and use static fee structure
+                const studentClass = data.student.class;
+                const feeStructure = staticFeeStructure[studentClass] || staticFeeStructure['1'];
+                const totalFee = feeStructure.totalFee;
+                
                 // Display payment history
                 renderPaymentHistory(data.payments || []);
 
-                // Only show total fee from fee structure and due date
-                const totalFee = data.feeStructure ? data.feeStructure.totalFee : 0;
-                const dueDate = data.feeStructure ? data.feeStructure.dueDate : null;
+                // Use static fee structure instead of dynamic data
+                const dueDate = new Date(new Date().getFullYear(), 3, 30); // April 30th of current year
                 const latestPayment = data.payments && data.payments[0];
                 const status = latestPayment ? latestPayment.status : null;
 
@@ -457,8 +479,8 @@
                 summaryBox.style.marginTop = '14px';
                 summaryBox.style.marginBottom = '0';
                 summaryBox.innerHTML = `
-                    <div><span style="color:#111;font-weight:700;">Total Fee:</span> <span style="color:#007bff;font-weight:700;">₹${totalFee}</span></div>
-                    <div><span style="color:#111;font-weight:700;">Due Date:</span> <span style="color:#d9534f;font-weight:700;">${dueDate ? new Date(dueDate).toLocaleDateString() : '-'}</span></div>
+                    <div><span style="color:#111;font-weight:700;">Total Fee:</span> <span style="color:#007bff;font-weight:700;">₹${totalFee.toLocaleString('en-IN')}</span></div>
+                    <div><span style="color:#111;font-weight:700;">Due Date:</span> <span style="color:#d9534f;font-weight:700;">${dueDate.toLocaleDateString()}</span></div>
                 `;
                 document.getElementById('fee-summary').innerHTML = '';
                 document.getElementById('fee-summary').appendChild(summaryBox);
