@@ -406,19 +406,19 @@
 
         // Static fee structure based on class
         const staticFeeStructure = {
-            'X': { totalFee: 50000},
-            'IX': { totalFee: 40000},
-            'VIII': { totalFee: 35000},
-            'VII': { totalFee: 33000},
-            'VI': { totalFee: 31000},
-            'V': { totalFee: 29000},
-            'IV': { totalFee: 28000},
-            'III': { totalFee: 26000},
-            'II': { totalFee: 24000},
-            'I': { totalFee: 22000},
-            'U.K.G': { totalFee: 20000},
-            'L.K.G': { totalFee: 18000},
-            'Nursery': { totalFee: 17000},
+            'X': { totalFee: 50000,firstTerm: 25000,secondTerm: 15000,thirdTerm: 10000},
+            'IX': { totalFee: 40000,firstTerm: 20000,secondTerm: 13000,thirdTerm: 7000},
+            'VIII': { totalFee: 35000,firstTerm: 17000,secondTerm: 11000,thirdTerm: 7000},
+            'VII': { totalFee: 33000,firstTerm: 15000,secondTerm: 11000,thirdTerm: 7000},
+            'VI': { totalFee: 31000,firstTerm: 15000,secondTerm: 9000,thirdTerm: 7000},
+            'V': { totalFee: 29000,firstTerm: 13000,secondTerm: 9000,thirdTerm: 7000},
+            'IV': { totalFee: 28000,firstTerm: 12000,secondTerm: 9000,thirdTerm: 7000},
+            'III': { totalFee: 26000,firstTerm: 11000,secondTerm: 9000,thirdTerm: 6000},
+            'II': { totalFee: 24000,firstTerm: 10000,secondTerm: 8000,thirdTerm: 6000},
+            'I': { totalFee: 22000,firstTerm: 10000,secondTerm: 7000,thirdTerm: 5000},
+            'U.K.G': { totalFee: 20000,firstTerm: 9000,secondTerm: 7000,thirdTerm: 4000},
+            'L.K.G': { totalFee: 18000,firstTerm: 9000,secondTerm: 5000,thirdTerm: 4000},
+            'Nursery': { totalFee: 17000,firstTerm: 8000,secondTerm: 5000,thirdTerm: 4000},
             
         };
 
@@ -459,9 +459,10 @@
                 const studentClass = data.student.class;
                 const feeStructure = staticFeeStructure[studentClass] || staticFeeStructure['I'];
                 const totalFee = feeStructure.totalFee;
+                const firstTerm = feeStructure.firstTerm;
+                const secondTerm = feeStructure.secondTerm;
+                const thirdTerm = feeStructure.thirdTerm;
                 
-                // Calculate fee per term (divide by 3)
-                const feePerTerm = Math.round(totalFee / 3);
                 
                 // Define 3 term due dates (same for everyone)
                 const currentYear = new Date().getFullYear();
@@ -493,17 +494,17 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px;">
                         <div style="background:#fff;padding:12px;border-radius:6px;border:1px solid #dee2e6;text-align:center;">
                             <div style="color:#007bff;font-weight:700;font-size:0.9em;margin-bottom:6px;">Term 1</div>
-                            <div style="color:#111;font-weight:600;margin-bottom:4px;">₹${feePerTerm.toLocaleString('en-IN')}</div>
+                            <div style="color:#111;font-weight:600;margin-bottom:4px;">₹${firstTerm.toLocaleString('en-IN')}</div>
                             <div style="color:#666;font-size:0.85em;">Due: ${term1DueDate.toLocaleDateString('en-IN')}</div>
                         </div>
                         <div style="background:#fff;padding:12px;border-radius:6px;border:1px solid #dee2e6;text-align:center;">
                             <div style="color:#007bff;font-weight:700;font-size:0.9em;margin-bottom:6px;">Term 2</div>
-                            <div style="color:#111;font-weight:600;margin-bottom:4px;">₹${feePerTerm.toLocaleString('en-IN')}</div>
+                            <div style="color:#111;font-weight:600;margin-bottom:4px;">₹${secondTerm.toLocaleString('en-IN')}</div>
                             <div style="color:#666;font-size:0.85em;">Due: ${term2DueDate.toLocaleDateString('en-IN')}</div>
                         </div>
                         <div style="background:#fff;padding:12px;border-radius:6px;border:1px solid #dee2e6;text-align:center;">
                             <div style="color:#007bff;font-weight:700;font-size:0.9em;margin-bottom:6px;">Term 3</div>
-                            <div style="color:#111;font-weight:600;margin-bottom:4px;">₹${feePerTerm.toLocaleString('en-IN')}</div>
+                            <div style="color:#111;font-weight:600;margin-bottom:4px;">₹${thirdTerm.toLocaleString('en-IN')}</div>
                             <div style="color:#666;font-size:0.85em;">Due: ${term3DueDate.toLocaleDateString('en-IN')}</div>
                         </div>
                     </div>
