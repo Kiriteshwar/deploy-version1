@@ -112,6 +112,12 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working' });
 });
 
+// Health check endpoint (used by static loader)
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+
 // Serve static files from public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
