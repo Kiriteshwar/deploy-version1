@@ -550,10 +550,10 @@ export const updateUser = asyncHandler(async (req, res) => {
     if (phone) {
         user.phone = phone;
 
-        // For students, also update guardianPhone to keep them in sync
+        // For students, also update fatherGuardianPhone to keep them in sync
         if (user.role === 'student' && user.studentInfo) {
-            user.studentInfo.guardianPhone = phone;
-            console.log(`Syncing guardianPhone for student ${user.name}: ${phone}`);
+            user.studentInfo.fatherGuardianPhone = phone;
+            console.log(`Syncing fatherGuardianPhone for student ${user.name}: ${phone}`);
         }
     }
 

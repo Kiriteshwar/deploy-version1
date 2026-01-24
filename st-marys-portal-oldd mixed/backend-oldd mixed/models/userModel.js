@@ -48,8 +48,17 @@ const userSchema = new mongoose.Schema({
                 sparse: true
             },
             guardianName: String,
-            guardianPhone: String,
-            address: String
+            fatherGuardianPhone: String,
+            motherName: String,
+            motherPhone: String,
+            address: String,
+            dateOfBirth: Date,
+            dateOfLeaving: Date,
+            caste: String,
+            subCaste: String,
+            religion: String,
+            identificationMark1: String,
+            identificationMark2: String
         },
         required: function () { return this.role === 'student'; }
     },

@@ -296,10 +296,21 @@ window.onload = () => {
                 return;
             }
             userData.studentInfo = {
-                class: cls, section: sec, rollNumber: roll,
+                class: cls,
+                section: sec,
+                rollNumber: roll,
                 guardianName: document.getElementById('new-guardian').value.trim(),
-                guardianPhone: document.getElementById('new-guardian-phone').value.trim() || phone,
-                address: document.getElementById('new-address').value.trim()
+                fatherGuardianPhone: document.getElementById('new-guardian-phone').value.trim() || phone,
+                motherName: document.getElementById('new-mother-name').value.trim(),
+                motherPhone: document.getElementById('new-mother-phone').value.trim(),
+                address: document.getElementById('new-address').value.trim(),
+                dateOfBirth: document.getElementById('new-dob').value || null,
+                dateOfLeaving: document.getElementById('new-dol').value || null,
+                religion: document.getElementById('new-religion').value.trim(),
+                caste: document.getElementById('new-caste').value.trim(),
+                subCaste: document.getElementById('new-subcaste').value.trim(),
+                identificationMark1: document.getElementById('new-id-mark1').value.trim(),
+                identificationMark2: document.getElementById('new-id-mark2').value.trim()
             };
         } else if (role === 'teacher') {
             userData.teacherInfo = {
@@ -365,9 +376,20 @@ window.onload = () => {
                 <div class="detail-row"><span class="detail-label">Roll Number:</span><span class="detail-value">${i.rollNumber || 'N/A'}</span></div>
                 <div class="detail-row"><span class="detail-label">Class:</span><span class="detail-value">${i.class || 'N/A'}</span></div>
                 <div class="detail-row"><span class="detail-label">Section:</span><span class="detail-value">${i.section || 'N/A'}</span></div>
-                <div class="detail-row"><span class="detail-label">Guardian:</span><span class="detail-value">${escapeHtml(i.guardianName) || 'N/A'}</span></div>
-                <div class="detail-row"><span class="detail-label">Guardian Phone:</span><span class="detail-value">${i.guardianPhone || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Date of Birth:</span><span class="detail-value">${formatDate(i.dateOfBirth)}</span></div>
+                <div class="detail-row"><span class="detail-label">Religion:</span><span class="detail-value">${escapeHtml(i.religion) || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Caste:</span><span class="detail-value">${escapeHtml(i.caste) || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Sub-Caste:</span><span class="detail-value">${escapeHtml(i.subCaste) || 'N/A'}</span></div>
+                <div class="section-title">Parent/Guardian Details</div>
+                <div class="detail-row"><span class="detail-label">Father/Guardian:</span><span class="detail-value">${escapeHtml(i.guardianName) || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Father/Guardian Phone:</span><span class="detail-value">${i.fatherGuardianPhone || i.guardianPhone || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Mother's Name:</span><span class="detail-value">${escapeHtml(i.motherName) || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Mother's Phone:</span><span class="detail-value">${i.motherPhone || 'N/A'}</span></div>
                 <div class="detail-row"><span class="detail-label">Address:</span><span class="detail-value">${escapeHtml(i.address) || 'N/A'}</span></div>
+                <div class="section-title">Identification</div>
+                <div class="detail-row"><span class="detail-label">ID Mark 1:</span><span class="detail-value">${escapeHtml(i.identificationMark1) || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">ID Mark 2:</span><span class="detail-value">${escapeHtml(i.identificationMark2) || 'N/A'}</span></div>
+                ${i.dateOfLeaving ? `<div class="detail-row"><span class="detail-label">Date of Leaving:</span><span class="detail-value" style="color:#c62828">${formatDate(i.dateOfLeaving)}</span></div>` : ''}
             `;
 
             // Fetch fee details for student
