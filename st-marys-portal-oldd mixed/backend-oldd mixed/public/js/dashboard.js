@@ -471,10 +471,10 @@ function addAdminCards() {
             action: () => { window.location.href = 'manage-exams.html'; }
         },
         {
-            id: 'school-settings-card',
-            icon: '⚙️',
-            title: 'School Settings',
-            action: () => { alert('School settings feature coming soon!'); }
+            id: 'school-info-card',
+            icon: '🏫',
+            title: 'School Info',
+            action: () => { window.location.href = 'school-info.html'; }
         }
     ];
     
