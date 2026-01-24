@@ -14,7 +14,9 @@ import {
     getUsers,
     addUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    // Fee analytics
+    getFeeAnalytics
 } from '../controllers/adminController.js';
 
 const router = express.Router();
@@ -34,6 +36,9 @@ router.get('/fees/student/:studentId', getStudentFees);
 router.post('/fees/pay/:studentId', makePayment);
 router.put('/fees/discount/:studentId', updateDiscount);
 router.get('/fees/search', searchPayments);
+
+// Fee analytics route
+router.get('/fee-analytics', getFeeAnalytics);
 
 // User management routes
 router.get('/users', getUsers);

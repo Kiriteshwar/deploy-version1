@@ -569,4 +569,151 @@ export const deleteUser = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndDelete(id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true });
+});
+
+// @desc    Get fee analytics for dashboard
+// @route   GET /api/admin/fee-analytics
+// @access  Private (Admin only)
+export const getFeeAnalytics = asyncHandler(async (req, res) => {
+    const { period, class: className, section } = req.query;
+    const currentYear = new Date().getFullYear().toString();
+
+    // Calculate date range based on period
+    let startDate = null;
+    const now = new Date();
+
+    switch (period) {
+        case 'today':
+            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            break;
+        case 'week':
+            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            break;
+        case 'month':
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            break;
+        case 'year':
+            startDate = new Date(now.getFullYear(), 0, 1);
+            break;
+        default:
+            startDate = null; // All time
+    }
+
+    try {
+        // Get all fee structures
+        const feeStructures = await FeeStructure.find({ academicYear: currentYear });
+
+        // Build query for fee payments
+        const paymentQuery = { academicYear: currentYear };
+        if (className) paymentQuery.class = className;
+        if (section) paymentQuery.section = section;
+
+        // Get all fee payments
+        const feePayments = await FeePayment.find(paymentQuery)
+            .populate('student', 'name studentInfo discount');
+
+        // Get all students for calculating expected fees
+        const studentQuery = { role: 'student' };
+        if (className) studentQuery['studentInfo.class'] = className;
+        if (section) studentQuery['studentInfo.section'] = section;
+        const students = await User.find(studentQuery).select('studentInfo discount');
+
+        // Calculate totals
+        let totalExpectedFromStructure = 0;
+        let totalToBePaid = 0;
+        let totalCollected = 0;
+        let periodCollected = 0;
+
+        // Calculate expected from structure (before discounts)
+        const classStudentCounts = {};
+        students.forEach(student => {
+            const cls = student.studentInfo?.class;
+            if (cls) {
+                classStudentCounts[cls] = (classStudentCounts[cls] || 0) + 1;
+            }
+        });
+
+        feeStructures.forEach(structure => {
+            const count = classStudentCounts[structure.class] || 0;
+            totalExpectedFromStructure += structure.totalFee * count;
+        });
+
+        // Calculate from payment records
+        const classBreakdown = {};
+
+        feePayments.forEach(payment => {
+            const cls = payment.class;
+            const sec = payment.section;
+            const key = `${cls}-${sec}`;
+
+            if (!classBreakdown[key]) {
+                classBreakdown[key] = {
+                    class: cls,
+                    section: sec,
+                    totalToBePaid: 0,
+                    totalCollected: 0,
+                    balance: 0,
+                    studentCount: 0
+                };
+            }
+
+            classBreakdown[key].totalToBePaid += payment.totalToBePaid || 0;
+            classBreakdown[key].totalCollected += payment.totalPaid || 0;
+            classBreakdown[key].balance += payment.balance || 0;
+            classBreakdown[key].studentCount += 1;
+
+            totalToBePaid += payment.totalToBePaid || 0;
+            totalCollected += payment.totalPaid || 0;
+
+            // Calculate period-specific collection
+            if (startDate && payment.payments) {
+                payment.payments.forEach(p => {
+                    if (p.paymentDate && new Date(p.paymentDate) >= startDate) {
+                        periodCollected += p.amount || 0;
+                    }
+                });
+            }
+        });
+
+        // If no period filter, periodCollected = totalCollected
+        if (!startDate) {
+            periodCollected = totalCollected;
+        }
+
+        // Calculate totals
+        const totalBalance = totalToBePaid - totalCollected;
+        const totalDiscounts = totalExpectedFromStructure - totalToBePaid;
+
+        // Convert breakdown to array and sort by class
+        const breakdownArray = Object.values(classBreakdown).sort((a, b) => {
+            if (a.class === b.class) return a.section.localeCompare(b.section);
+            return a.class.localeCompare(b.class);
+        });
+
+        // Get unique classes for filter dropdown
+        const availableClasses = [...new Set(feeStructures.map(f => f.class))].sort();
+
+        res.json({
+            success: true,
+            summary: {
+                totalExpectedFromStructure,
+                totalToBePaid,
+                totalCollected,
+                periodCollected,
+                totalBalance,
+                totalDiscounts,
+                period: period || 'all'
+            },
+            breakdown: breakdownArray,
+            availableClasses,
+            filters: {
+                class: className || null,
+                section: section || null,
+                period: period || 'all'
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching fee analytics:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 }); 

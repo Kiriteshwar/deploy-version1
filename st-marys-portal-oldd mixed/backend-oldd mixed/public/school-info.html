@@ -17,7 +17,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
             gap: 16px;
         }
@@ -28,11 +28,6 @@
             color: #333;
         }
 
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
         .back-btn {
             padding: 10px 20px;
             background-color: #757575;
@@ -41,11 +36,63 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
-            transition: background-color 0.2s;
         }
 
         .back-btn:hover {
             background-color: #616161;
+        }
+
+        /* Tab Styles */
+        .tabs-container {
+            display: flex;
+            gap: 0;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-btn {
+            padding: 12px 28px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: #1976d2;
+        }
+
+        .tab-btn.active {
+            color: #1976d2;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #1976d2;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         .add-user-btn {
@@ -56,11 +103,57 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
-            transition: background-color 0.2s;
         }
 
         .add-user-btn:hover {
             background-color: #43a047;
+        }
+
+        /* Stats and Filter styles */
+        .stats-container {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            min-width: 140px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-card.students,
+        .stat-card.collected {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .stat-card.teachers,
+        .stat-card.balance {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        }
+
+        .stat-card.admins,
+        .stat-card.discounts {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .stat-number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
         }
 
         .filters-container {
@@ -80,7 +173,6 @@
             cursor: pointer;
             font-weight: 500;
             font-size: 0.9rem;
-            transition: all 0.2s;
         }
 
         .filter-btn:hover {
@@ -90,6 +182,14 @@
         .filter-btn.active {
             background-color: #1976d2;
             color: white;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: #fff;
         }
 
         .search-container {
@@ -108,11 +208,6 @@
             background: #fff;
         }
 
-        .search-box:focus {
-            outline: none;
-            border-color: #1976d2;
-        }
-
         .search-btn {
             padding: 10px 20px;
             background-color: #1976d2;
@@ -121,82 +216,35 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
-            transition: background-color 0.2s;
         }
 
-        .search-btn:hover {
-            background-color: #1565c0;
-        }
-
-        .stats-container {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            min-width: 120px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .stat-card.students {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
-        }
-
-        .stat-card.teachers {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
-        }
-
-        .stat-card.admins {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
-        }
-
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            opacity: 0.9;
-        }
-
-        .users-table-container {
+        /* Table styles */
+        .table-container {
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             overflow: hidden;
         }
 
-        .users-table {
+        .data-table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        .users-table th,
-        .users-table td {
+        .data-table th,
+        .data-table td {
             padding: 12px 14px;
             text-align: left;
             border-bottom: 1px solid #eee;
         }
 
-        .users-table th {
+        .data-table th {
             background-color: #f8f9fa;
             font-weight: 600;
             color: #333;
         }
 
-        .users-table tr:hover {
+        .data-table tr:hover {
             background-color: #f8f9fa;
         }
 
@@ -231,17 +279,17 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.85rem;
-            transition: background-color 0.2s;
-        }
-
-        .view-btn:hover {
-            background-color: #1565c0;
         }
 
         .no-data {
             text-align: center;
             padding: 40px;
             color: #999;
+        }
+
+        /* Currency formatting */
+        .currency {
+            font-family: 'Roboto Mono', monospace;
         }
 
         /* Modal Styles */
@@ -292,12 +340,6 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: #999;
-            padding: 0;
-            line-height: 1;
-        }
-
-        .modal-close:hover {
-            color: #333;
         }
 
         .modal-body {
@@ -308,10 +350,6 @@
             display: flex;
             padding: 10px 0;
             border-bottom: 1px solid #f0f0f0;
-        }
-
-        .detail-row:last-child {
-            border-bottom: none;
         }
 
         .detail-label {
@@ -359,12 +397,6 @@
             box-sizing: border-box;
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #1976d2;
-        }
-
         .form-row {
             display: flex;
             gap: 16px;
@@ -397,7 +429,6 @@
             font-weight: 500;
             cursor: pointer;
             margin-top: 16px;
-            transition: background-color 0.2s;
         }
 
         .submit-btn:hover {
@@ -410,11 +441,11 @@
         }
 
         @media (max-width: 768px) {
-            .users-table-container {
+            .table-container {
                 overflow-x: auto;
             }
 
-            .users-table {
+            .data-table {
                 min-width: 600px;
             }
 
@@ -434,62 +465,127 @@
     <div class="school-info-container">
         <div class="page-header">
             <h1>🏫 School Info</h1>
-            <div class="header-buttons">
+            <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <button class="tab-btn active" data-tab="users">👥 Users</button>
+            <button class="tab-btn" data-tab="fees">💰 Fees</button>
+        </div>
+
+        <!-- Users Tab -->
+        <div class="tab-content active" id="users-tab">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-count">-</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card students">
+                    <div class="stat-number" id="students-count">-</div>
+                    <div class="stat-label">Students</div>
+                </div>
+                <div class="stat-card teachers">
+                    <div class="stat-number" id="teachers-count">-</div>
+                    <div class="stat-label">Teachers</div>
+                </div>
+                <div class="stat-card admins">
+                    <div class="stat-number" id="admins-count">-</div>
+                    <div class="stat-label">Admins</div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
                 <button class="add-user-btn" id="add-user-btn">➕ Add User</button>
-                <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back</button>
+            </div>
+
+            <div class="filters-container">
+                <button class="filter-btn active" data-role="all">All</button>
+                <button class="filter-btn" data-role="student">Students</button>
+                <button class="filter-btn" data-role="teacher">Teachers</button>
+                <button class="filter-btn" data-role="admin">Admins</button>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-box" id="search-input"
+                    placeholder="Search by name, email, phone, or roll number...">
+                <button class="search-btn" id="search-btn">🔍 Search</button>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="users-table">
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr>
+                            <td colspan="6" class="no-data">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="stats-container">
-            <div class="stat-card" id="total-stat">
-                <div class="stat-number" id="total-count">-</div>
-                <div class="stat-label">Total Users</div>
+        <!-- Fees Tab -->
+        <div class="tab-content" id="fees-tab">
+            <div class="stats-container" id="fee-stats">
+                <div class="stat-card">
+                    <div class="stat-number currency" id="fee-expected">₹0</div>
+                    <div class="stat-label">Total Expected</div>
+                </div>
+                <div class="stat-card collected">
+                    <div class="stat-number currency" id="fee-collected">₹0</div>
+                    <div class="stat-label">Collected</div>
+                </div>
+                <div class="stat-card balance">
+                    <div class="stat-number currency" id="fee-balance">₹0</div>
+                    <div class="stat-label">Balance Due</div>
+                </div>
+                <div class="stat-card discounts">
+                    <div class="stat-number currency" id="fee-discounts">₹0</div>
+                    <div class="stat-label">Discounts Given</div>
+                </div>
             </div>
-            <div class="stat-card students" id="students-stat">
-                <div class="stat-number" id="students-count">-</div>
-                <div class="stat-label">Students</div>
-            </div>
-            <div class="stat-card teachers" id="teachers-stat">
-                <div class="stat-number" id="teachers-count">-</div>
-                <div class="stat-label">Teachers</div>
-            </div>
-            <div class="stat-card admins" id="admins-stat">
-                <div class="stat-number" id="admins-count">-</div>
-                <div class="stat-label">Admins</div>
-            </div>
-        </div>
 
-        <div class="filters-container">
-            <button class="filter-btn active" data-role="all">All</button>
-            <button class="filter-btn" data-role="student">Students</button>
-            <button class="filter-btn" data-role="teacher">Teachers</button>
-            <button class="filter-btn" data-role="admin">Admins</button>
-        </div>
+            <div class="filters-container" id="fee-filters">
+                <span style="font-weight:500; margin-right:8px;">Period:</span>
+                <button class="filter-btn active" data-period="all">All Time</button>
+                <button class="filter-btn" data-period="year">This Year</button>
+                <button class="filter-btn" data-period="month">This Month</button>
+                <button class="filter-btn" data-period="week">This Week</button>
+                <button class="filter-btn" data-period="today">Today</button>
 
-        <div class="search-container">
-            <input type="text" class="search-box" id="search-input"
-                placeholder="Search by name, email, phone, or roll number...">
-            <button class="search-btn" id="search-btn">🔍 Search</button>
-        </div>
+                <select class="filter-select" id="class-filter" style="margin-left:20px;">
+                    <option value="">All Classes</option>
+                </select>
+            </div>
 
-        <div class="users-table-container">
-            <table class="users-table">
-                <thead>
-                    <tr>
-                        <th>Roll No</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Role</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="users-table-body">
-                    <tr>
-                        <td colspan="6" class="no-data">Loading users...</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-container">
+                <table class="data-table" id="fee-table">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Students</th>
+                            <th>To Be Paid</th>
+                            <th>Collected</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fee-table-body">
+                        <tr>
+                            <td colspan="6" class="no-data">Loading fee data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -497,12 +593,9 @@
     <div class="modal-overlay" id="user-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title">User Details</h2>
-                <button class="modal-close" id="modal-close">&times;</button>
+                <h2 id="modal-title">User Details</h2><button class="modal-close" id="modal-close">&times;</button>
             </div>
-            <div class="modal-body" id="modal-body">
-                <!-- User details will be loaded here -->
-            </div>
+            <div class="modal-body" id="modal-body"></div>
         </div>
     </div>
 
@@ -510,36 +603,19 @@
     <div class="modal-overlay" id="add-user-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add New User</h2>
-                <button class="modal-close" id="add-modal-close">&times;</button>
+                <h2>Add New User</h2><button class="modal-close" id="add-modal-close">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="add-user-form">
                     <div class="section-title">Basic Information</div>
-
-                    <div class="form-group">
-                        <label>Full Name *</label>
-                        <input type="text" id="new-name" required placeholder="Enter full name">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Email *</label>
-                        <input type="email" id="new-email" required placeholder="Enter email address">
-                    </div>
-
+                    <div class="form-group"><label>Full Name *</label><input type="text" id="new-name" required></div>
+                    <div class="form-group"><label>Email *</label><input type="email" id="new-email" required></div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>Phone *</label>
-                            <input type="tel" id="new-phone" required placeholder="Enter phone number">
-                        </div>
-                        <div class="form-group">
-                            <label>Password *</label>
-                            <input type="password" id="new-password" required placeholder="Enter password">
-                        </div>
+                        <div class="form-group"><label>Phone *</label><input type="tel" id="new-phone" required></div>
+                        <div class="form-group"><label>Password *</label><input type="password" id="new-password"
+                                required></div>
                     </div>
-
-                    <div class="form-group">
-                        <label>Role *</label>
+                    <div class="form-group"><label>Role *</label>
                         <select id="new-role" required>
                             <option value="">Select Role</option>
                             <option value="student">Student</option>
@@ -547,66 +623,32 @@
                             <option value="admin">Admin</option>
                         </select>
                     </div>
-
-                    <!-- Student Fields -->
                     <div class="role-fields" id="student-fields">
                         <div class="section-title">Student Information</div>
                         <div class="form-row">
-                            <div class="form-group">
-                                <label>Class *</label>
-                                <input type="text" id="new-class" placeholder="e.g. X, IX">
-                            </div>
-                            <div class="form-group">
-                                <label>Section *</label>
-                                <input type="text" id="new-section" placeholder="e.g. A, B">
-                            </div>
+                            <div class="form-group"><label>Class *</label><input type="text" id="new-class"></div>
+                            <div class="form-group"><label>Section *</label><input type="text" id="new-section"></div>
                         </div>
-                        <div class="form-group">
-                            <label>Roll Number *</label>
-                            <input type="text" id="new-roll" placeholder="Enter roll number">
+                        <div class="form-group"><label>Roll Number *</label><input type="text" id="new-roll"></div>
+                        <div class="form-group"><label>Guardian Name</label><input type="text" id="new-guardian"></div>
+                        <div class="form-group"><label>Guardian Phone</label><input type="tel" id="new-guardian-phone">
                         </div>
-                        <div class="form-group">
-                            <label>Guardian Name</label>
-                            <input type="text" id="new-guardian" placeholder="Enter guardian name">
-                        </div>
-                        <div class="form-group">
-                            <label>Guardian Phone</label>
-                            <input type="tel" id="new-guardian-phone" placeholder="Enter guardian phone">
-                        </div>
-                        <div class="form-group">
-                            <label>Address</label>
-                            <input type="text" id="new-address" placeholder="Enter address">
-                        </div>
+                        <div class="form-group"><label>Address</label><input type="text" id="new-address"></div>
                     </div>
-
-                    <!-- Teacher Fields -->
                     <div class="role-fields" id="teacher-fields">
                         <div class="section-title">Teacher Information</div>
-                        <div class="form-group">
-                            <label>Subjects (comma separated)</label>
-                            <input type="text" id="new-subjects" placeholder="e.g. Mathematics, Physics">
-                        </div>
+                        <div class="form-group"><label>Subjects (comma separated)</label><input type="text"
+                                id="new-subjects"></div>
                         <div class="form-row">
-                            <div class="form-group">
-                                <label>Class Teacher Of (Class)</label>
-                                <input type="text" id="new-ct-class" placeholder="e.g. X">
-                            </div>
-                            <div class="form-group">
-                                <label>Class Teacher Of (Section)</label>
-                                <input type="text" id="new-ct-section" placeholder="e.g. A">
-                            </div>
+                            <div class="form-group"><label>Class Teacher Of (Class)</label><input type="text"
+                                    id="new-ct-class"></div>
+                            <div class="form-group"><label>Section</label><input type="text" id="new-ct-section"></div>
                         </div>
                     </div>
-
-                    <!-- Admin Fields -->
                     <div class="role-fields" id="admin-fields">
                         <div class="section-title">Admin Information</div>
-                        <div class="form-group">
-                            <label>Designation</label>
-                            <input type="text" id="new-designation" placeholder="e.g. Principal, Coordinator">
-                        </div>
+                        <div class="form-group"><label>Designation</label><input type="text" id="new-designation"></div>
                     </div>
-
                     <button type="submit" class="submit-btn" id="submit-user-btn">Add User</button>
                 </form>
             </div>
