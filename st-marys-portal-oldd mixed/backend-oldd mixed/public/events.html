@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events | St. Mary's High School</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/stylesHomeEvents.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header>
+    <div class="nav-container">
+      <div class="brand">
+        <img src="../images/logo.jpg" alt="SMHS Logo">
+        <span>St. Mary’s High School</span>
+      </div>
+
+      
+      <button class="mobile-nav-toggle" aria-label="Toggle Menu">
+        ☰
+      </button>
+
+
+      <nav class="nav-links">
+        <a href="/">Home</a>
+        <a href="/events.html" class="active">Events</a>
+        <a href="/admissions.html">Admissions</a>
+      </nav>
+
+      <a href="/login.html" class="login-btn">Login</a>
+    </div>
+  </header>
+
+  <!-- PAGE HERO -->
+  <section class="page-hero">
+    <h1>School Events</h1>
+    <p>
+      Celebrating academic excellence, cultural heritage, and student achievements
+      through meaningful events and activities.
+    </p>
+  </section>
+
+  <!-- FEATURED EVENT -->
+<section class="featured-event">
+  <div class="featured-content">
+    <div class="featured-text">
+      <span class="featured-badge">Featured Event</span>
+      <h2>Annual Sports Day 2024</h2>
+      <p>
+        A vibrant celebration of sportsmanship, teamwork, and student energy
+        with track events, team games, and performances.
+      </p>
+
+      <a href="event.html?id=sports-day" class="btn-primary">
+        View Event Gallery
+      </a>
+    </div>
+
+    <div class="featured-image">
+      <img src="../images/event.jpg" alt="Annual Sports Day">
+    </div>
+  </div>
+</section>
+
+
+<!-- EVENTS -->
+<section class="events-wrapper">
+  <div class="main-content">
+    <h2 class="section-title">All Events</h2>
+    <p class="section-subtitle">
+      Moments that reflect learning, culture, sports, and student achievements.
+    </p>
+
+    <div class="events-grid">
+
+      <!-- Event 1 -->
+      <div class="event-card">
+        <a href="event.html?id=yoga-day" class="event-card-link"></a>
+
+        <div class="event-image">
+          <img src="../images/ph2.jpg" alt="International Yoga Day">
+        </div>
+
+        <div class="event-content">
+          <div class="event-date">21 June 2024</div>
+          <div class="event-title">International Yoga Day</div>
+          <div class="event-description">
+            Students participated in guided yoga sessions promoting physical health,
+            mental well-being, and mindfulness.
+          </div>
+          
+          <div class="event-footer">
+            <span class="event-btn">
+              View Event
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Event 2 -->
+      <div class="event-card">
+        <a href="event.html?id=sports-day" class="event-card-link"></a>
+
+        <div class="event-image">
+          <img src="../images/event.jpg" alt="Annual Sports Day">
+        </div>
+
+        <div class="event-content">
+          <div class="event-date">15 March 2024</div>
+          <div class="event-title">Annual Sports Day</div>
+          <div class="event-description">
+            A vibrant celebration of sportsmanship and teamwork with track events,
+            team games, and student performances.
+          </div>
+
+          <div class="event-footer">
+            <span class="event-btn">
+              View Event
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Event 3 -->
+      <div class="event-card">
+        <a href="event.html?id=diwali" class="event-card-link"></a>
+
+        <div class="event-image">
+          <img src="../images/ph5.jpg" alt="Diwali Celebrations">
+        </div>
+
+        <div class="event-content">
+          <div class="event-date">12 November 2024</div>
+          <div class="event-title">Diwali Festival Celebration</div>
+          <div class="event-description">
+            Students and teachers celebrated Diwali with rangoli competitions,
+            cultural programs, and traditional performances.
+          </div>
+
+          <div class="event-footer">
+            <span class="event-btn">
+              View Event
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer class="ev-footer">
+  <div style="font-size: 1rem; font-weight: 400; margin-top: 2px;">
+    <a href="/terms.html" class="copyright-link">© 2026 St.Mary's High School</a>. All rights reserved.
+  </div>
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".mobile-nav-toggle");
+  const nav = document.querySelector(".nav-links");
+
+  if (!toggle || !nav) return;
+
+  toggle.addEventListener("click", () => {
+    nav.classList.toggle("show");
+    toggle.textContent = nav.classList.contains("show") ? "✕" : "☰";
+  });
+});
+</script>
+
+
+</body>
+</html>

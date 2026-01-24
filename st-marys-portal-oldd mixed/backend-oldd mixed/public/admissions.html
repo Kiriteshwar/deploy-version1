@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admissions | St. Mary's High School</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/stylesHomeEvents.css">
+  <link rel="stylesheet" href="../css/admissions.css">
+</head>
+
+<body>
+
+<!-- NAVBAR (reuse same navbar CSS) -->
+<header>
+  <div class="nav-container">
+    <div class="brand">
+      <img src="../images/logo.jpg" alt="SMHS Logo">
+      <span>St. Mary’s High School</span>
+    </div>
+
+    <button class="mobile-nav-toggle" aria-label="Toggle Menu">
+      ☰
+    </button>
+
+
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="/admissions.html" class="active">Admissions</a>
+    </nav>
+
+    <a href="/login.html" class="login-btn">Login</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="admission-hero">
+  <div class="hero-content">
+    <span class="hero-badge">Admissions Open</span>
+    <h1>Give Your Child a Strong Foundation</h1>
+    <p>
+      Join St. Mary’s High School — where academic excellence,
+      discipline, and holistic development shape confident learners.
+    </p>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="admission-highlights">
+  <div class="main-content">
+    <div class="highlights-grid">
+      <div class="highlight-card">
+        <h3>25+ Years of Excellence</h3>
+        <p>Trusted by generations of parents for quality education.</p>
+      </div>
+      <div class="highlight-card">
+        <h3>Experienced Faculty</h3>
+        <p>Dedicated teachers focused on student growth.</p>
+      </div>
+      <div class="highlight-card">
+        <h3>Modern Infrastructure</h3>
+        <p>Smart classrooms, labs, sports, and activities.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADMISSION ENQUIRY -->
+<section class="admission-enquiry" id="admissions">
+  <div class="enquiry-wrapper">
+
+    <!-- LEFT CONTENT -->
+    <div class="enquiry-info">
+      <h2>Admission Enquiry</h2>
+      <p>
+        Take the first step towards your child’s future at
+        <strong>St. Mary’s High School</strong>.
+      </p>
+
+      <ul class="enquiry-points">
+        <li>✔ Quick response from our admissions team</li>
+        <li>✔ No obligation enquiry</li>
+        <li>✔ Guidance on classes & admission process</li>
+      </ul>
+    </div>
+
+    <!-- FORM -->
+    <form id="interest-form" class="enquiry-form">
+      <label>
+        Parent / Guardian Name
+        <input
+          type="text"
+          id="interest-name"
+          name="name"
+          placeholder="Enter full name"
+          required
+        />
+      </label>
+
+      <label>
+        Phone Number
+        <input
+          type="tel"
+          id="interest-phone"
+          name="phone"
+          placeholder="Enter mobile number"
+          required
+          pattern="[0-9]{10,}"
+        />
+      </label>
+
+      <button type="submit">Submit Enquiry</button>
+
+      <p class="privacy-note">
+        We respect your privacy. Your details are safe with us.
+      </p>
+    </form>
+
+    <!-- THANK YOU -->
+    <div id="interest-thankyou" class="enquiry-thankyou">
+      <h3>Thank you!</h3>
+      <p>Our admissions team will contact you shortly.</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- PROCESS -->
+<section class="admission-process">
+  <div class="main-content">
+    <h2>Admission Process</h2>
+
+    <div class="process-grid">
+      <div class="process-step">
+        <span>01</span>
+        <h4>Submit Enquiry</h4>
+        <p>Share your contact details.</p>
+      </div>
+      <div class="process-step">
+        <span>02</span>
+        <h4>Get a Call</h4>
+        <p>Our team explains admission details.</p>
+      </div>
+      <div class="process-step">
+        <span>03</span>
+        <h4>School Visit</h4>
+        <p>Visit campus & complete formalities.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="ev-footer">
+  <div style="font-size: 1rem; font-weight: 400; margin-top: 2px;">
+    <a href="/terms.html" class="copyright-link">© 2026 St.Mary's High School</a>. All rights reserved.
+  </div>
+</footer>
+
+<script>
+// Mobile nav toggle
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".mobile-nav-toggle");
+  const nav = document.querySelector(".nav-links");
+
+  if (!toggle || !nav) return;
+
+  toggle.addEventListener("click", () => {
+    nav.classList.toggle("show");
+    toggle.textContent = nav.classList.contains("show") ? "✕" : "☰";
+  });
+});
+
+// Admission / Interest form submit handler
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('interest-form');
+  const thankyou = document.getElementById('interest-thankyou');
+
+  if (!form) return;
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById('interest-name').value.trim();
+    const phone = document.getElementById('interest-phone').value.trim();
+
+    if (!name || !phone) return;
+
+    try {
+      const res = await fetch('/api/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone })
+      });
+
+      if (res.ok) {
+        form.style.display = 'none';
+        thankyou.style.display = 'block';
+      } else {
+        alert('Failed to submit. Please try again.');
+      }
+    } catch (err) {
+      alert('Failed to submit. Please try again later.');
+    }
+  });
+});
+
+</script>
+
+</body>
+</html>

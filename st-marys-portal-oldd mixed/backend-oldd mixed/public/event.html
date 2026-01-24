@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Gallery | St. Mary's High School</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/stylesHomeEvents.css">
+</head>
+
+<body>
+
+<!-- NAVBAR (same as events page) -->
+<header>
+  <div class="nav-container">
+    <div class="brand">
+      <img src="../images/logo.jpg" alt="SMHS Logo">
+      <span>St. Mary’s High School</span>
+    </div>
+
+    
+    <button class="mobile-nav-toggle" aria-label="Toggle Menu">
+      ☰
+    </button>
+
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="/events.html" class="active">Events</a>
+      <a href="/admissions.html">Admissions</a>
+    </nav>
+
+    <a href="/login.html" class="login-btn">Login</a>
+  </div>
+</header>
+
+<!-- EVENT HERO -->
+<section class="event-hero">
+  <h1 id="eventTitle"></h1>
+  <p id="eventDesc"></p>
+</section>
+
+<!-- EVENT DETAIL -->
+<section class="event-detail">
+  <div class="event-detail-inner">
+
+    <!-- LEFT: TEXT -->
+    <div class="event-text">
+      <h2>About This Event</h2>
+      <p id="eventLongDesc"></p>
+
+      <a href="/events.html" class="btn-secondary">
+         Back to Events
+      </a>
+    </div>
+
+    <!-- RIGHT: IMAGES -->
+    <div class="event-gallery">
+        <div class="gallery-hero">
+            <img id="mainImage" alt="Event highlight">
+        </div>
+
+        <div class="gallery-grid" id="gallery"></div>
+    </div>
+
+
+
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <span onclick="closeLightbox()">×</span>
+  <img id="lightboxImg">
+</div>
+
+
+<!-- FOOTER -->
+<footer class="ev-footer">
+  <div style="font-size: 1rem; font-weight: 400; margin-top: 2px;">
+    <a href="/terms.html" class="copyright-link">© 2026 St.Mary's High School</a>. All rights reserved.
+  </div>
+</footer>
+
+<script>
+// Mobile nav toggle
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector(".mobile-nav-toggle");
+  const nav = document.querySelector(".nav-links");
+
+  if (!toggle || !nav) return;
+
+  toggle.addEventListener("click", () => {
+    nav.classList.toggle("show");
+    toggle.textContent = nav.classList.contains("show") ? "✕" : "☰";
+  });
+});
+
+const events = {
+  "yoga-day": {
+    title: "International Yoga Day",
+    shortDesc: "Students participated in yoga sessions promoting health and mindfulness.",
+    longDesc: "International Yoga Day was celebrated with great enthusiasm. Students participated in guided yoga sessions focusing on flexibility, breathing techniques, mindfulness, and mental well-being. The event emphasized the importance of a healthy lifestyle and inner balance.",
+    images: ["../images/ph1.jpg","../images/ph2.jpg","../images/ph3.jpg",]
+  },
+  "sports-day": {
+    title: "Annual Sports Day",
+    shortDesc: "A celebration of sportsmanship and teamwork.",
+    longDesc: "Annual Sports Day showcased the energy, discipline, and teamwork of our students. The event included track and field competitions, team sports, cultural performances, and award ceremonies, fostering sportsmanship and confidence among students.",
+    images: ["../images/event.jpg","../images/ph5.jpg","../images/ph4.jpg"]
+  },
+  "diwali": {
+    title: "Diwali Festival Celebration",
+    shortDesc: "Cultural programs and festive celebrations.",
+    longDesc: "The Diwali Festival Celebration brought together students and teachers in a colorful display of culture and tradition. Rangoli competitions, dance performances, and festive activities highlighted the joy of togetherness and cultural heritage.",
+    images: ["../images/ph5.jpg","../images/ph3.jpg","../images/ph2.jpg"]
+  }
+};
+
+const id = new URLSearchParams(location.search).get("id");
+const event = events[id];
+
+if (event) {
+  document.getElementById("eventTitle").innerText = event.title;
+  document.getElementById("eventDesc").innerText = event.shortDesc;
+  document.getElementById("eventLongDesc").innerText = event.longDesc;
+
+  const mainImage = document.getElementById("mainImage");
+    mainImage.src = event.images[0];
+    mainImage.onclick = () => openLightbox(event.images[0]);
+
+    const gallery = document.getElementById("gallery");
+    event.images.slice(1).forEach(src => {
+        const img = document.createElement("img");
+        img.src = src;
+        img.onclick = () => openLightbox(src);
+        gallery.appendChild(img);
+    });
+
+
+}
+
+function openLightbox(src) {
+  document.getElementById("lightboxImg").src = src;
+  document.getElementById("lightbox").style.display = "flex";
+}
+
+function closeLightbox() {
+  document.getElementById("lightbox").style.display = "none";
+}
+</script>
+
+</body>
+</html>
