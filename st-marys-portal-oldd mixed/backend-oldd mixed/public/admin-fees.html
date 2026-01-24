@@ -1341,7 +1341,7 @@
                 const paymentDate = pay.paymentDate || new Date();
                 const dateStr = formatDateTime(paymentDate);
                 const datePart = dateStr.split(' ')[0] || '-';
-                const timePart = dateStr.split(' ')[1] || '-';
+                const timePart = dateStr.split(' ').slice(1).join(' ') || '-';
                 
                 docPDF.text(`Receipt No: ${receiptNo}`, 20, y + 3);
                 docPDF.text(`Date: ${datePart}`, 130, y + 3);

@@ -640,8 +640,11 @@
                 if (pay.receipt && pay.receipt.number) {
                     docPDF.text(`Receipt No: ${pay.receipt.number}`, 20, y + 3);
                 }
-                docPDF.text(`Date: ${formatDateTime(pay.paymentDate).split(' ')[0]}`, 130, y + 3);
-                docPDF.text(`Time: ${formatDateTime(pay.paymentDate).split(' ')[1]}`, 130, y + 10);
+                const paymentDateStr = formatDateTime(pay.paymentDate);
+                const datePart = paymentDateStr.split(' ')[0] || '-';
+                const timePart = paymentDateStr.split(' ').slice(1).join(' ') || '-';
+                docPDF.text(`Date: ${datePart}`, 130, y + 3);
+                docPDF.text(`Time: ${timePart}`, 130, y + 10);
                 docPDF.text(`Academic Year: ${new Date().getFullYear()}-${new Date().getFullYear() + 1}`, 20, y + 10);
 
                 // Student Information Section
