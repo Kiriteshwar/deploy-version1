@@ -377,10 +377,17 @@ window.onload = () => {
                 });
                 const feeData = await feeResponse.json();
 
-                if (feeData.success) {
+                // API returns { student, feeStructure, payments } without success field
+                if (feeResponse.ok && feeData.feeStructure) {
                     const totalFromStructure = feeData.feeStructure?.totalFee || 0;
-                    const discount = user.discount || 0;
-                    const amountPaid = feeData.totalPaid || 0;
+                    const discount = feeData.student?.discount || user.discount || 0;
+
+                    // Calculate total paid from payments array
+                    let amountPaid = 0;
+                    if (feeData.payments && feeData.payments.length > 0) {
+                        amountPaid = feeData.payments.reduce((sum, p) => sum + (p.totalPaid || 0), 0);
+                    }
+
                     const remaining = (totalFromStructure - discount) - amountPaid;
 
                     html += `
@@ -390,6 +397,8 @@ window.onload = () => {
                         <div class="detail-row"><span class="detail-label">Amount Paid:</span><span class="detail-value" style="color:#1976d2">${formatCurrency(amountPaid)}</span></div>
                         <div class="detail-row"><span class="detail-label">Remaining:</span><span class="detail-value" style="color:${remaining > 0 ? '#c62828' : '#2e7d32'}; font-weight:600">${formatCurrency(remaining)}</span></div>
                     `;
+                } else if (feeData.error) {
+                    console.error('Fee API error:', feeData.error);
                 }
             } catch (err) {
                 console.error('Error fetching fee details:', err);
