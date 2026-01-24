@@ -157,31 +157,42 @@
         }
 
         .filters-container {
-            display: flex;
-            gap: 10px;
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 10px !important;
             margin-bottom: 20px;
             flex-wrap: wrap;
             align-items: center;
         }
 
+        #fee-filters {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
         .filter-btn {
-            padding: 8px 16px;
-            border: none;
-            background-color: #e0e0e0;
-            color: #333;
-            border-radius: 6px;
+            padding: 8px 16px !important;
+            border: none !important;
+            background-color: #e0e0e0 !important;
+            color: #333 !important;
+            border-radius: 6px !important;
             cursor: pointer;
             font-weight: 500;
             font-size: 0.9rem;
+            display: inline-block !important;
+            width: auto !important;
         }
 
         .filter-btn:hover {
-            background-color: #bdbdbd;
+            background-color: #bdbdbd !important;
         }
 
         .filter-btn.active {
-            background-color: #1976d2;
-            color: white;
+            background-color: #1976d2 !important;
+            color: white !important;
         }
 
         .filter-select {

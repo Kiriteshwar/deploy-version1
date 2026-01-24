@@ -200,7 +200,7 @@ window.onload = () => {
     }
 
     function updateFeeStats(summary) {
-        document.getElementById('fee-expected').textContent = formatCurrency(summary.totalToBePaid);
+        document.getElementById('fee-expected').textContent = formatCurrency(summary.totalExpected);
         document.getElementById('fee-collected').textContent = formatCurrency(summary.periodCollected);
         document.getElementById('fee-balance').textContent = formatCurrency(summary.totalBalance);
         document.getElementById('fee-discounts').textContent = formatCurrency(summary.totalDiscounts);

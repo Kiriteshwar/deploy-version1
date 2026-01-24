@@ -576,7 +576,6 @@ export const deleteUser = asyncHandler(async (req, res) => {
 // @access  Private (Admin only)
 export const getFeeAnalytics = asyncHandler(async (req, res) => {
     const { period, class: className, section } = req.query;
-    const currentYear = new Date().getFullYear().toString();
 
     // Calculate date range based on period
     let startDate = null;
@@ -600,89 +599,124 @@ export const getFeeAnalytics = asyncHandler(async (req, res) => {
     }
 
     try {
-        // Get all fee structures
-        const feeStructures = await FeeStructure.find({ academicYear: currentYear });
+        // Get ALL fee structures (all years)
+        const feeStructures = await FeeStructure.find({});
 
-        // Build query for fee payments
-        const paymentQuery = { academicYear: currentYear };
-        if (className) paymentQuery.class = className;
-        if (section) paymentQuery.section = section;
-
-        // Get all fee payments
-        const feePayments = await FeePayment.find(paymentQuery)
-            .populate('student', 'name studentInfo discount');
-
-        // Get all students for calculating expected fees
-        const studentQuery = { role: 'student' };
-        if (className) studentQuery['studentInfo.class'] = className;
-        if (section) studentQuery['studentInfo.section'] = section;
-        const students = await User.find(studentQuery).select('studentInfo discount');
-
-        // Calculate totals
-        let totalExpectedFromStructure = 0;
-        let totalToBePaid = 0;
-        let totalCollected = 0;
-        let periodCollected = 0;
-
-        // Calculate expected from structure (before discounts)
-        const classStudentCounts = {};
-        students.forEach(student => {
-            const cls = student.studentInfo?.class;
-            if (cls) {
-                classStudentCounts[cls] = (classStudentCounts[cls] || 0) + 1;
+        // Create a map of class -> totalFee (use latest fee structure per class)
+        const feeStructureMap = {};
+        feeStructures.forEach(fs => {
+            // If multiple years exist, use the one with higher totalFee or latest
+            if (!feeStructureMap[fs.class] || fs.totalFee > feeStructureMap[fs.class].totalFee) {
+                feeStructureMap[fs.class] = fs;
             }
         });
 
-        feeStructures.forEach(structure => {
-            const count = classStudentCounts[structure.class] || 0;
-            totalExpectedFromStructure += structure.totalFee * count;
-        });
+        // Build query for students
+        const studentQuery = { role: 'student' };
+        if (className) studentQuery['studentInfo.class'] = className;
+        if (section) studentQuery['studentInfo.section'] = section;
 
-        // Calculate from payment records
+        // Get all students with their discounts
+        const students = await User.find(studentQuery).select('studentInfo discount');
+
+        // Build query for fee payments (ALL years)
+        const paymentQuery = {};
+        if (className) paymentQuery.class = className;
+        if (section) paymentQuery.section = section;
+
+        // Get ALL fee payments (all years)
+        const feePayments = await FeePayment.find(paymentQuery);
+
+        // Calculate totals
+        let totalExpected = 0;  // Sum of (students × their class fee structure)
+        let totalToBePaid = 0;  // After discounts
+        let totalCollected = 0; // All time collected
+        let periodCollected = 0; // Collected in selected period
+        let totalDiscounts = 0;  // Total discounts given
+
+        // Calculate expected and discounts per student
         const classBreakdown = {};
 
-        feePayments.forEach(payment => {
-            const cls = payment.class;
-            const sec = payment.section;
-            const key = `${cls}-${sec}`;
+        students.forEach(student => {
+            const cls = student.studentInfo?.class;
+            const sec = student.studentInfo?.section || '-';
 
+            if (!cls) return;
+
+            const feeStructure = feeStructureMap[cls];
+            if (!feeStructure) return;
+
+            const structureFee = feeStructure.totalFee || 0;
+            const discount = student.discount || 0;
+            const toBePaid = structureFee - discount;
+
+            totalExpected += structureFee;
+            totalToBePaid += toBePaid;
+            totalDiscounts += discount;
+
+            // Add to class breakdown
+            const key = `${cls}-${sec}`;
             if (!classBreakdown[key]) {
                 classBreakdown[key] = {
                     class: cls,
                     section: sec,
+                    studentCount: 0,
+                    totalExpected: 0,
                     totalToBePaid: 0,
                     totalCollected: 0,
+                    periodCollected: 0,
                     balance: 0,
-                    studentCount: 0
+                    discounts: 0
                 };
             }
-
-            classBreakdown[key].totalToBePaid += payment.totalToBePaid || 0;
-            classBreakdown[key].totalCollected += payment.totalPaid || 0;
-            classBreakdown[key].balance += payment.balance || 0;
             classBreakdown[key].studentCount += 1;
+            classBreakdown[key].totalExpected += structureFee;
+            classBreakdown[key].totalToBePaid += toBePaid;
+            classBreakdown[key].discounts += discount;
+        });
 
-            totalToBePaid += payment.totalToBePaid || 0;
-            totalCollected += payment.totalPaid || 0;
+        // Process payments to calculate collected amounts
+        feePayments.forEach(payment => {
+            const cls = payment.class;
+            const sec = payment.section || '-';
+            const key = `${cls}-${sec}`;
 
-            // Calculate period-specific collection
-            if (startDate && payment.payments) {
+            // Add to total collected (all time)
+            const paidAmount = payment.totalPaid || 0;
+            totalCollected += paidAmount;
+
+            if (classBreakdown[key]) {
+                classBreakdown[key].totalCollected += paidAmount;
+            }
+
+            // Calculate period-specific collection from individual payments
+            if (payment.payments && payment.payments.length > 0) {
                 payment.payments.forEach(p => {
-                    if (p.paymentDate && new Date(p.paymentDate) >= startDate) {
+                    if (startDate) {
+                        // If there's a period filter, only count payments within that period
+                        if (p.paymentDate && new Date(p.paymentDate) >= startDate) {
+                            periodCollected += p.amount || 0;
+                            if (classBreakdown[key]) {
+                                classBreakdown[key].periodCollected += p.amount || 0;
+                            }
+                        }
+                    } else {
+                        // All time - add all payments
                         periodCollected += p.amount || 0;
+                        if (classBreakdown[key]) {
+                            classBreakdown[key].periodCollected += p.amount || 0;
+                        }
                     }
                 });
             }
         });
 
-        // If no period filter, periodCollected = totalCollected
-        if (!startDate) {
-            periodCollected = totalCollected;
-        }
-
-        // Calculate totals
+        // Calculate balances
         const totalBalance = totalToBePaid - totalCollected;
-        const totalDiscounts = totalExpectedFromStructure - totalToBePaid;
+
+        Object.values(classBreakdown).forEach(row => {
+            row.balance = row.totalToBePaid - row.totalCollected;
+        });
 
         // Convert breakdown to array and sort by class
         const breakdownArray = Object.values(classBreakdown).sort((a, b) => {
@@ -691,12 +725,12 @@ export const getFeeAnalytics = asyncHandler(async (req, res) => {
         });
 
         // Get unique classes for filter dropdown
-        const availableClasses = [...new Set(feeStructures.map(f => f.class))].sort();
+        const availableClasses = [...new Set(Object.keys(feeStructureMap))].sort();
 
         res.json({
             success: true,
             summary: {
-                totalExpectedFromStructure,
+                totalExpected,
                 totalToBePaid,
                 totalCollected,
                 periodCollected,
