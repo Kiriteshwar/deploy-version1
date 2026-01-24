@@ -1,0 +1,397 @@
+/* ===============================
+   ADMISSIONS PAGE STYLES
+================================ */
+
+.admission-hero {
+  padding: 120px 20px;
+  background: linear-gradient(135deg, #0f2a44, #1e6fb9);
+  color: white;
+  text-align: center;
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: auto;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.admission-hero h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+
+.admission-hero p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+/* Highlights */
+.admission-highlights {
+  padding: 80px 20px;
+}
+
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+}
+
+.highlight-card {
+  background: white;
+  padding: 32px;
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+}
+
+/* Form */
+.admission-form-section {
+  padding: 100px 20px;
+  background: #f8fafc;
+}
+
+.form-wrapper {
+  max-width: 1000px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.form-info h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.form-points {
+  margin-top: 20px;
+  list-style: none;
+  padding: 0;
+}
+
+.form-points li {
+  margin-bottom: 10px;
+}
+
+/* Form box */
+.admission-form {
+  background: white;
+  padding: 40px;
+  border-radius: 22px;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.12);
+}
+
+.admission-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.admission-form input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  margin-top: 6px;
+  font-size: 1rem;
+}
+
+.admission-form button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 14px;
+  background: #1e6fb9;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admission-form button:hover {
+  background: #155a96;
+}
+
+.form-note {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Process */
+.admission-process {
+  padding: 100px 20px;
+}
+
+.admission-process h2 {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+}
+
+.process-step {
+  background: white;
+  padding: 32px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+}
+
+.process-step span {
+  display: inline-block;
+  background: #1e6fb9;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .form-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .admission-hero h1 {
+    font-size: 2.4rem;
+  }
+}
+
+/* ===============================
+   SIMPLE FOOTER (Events / Event / Admissions)
+================================ */
+
+.ev-footer {
+  margin-top: 100px;
+  padding: 28px 20px;
+  background: linear-gradient(
+    180deg,
+    rgba(15,42,68,0.95),
+    rgba(11,31,51,0.95)
+  );
+  text-align: center;
+}
+
+.ev-footer-inner {
+  max-width: 900px;
+  margin: auto;
+  color: #cbd5e0;
+  font-size: 0.95rem;
+  backdrop-filter: blur(6px);
+}
+
+/* Copyright link */
+.ev-footer .copyright-link,
+.ev-footer .copyright-link:visited,
+.ev-footer .copyright-link:hover,
+.ev-footer .copyright-link:active {
+  color: #e5e7eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.ev-footer .copyright-link:hover {
+  text-decoration: none;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .ev-footer {
+    margin-top: 70px;
+    padding: 22px 16px;
+  }
+
+  .ev-footer-inner {
+    font-size: 0.9rem;
+  }
+}
+
+
+/* ===============================
+   ADMISSION ENQUIRY SECTION
+================================ */
+
+.admission-enquiry {
+  padding: 100px 20px;
+  background: linear-gradient(
+    180deg,
+    #f8fafc,
+    #ffffff
+  );
+}
+
+.enquiry-wrapper {
+  max-width: 1100px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+/* Left info */
+.enquiry-info h2 {
+  font-size: 2.2rem;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+.enquiry-info p {
+  color: var(--muted);
+  margin-bottom: 20px;
+  max-width: 480px;
+}
+
+.enquiry-points {
+  list-style: none;
+  padding: 0;
+}
+
+.enquiry-points li {
+  margin-bottom: 10px;
+  color: #374151;
+}
+
+/* Form */
+.enquiry-form {
+  background: white;
+  padding: 40px;
+  border-radius: 22px;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.12);
+}
+
+.enquiry-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.enquiry-form input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 1rem;
+}
+
+.enquiry-form button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px;
+  background: var(--secondary);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.enquiry-form button:hover {
+  background: #155a96;
+}
+
+.privacy-note {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Thank you state */
+.enquiry-thankyou {
+  display: none;
+  text-align: center;
+  background: white;
+  padding: 40px;
+  border-radius: 22px;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.12);
+}
+
+.enquiry-thankyou h3 {
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .enquiry-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ===== MOBILE NAV ===== */
+.mobile-nav-toggle {
+  display: none;
+  font-size: 1.6rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--primary);
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .mobile-nav-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    background: white;
+    flex-direction: column;
+    gap: 18px;
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 999;
+  }
+
+  .nav-links.show {
+    display: flex;
+  }
+}
+
+
+.admission-stats {
+  margin-top: -60px;
+  padding: 40px 20px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.stat-box {
+  background: white;
+  padding: 28px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+}
+
+.stat-box h3 {
+  font-size: 2.2rem;
+  color: var(--secondary);
+  font-weight: 800;
+}
