@@ -33,9 +33,24 @@ window.onload = () => {
         });
     });
 
-    // Setup search
-    document.getElementById('search-input').addEventListener('input', () => {
+    // Setup search button
+    document.getElementById('search-btn').addEventListener('click', () => {
         filterAndDisplayUsers();
+    });
+
+    // Search on Enter key
+    document.getElementById('search-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            filterAndDisplayUsers();
+        }
+    });
+
+    // Setup modal close
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('user-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'user-modal') {
+            closeModal();
+        }
     });
 
     async function fetchAllUsers() {
@@ -61,7 +76,7 @@ window.onload = () => {
             console.error('Error fetching users:', error);
             document.getElementById('users-table-body').innerHTML = `
                 <tr>
-                    <td colspan="5" class="no-data">Failed to load users. Please try again.</td>
+                    <td colspan="6" class="no-data">Failed to load users. Please try again.</td>
                 </tr>
             `;
         }
@@ -89,12 +104,13 @@ window.onload = () => {
             filteredUsers = filteredUsers.filter(u => u.role === activeFilter);
         }
 
-        // Filter by search term
+        // Filter by search term (name, email, phone, or roll number)
         if (searchTerm) {
             filteredUsers = filteredUsers.filter(u =>
                 u.name?.toLowerCase().includes(searchTerm) ||
                 u.email?.toLowerCase().includes(searchTerm) ||
-                u.phone?.toLowerCase().includes(searchTerm)
+                u.phone?.toLowerCase().includes(searchTerm) ||
+                u.studentInfo?.rollNumber?.toLowerCase().includes(searchTerm)
             );
         }
 
@@ -107,56 +123,31 @@ window.onload = () => {
         if (users.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="no-data">No users found.</td>
+                    <td colspan="6" class="no-data">No users found.</td>
                 </tr>
             `;
             return;
         }
 
-        tbody.innerHTML = users.map(user => `
+        tbody.innerHTML = users.map((user, index) => `
             <tr>
+                <td>${getRollNumber(user)}</td>
                 <td><strong>${escapeHtml(user.name || 'N/A')}</strong></td>
                 <td>${escapeHtml(user.email || 'N/A')}</td>
                 <td>${escapeHtml(user.phone || 'N/A')}</td>
                 <td><span class="role-badge ${user.role}">${user.role}</span></td>
-                <td class="info-cell">${getRoleDetails(user)}</td>
+                <td><button class="view-btn" onclick="showUserDetails(${index})">View Details</button></td>
             </tr>
         `).join('');
+
+        // Store users globally for modal access
+        window.currentUsers = users;
     }
 
-    function getRoleDetails(user) {
-        if (user.role === 'student' && user.studentInfo) {
-            const info = user.studentInfo;
-            const parts = [];
-            if (info.class) parts.push(`<strong>Class:</strong> ${info.class}`);
-            if (info.section) parts.push(`<strong>Section:</strong> ${info.section}`);
-            if (info.rollNumber) parts.push(`<strong>Roll:</strong> ${info.rollNumber}`);
-            if (info.guardianName) parts.push(`<strong>Guardian:</strong> ${escapeHtml(info.guardianName)}`);
-            return parts.join(' | ') || '-';
+    function getRollNumber(user) {
+        if (user.role === 'student' && user.studentInfo?.rollNumber) {
+            return user.studentInfo.rollNumber;
         }
-
-        if (user.role === 'teacher' && user.teacherInfo) {
-            const info = user.teacherInfo;
-            const parts = [];
-            if (info.subjects && info.subjects.length > 0) {
-                parts.push(`<strong>Subjects:</strong> ${info.subjects.join(', ')}`);
-            }
-            if (info.classTeacher) {
-                const ct = info.classTeacher;
-                if (ct.class || ct.section) {
-                    parts.push(`<strong>Class Teacher:</strong> ${ct.class || ''} ${ct.section || ''}`);
-                }
-            }
-            return parts.join(' | ') || '-';
-        }
-
-        if (user.role === 'admin' && user.adminInfo) {
-            const info = user.adminInfo;
-            if (info.designation) {
-                return `<strong>Designation:</strong> ${escapeHtml(info.designation)}`;
-            }
-        }
-
         return '-';
     }
 
@@ -166,4 +157,156 @@ window.onload = () => {
         div.textContent = text;
         return div.innerHTML;
     }
+
+    function closeModal() {
+        document.getElementById('user-modal').classList.remove('active');
+    }
+
+    // Make showUserDetails globally accessible
+    window.showUserDetails = function (index) {
+        const user = window.currentUsers[index];
+        if (!user) return;
+
+        document.getElementById('modal-title').textContent = user.name || 'User Details';
+
+        let html = `
+            <div class="section-title">Basic Information</div>
+            <div class="detail-row">
+                <span class="detail-label">Name:</span>
+                <span class="detail-value">${escapeHtml(user.name) || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value">${escapeHtml(user.email) || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Phone:</span>
+                <span class="detail-value">${escapeHtml(user.phone) || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Role:</span>
+                <span class="detail-value"><span class="role-badge ${user.role}">${user.role}</span></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value">${user.isActive !== false ? '✅ Active' : '❌ Inactive'}</span>
+            </div>
+        `;
+
+        // Student-specific info
+        if (user.role === 'student' && user.studentInfo) {
+            const info = user.studentInfo;
+            html += `
+                <div class="section-title">Student Information</div>
+                <div class="detail-row">
+                    <span class="detail-label">Roll Number:</span>
+                    <span class="detail-value">${escapeHtml(info.rollNumber) || 'N/A'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Class:</span>
+                    <span class="detail-value">${escapeHtml(info.class) || 'N/A'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Section:</span>
+                    <span class="detail-value">${escapeHtml(info.section) || 'N/A'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Guardian Name:</span>
+                    <span class="detail-value">${escapeHtml(info.guardianName) || 'N/A'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Guardian Phone:</span>
+                    <span class="detail-value">${escapeHtml(info.guardianPhone) || 'N/A'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Address:</span>
+                    <span class="detail-value">${escapeHtml(info.address) || 'N/A'}</span>
+                </div>
+            `;
+        }
+
+        // Teacher-specific info
+        if (user.role === 'teacher' && user.teacherInfo) {
+            const info = user.teacherInfo;
+            html += `
+                <div class="section-title">Teacher Information</div>
+            `;
+            if (info.subjects && info.subjects.length > 0) {
+                html += `
+                    <div class="detail-row">
+                        <span class="detail-label">Subjects:</span>
+                        <span class="detail-value">${info.subjects.join(', ')}</span>
+                    </div>
+                `;
+            }
+            if (info.classTeacher) {
+                html += `
+                    <div class="detail-row">
+                        <span class="detail-label">Class Teacher:</span>
+                        <span class="detail-value">${info.classTeacher.class || ''} ${info.classTeacher.section || ''}</span>
+                    </div>
+                `;
+            }
+            if (info.qualifications && info.qualifications.length > 0) {
+                html += `
+                    <div class="detail-row">
+                        <span class="detail-label">Qualifications:</span>
+                        <span class="detail-value">${info.qualifications.map(q => q.degree).join(', ')}</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Admin-specific info
+        if (user.role === 'admin' && user.adminInfo) {
+            const info = user.adminInfo;
+            html += `
+                <div class="section-title">Admin Information</div>
+                <div class="detail-row">
+                    <span class="detail-label">Designation:</span>
+                    <span class="detail-value">${escapeHtml(info.designation) || 'N/A'}</span>
+                </div>
+            `;
+            if (info.permissions && info.permissions.length > 0) {
+                html += `
+                    <div class="detail-row">
+                        <span class="detail-label">Permissions:</span>
+                        <span class="detail-value">${info.permissions.join(', ')}</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Additional info
+        if (user.dateOfBirth || user.gender || user.joinDate) {
+            html += `<div class="section-title">Additional Information</div>`;
+            if (user.dateOfBirth) {
+                html += `
+                    <div class="detail-row">
+                        <span class="detail-label">Date of Birth:</span>
+                        <span class="detail-value">${new Date(user.dateOfBirth).toLocaleDateString()}</span>
+                    </div>
+                `;
+            }
+            if (user.gender) {
+                html += `
+                    <div class="detail-row">
+                        <span class="detail-label">Gender:</span>
+                        <span class="detail-value">${escapeHtml(user.gender)}</span>
+                    </div>
+                `;
+            }
+            if (user.joinDate) {
+                html += `
+                    <div class="detail-row">
+                        <span class="detail-label">Join Date:</span>
+                        <span class="detail-value">${new Date(user.joinDate).toLocaleDateString()}</span>
+                    </div>
+                `;
+            }
+        }
+
+        document.getElementById('modal-body').innerHTML = html;
+        document.getElementById('user-modal').classList.add('active');
+    };
 };
