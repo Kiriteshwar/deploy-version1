@@ -340,11 +340,13 @@ window.onload = () => {
     }
 
     // Global function for View Details
-    window.showUserDetails = function (index) {
+    window.showUserDetails = async function (index) {
         const user = window.currentUsers[index];
         if (!user) return;
 
         document.getElementById('modal-title').textContent = user.name || 'User Details';
+        document.getElementById('modal-body').innerHTML = '<div class="no-data">Loading...</div>';
+        document.getElementById('user-modal').classList.add('active');
 
         let html = `
             <div class="section-title">Basic Information</div>
@@ -366,6 +368,31 @@ window.onload = () => {
                 <div class="detail-row"><span class="detail-label">Guardian Phone:</span><span class="detail-value">${i.guardianPhone || 'N/A'}</span></div>
                 <div class="detail-row"><span class="detail-label">Address:</span><span class="detail-value">${escapeHtml(i.address) || 'N/A'}</span></div>
             `;
+
+            // Fetch fee details for student
+            try {
+                const feeResponse = await fetch(`/api/admin/fees/student/${user._id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const feeData = await feeResponse.json();
+
+                if (feeData.success) {
+                    const totalFromStructure = feeData.feeStructure?.totalFee || 0;
+                    const discount = user.discount || 0;
+                    const amountPaid = feeData.totalPaid || 0;
+                    const remaining = (totalFromStructure - discount) - amountPaid;
+
+                    html += `
+                        <div class="section-title">Fee Details</div>
+                        <div class="detail-row"><span class="detail-label">Fee (Structure):</span><span class="detail-value" style="font-weight:600">${formatCurrency(totalFromStructure)}</span></div>
+                        <div class="detail-row"><span class="detail-label">Discount Given:</span><span class="detail-value" style="color:#4caf50">${formatCurrency(discount)}</span></div>
+                        <div class="detail-row"><span class="detail-label">Amount Paid:</span><span class="detail-value" style="color:#1976d2">${formatCurrency(amountPaid)}</span></div>
+                        <div class="detail-row"><span class="detail-label">Remaining:</span><span class="detail-value" style="color:${remaining > 0 ? '#c62828' : '#2e7d32'}; font-weight:600">${formatCurrency(remaining)}</span></div>
+                    `;
+                }
+            } catch (err) {
+                console.error('Error fetching fee details:', err);
+            }
         }
 
         if (user.role === 'teacher' && user.teacherInfo) {
@@ -388,6 +415,5 @@ window.onload = () => {
         `;
 
         document.getElementById('modal-body').innerHTML = html;
-        document.getElementById('user-modal').classList.add('active');
     };
 };
