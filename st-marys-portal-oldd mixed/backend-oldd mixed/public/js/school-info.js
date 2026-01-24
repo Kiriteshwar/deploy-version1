@@ -45,12 +45,40 @@ window.onload = () => {
         }
     });
 
-    // Setup modal close
+    // Setup modal close for View Details
     document.getElementById('modal-close').addEventListener('click', closeModal);
     document.getElementById('user-modal').addEventListener('click', (e) => {
         if (e.target.id === 'user-modal') {
             closeModal();
         }
+    });
+
+    // Setup Add User modal
+    document.getElementById('add-user-btn').addEventListener('click', openAddUserModal);
+    document.getElementById('add-modal-close').addEventListener('click', closeAddUserModal);
+    document.getElementById('add-user-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'add-user-modal') {
+            closeAddUserModal();
+        }
+    });
+
+    // Role selection - show/hide relevant fields
+    document.getElementById('new-role').addEventListener('change', (e) => {
+        const role = e.target.value;
+        document.querySelectorAll('.role-fields').forEach(el => el.classList.remove('active'));
+        if (role === 'student') {
+            document.getElementById('student-fields').classList.add('active');
+        } else if (role === 'teacher') {
+            document.getElementById('teacher-fields').classList.add('active');
+        } else if (role === 'admin') {
+            document.getElementById('admin-fields').classList.add('active');
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('add-user-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await addNewUser();
     });
 
     async function fetchAllUsers() {
@@ -158,8 +186,97 @@ window.onload = () => {
         return div.innerHTML;
     }
 
+    // Format date as DD/MM/YYYY
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
     function closeModal() {
         document.getElementById('user-modal').classList.remove('active');
+    }
+
+    function openAddUserModal() {
+        document.getElementById('add-user-form').reset();
+        document.querySelectorAll('.role-fields').forEach(el => el.classList.remove('active'));
+        document.getElementById('add-user-modal').classList.add('active');
+    }
+
+    function closeAddUserModal() {
+        document.getElementById('add-user-modal').classList.remove('active');
+    }
+
+    async function addNewUser() {
+        const role = document.getElementById('new-role').value;
+        const userData = {
+            name: document.getElementById('new-name').value.trim(),
+            email: document.getElementById('new-email').value.trim(),
+            phone: document.getElementById('new-phone').value.trim(),
+            password: document.getElementById('new-password').value,
+            role: role
+        };
+
+        // Add role-specific data
+        if (role === 'student') {
+            userData.studentInfo = {
+                class: document.getElementById('new-class').value.trim(),
+                section: document.getElementById('new-section').value.trim(),
+                rollNumber: document.getElementById('new-roll').value.trim(),
+                guardianName: document.getElementById('new-guardian').value.trim(),
+                guardianPhone: document.getElementById('new-guardian-phone').value.trim(),
+                address: document.getElementById('new-address').value.trim()
+            };
+        } else if (role === 'teacher') {
+            const subjects = document.getElementById('new-subjects').value
+                .split(',')
+                .map(s => s.trim())
+                .filter(s => s);
+            userData.teacherInfo = {
+                subjects: subjects,
+                classTeacher: {
+                    class: document.getElementById('new-ct-class').value.trim(),
+                    section: document.getElementById('new-ct-section').value.trim()
+                }
+            };
+        } else if (role === 'admin') {
+            userData.adminInfo = {
+                designation: document.getElementById('new-designation').value.trim()
+            };
+        }
+
+        try {
+            document.getElementById('submit-user-btn').disabled = true;
+            document.getElementById('submit-user-btn').textContent = 'Adding...';
+
+            const response = await fetch('/api/admin/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(userData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                alert('User added successfully!');
+                closeAddUserModal();
+                fetchAllUsers(); // Refresh the list
+            } else {
+                alert(result.message || 'Failed to add user');
+            }
+        } catch (error) {
+            console.error('Error adding user:', error);
+            alert('Failed to add user. Please try again.');
+        } finally {
+            document.getElementById('submit-user-btn').disabled = false;
+            document.getElementById('submit-user-btn').textContent = 'Add User';
+        }
     }
 
     // Make showUserDetails globally accessible
@@ -278,33 +395,30 @@ window.onload = () => {
         }
 
         // Additional info
-        if (user.dateOfBirth || user.gender || user.joinDate) {
-            html += `<div class="section-title">Additional Information</div>`;
-            if (user.dateOfBirth) {
-                html += `
-                    <div class="detail-row">
-                        <span class="detail-label">Date of Birth:</span>
-                        <span class="detail-value">${new Date(user.dateOfBirth).toLocaleDateString()}</span>
-                    </div>
-                `;
-            }
-            if (user.gender) {
-                html += `
-                    <div class="detail-row">
-                        <span class="detail-label">Gender:</span>
-                        <span class="detail-value">${escapeHtml(user.gender)}</span>
-                    </div>
-                `;
-            }
-            if (user.joinDate) {
-                html += `
-                    <div class="detail-row">
-                        <span class="detail-label">Join Date:</span>
-                        <span class="detail-value">${new Date(user.joinDate).toLocaleDateString()}</span>
-                    </div>
-                `;
-            }
+        html += `<div class="section-title">Additional Information</div>`;
+
+        if (user.dateOfBirth) {
+            html += `
+                <div class="detail-row">
+                    <span class="detail-label">Date of Birth:</span>
+                    <span class="detail-value">${formatDate(user.dateOfBirth)}</span>
+                </div>
+            `;
         }
+        if (user.gender) {
+            html += `
+                <div class="detail-row">
+                    <span class="detail-label">Gender:</span>
+                    <span class="detail-value">${escapeHtml(user.gender)}</span>
+                </div>
+            `;
+        }
+        html += `
+            <div class="detail-row">
+                <span class="detail-label">Join Date:</span>
+                <span class="detail-value">${formatDate(user.joinDate)}</span>
+            </div>
+        `;
 
         document.getElementById('modal-body').innerHTML = html;
         document.getElementById('user-modal').classList.add('active');

@@ -28,9 +28,14 @@
             color: #333;
         }
 
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
         .back-btn {
             padding: 10px 20px;
-            background-color: #1976d2;
+            background-color: #757575;
             color: white;
             border: none;
             border-radius: 6px;
@@ -40,7 +45,22 @@
         }
 
         .back-btn:hover {
-            background-color: #1565c0;
+            background-color: #616161;
+        }
+
+        .add-user-btn {
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .add-user-btn:hover {
+            background-color: #43a047;
         }
 
         .filters-container {
@@ -245,9 +265,9 @@
         .modal-content {
             background: white;
             border-radius: 12px;
-            max-width: 500px;
+            max-width: 550px;
             width: 90%;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
@@ -313,6 +333,82 @@
             border-bottom: 2px solid #e3f2fd;
         }
 
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .role-fields {
+            display: none;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .role-fields.active {
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #43a047;
+        }
+
+        .submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
         @media (max-width: 768px) {
             .users-table-container {
                 overflow-x: auto;
@@ -325,6 +421,11 @@
             .search-box {
                 min-width: 100%;
             }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
         }
     </style>
 </head>
@@ -333,7 +434,10 @@
     <div class="school-info-container">
         <div class="page-header">
             <h1>🏫 School Info</h1>
-            <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+            <div class="header-buttons">
+                <button class="add-user-btn" id="add-user-btn">➕ Add User</button>
+                <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back</button>
+            </div>
         </div>
 
         <div class="stats-container">
@@ -398,6 +502,113 @@
             </div>
             <div class="modal-body" id="modal-body">
                 <!-- User details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal-overlay" id="add-user-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New User</h2>
+                <button class="modal-close" id="add-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-user-form">
+                    <div class="section-title">Basic Information</div>
+
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="new-name" required placeholder="Enter full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="new-email" required placeholder="Enter email address">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone *</label>
+                            <input type="tel" id="new-phone" required placeholder="Enter phone number">
+                        </div>
+                        <div class="form-group">
+                            <label>Password *</label>
+                            <input type="password" id="new-password" required placeholder="Enter password">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Role *</label>
+                        <select id="new-role" required>
+                            <option value="">Select Role</option>
+                            <option value="student">Student</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <!-- Student Fields -->
+                    <div class="role-fields" id="student-fields">
+                        <div class="section-title">Student Information</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Class *</label>
+                                <input type="text" id="new-class" placeholder="e.g. X, IX">
+                            </div>
+                            <div class="form-group">
+                                <label>Section *</label>
+                                <input type="text" id="new-section" placeholder="e.g. A, B">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Roll Number *</label>
+                            <input type="text" id="new-roll" placeholder="Enter roll number">
+                        </div>
+                        <div class="form-group">
+                            <label>Guardian Name</label>
+                            <input type="text" id="new-guardian" placeholder="Enter guardian name">
+                        </div>
+                        <div class="form-group">
+                            <label>Guardian Phone</label>
+                            <input type="tel" id="new-guardian-phone" placeholder="Enter guardian phone">
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input type="text" id="new-address" placeholder="Enter address">
+                        </div>
+                    </div>
+
+                    <!-- Teacher Fields -->
+                    <div class="role-fields" id="teacher-fields">
+                        <div class="section-title">Teacher Information</div>
+                        <div class="form-group">
+                            <label>Subjects (comma separated)</label>
+                            <input type="text" id="new-subjects" placeholder="e.g. Mathematics, Physics">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Class Teacher Of (Class)</label>
+                                <input type="text" id="new-ct-class" placeholder="e.g. X">
+                            </div>
+                            <div class="form-group">
+                                <label>Class Teacher Of (Section)</label>
+                                <input type="text" id="new-ct-section" placeholder="e.g. A">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Fields -->
+                    <div class="role-fields" id="admin-fields">
+                        <div class="section-title">Admin Information</div>
+                        <div class="form-group">
+                            <label>Designation</label>
+                            <input type="text" id="new-designation" placeholder="e.g. Principal, Coordinator">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submit-user-btn">Add User</button>
+                </form>
             </div>
         </div>
     </div>
