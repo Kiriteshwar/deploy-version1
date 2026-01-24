@@ -563,6 +563,39 @@ window.onload = () => {
         }
     }
 
+    function excelDOBToISO(value) {
+        // Case 1: Excel serial number
+        if (typeof value === 'number') {
+            const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+            const date = new Date(excelEpoch.getTime() + value * 86400000);
+            return date.toISOString();
+        }
+
+        // Case 2: dd-mm-yy OR dd-mm-yyyy string
+        if (typeof value === 'string') {
+            const parts = value.split('-');
+            if (parts.length === 3) {
+                let [dd, mm, yy] = parts;
+
+                // Convert 2-digit year → 4-digit year
+                if (yy.length === 2) {
+                    yy = Number(yy) > 30 ? `19${yy}` : `20${yy}`;
+                }
+
+                const date = new Date(Date.UTC(yy, mm - 1, dd));
+                return date.toISOString();
+            }
+        }
+
+        // Case 3: JS Date object
+        if (value instanceof Date) {
+            return value.toISOString();
+        }
+
+        return null;
+    }
+
+
     async function processExcelFile(file) {
         try {
             const data = await file.arrayBuffer();
@@ -579,13 +612,18 @@ window.onload = () => {
             if (!confirm(`Found ${jsonData.length} rows. Proceed with import?`)) return;
 
             // Send to backend
+            const transformedUsers = jsonData.map(row => ({
+                ...row,
+                dateOfBirth: excelDOBToISO(row.dateOfBirth)
+            }));
+
             const response = await fetch('/api/admin/users/bulk', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ users: jsonData })
+                body: JSON.stringify({ users: transformedUsers })
             });
 
             const result = await response.json();
