@@ -508,6 +508,41 @@
 
             <div class="action-buttons">
                 <button class="add-user-btn" id="add-user-btn">➕ Add User</button>
+                <button class="add-user-btn" id="excel-import-btn" style="background:#ff9800;">📊 Import Excel</button>
+                <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" style="display:none;">
+            </div>
+
+            <!-- Excel Format Note -->
+            <div id="excel-format-note"
+                style="display:none; background:#fff3e0; border:1px solid #ff9800; border-radius:8px; padding:16px; margin-bottom:20px;">
+                <h4 style="margin:0 0 12px 0; color:#e65100;">📋 Excel Import Format</h4>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">Your Excel file must have headers in the first row.
+                    Required columns are marked with *</p>
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                    <div>
+                        <strong>Students:</strong>
+                        <ul style="margin:5px 0; padding-left:20px; font-size:0.85rem;">
+                            <li>name* | email* | phone* | password* | role* (student)</li>
+                            <li>class* | section* | rollNumber*</li>
+                            <li>guardianName | fatherGuardianPhone | motherName | motherPhone</li>
+                            <li>address | dateOfBirth (YYYY-MM-DD) | religion | caste | subCaste</li>
+                            <li>identificationMark1 | identificationMark2</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>Teachers:</strong>
+                        <ul style="margin:5px 0; padding-left:20px; font-size:0.85rem;">
+                            <li>name* | email* | phone* | password* | role* (teacher)</li>
+                            <li>subjects (comma-separated) | salary</li>
+                            <li>classTeacherClass | classTeacherSection</li>
+                        </ul>
+                    </div>
+                </div>
+                <button id="close-excel-note"
+                    style="margin-top:10px; padding:6px 12px; background:#e65100; color:white; border:none; border-radius:4px; cursor:pointer;">Close</button>
+                <button id="download-template"
+                    style="margin-top:10px; margin-left:10px; padding:6px 12px; background:#4caf50; color:white; border:none; border-radius:4px; cursor:pointer;">📥
+                    Download Template</button>
             </div>
 
             <div class="filters-container">
@@ -613,6 +648,11 @@
                 <h2 id="modal-title">User Details</h2><button class="modal-close" id="modal-close">&times;</button>
             </div>
             <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer"
+                style="padding:16px 20px; border-top:1px solid #eee; display:flex; justify-content:flex-end; gap:10px;">
+                <button class="submit-btn" id="print-details-btn"
+                    style="width:auto; background:#1976d2; padding:10px 20px;">🖨️ Print Details</button>
+            </div>
         </div>
     </div>
 

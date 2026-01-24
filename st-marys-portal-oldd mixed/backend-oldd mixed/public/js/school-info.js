@@ -97,6 +97,34 @@ window.onload = () => {
         await addNewUser();
     });
 
+    // ========== PRINT BUTTON ==========
+    document.getElementById('print-details-btn').addEventListener('click', printUserDetails);
+
+    // ========== EXCEL IMPORT ==========
+    document.getElementById('excel-import-btn').addEventListener('click', () => {
+        document.getElementById('excel-format-note').style.display = 'block';
+    });
+    document.getElementById('close-excel-note').addEventListener('click', () => {
+        document.getElementById('excel-format-note').style.display = 'none';
+    });
+    document.getElementById('download-template').addEventListener('click', downloadExcelTemplate);
+    document.getElementById('excel-file-input').addEventListener('change', handleExcelUpload);
+
+    // Click Import Excel opens file picker after viewing instructions
+    document.getElementById('excel-format-note').addEventListener('click', (e) => {
+        if (e.target.id === 'download-template' || e.target.id === 'close-excel-note') return;
+        if (e.target.tagName === 'BUTTON' && e.target.textContent.includes('Import')) {
+            document.getElementById('excel-file-input').click();
+        }
+    });
+
+    // Add "Choose File" button in note
+    const importBtn = document.createElement('button');
+    importBtn.textContent = '📤 Choose Excel File';
+    importBtn.style.cssText = 'margin-top:10px; margin-left:10px; padding:6px 12px; background:#1976d2; color:white; border:none; border-radius:4px; cursor:pointer;';
+    importBtn.addEventListener('click', () => document.getElementById('excel-file-input').click());
+    document.getElementById('excel-format-note').appendChild(importBtn);
+
     // ========== FEES TAB ==========
 
     // Period filter buttons
@@ -449,4 +477,136 @@ window.onload = () => {
 
         document.getElementById('modal-body').innerHTML = html;
     };
+
+    // Print user details function
+    function printUserDetails() {
+        const modalBody = document.getElementById('modal-body');
+        const title = document.getElementById('modal-title').textContent;
+
+        // Create print-friendly content (exclude fee details)
+        let content = modalBody.innerHTML;
+        // Remove fee details section if present
+        const feeStart = content.indexOf('<div class="section-title">Fee Details');
+        if (feeStart !== -1) {
+            const nextSection = content.indexOf('<div class="section-title">', feeStart + 1);
+            if (nextSection !== -1) {
+                content = content.substring(0, feeStart) + content.substring(nextSection);
+            } else {
+                content = content.substring(0, feeStart);
+            }
+        }
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>${title} - Print</title>
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; max-width: 800px; margin: auto; }
+                    .section-title { font-weight: 700; color: #1976d2; margin: 20px 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #e3f2fd; font-size: 1.1rem; }
+                    .section-title:first-child { margin-top: 0; }
+                    .detail-row { display: flex; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+                    .detail-label { font-weight: 600; color: #555; min-width: 180px; }
+                    .detail-value { color: #222; flex: 1; }
+                    .role-badge { padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 500; text-transform: capitalize; }
+                    .role-badge.student { background-color: #e8f5e9; color: #2e7d32; }
+                    .role-badge.teacher { background-color: #fff3e0; color: #e65100; }
+                    .role-badge.admin { background-color: #e3f2fd; color: #1565c0; }
+                    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+                    .header-info { text-align: center; color: #666; margin-bottom: 30px; }
+                    @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+                </style>
+            </head>
+            <body>
+                <h1>St. Mary's School</h1>
+                <div class="header-info">User Details: ${title}</div>
+                ${content}
+                <script>window.onload = function() { window.print(); window.close(); }</script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+
+    // Download Excel template
+    function downloadExcelTemplate() {
+        // CSV format template
+        const studentHeaders = 'name,email,phone,password,role,class,section,rollNumber,guardianName,fatherGuardianPhone,motherName,motherPhone,address,dateOfBirth,religion,caste,subCaste,identificationMark1,identificationMark2';
+        const teacherHeaders = 'name,email,phone,password,role,subjects,salary,classTeacherClass,classTeacherSection';
+
+        const templateContent = `STUDENT TEMPLATE\n${studentHeaders}\nJohn Doe,john@example.com,9876543210,password123,student,X,A,STU001,Father Name,9876543210,Mother Name,9876543211,123 Main Street,2010-05-15,Hindu,General,,Mole on left arm,\n\nTEACHER TEMPLATE\n${teacherHeaders}\nJane Teacher,jane@example.com,9876543212,password123,teacher,"Math,Science",50000,X,A`;
+
+        const blob = new Blob([templateContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'user_import_template.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Handle Excel upload
+    async function handleExcelUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Check if SheetJS is loaded
+        if (typeof XLSX === 'undefined') {
+            // Load SheetJS dynamically
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+            script.onload = () => processExcelFile(file);
+            document.head.appendChild(script);
+        } else {
+            processExcelFile(file);
+        }
+    }
+
+    async function processExcelFile(file) {
+        try {
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+            if (jsonData.length === 0) {
+                alert('No data found in the Excel file');
+                return;
+            }
+
+            // Confirm import
+            if (!confirm(`Found ${jsonData.length} rows. Proceed with import?`)) return;
+
+            // Send to backend
+            const response = await fetch('/api/admin/users/bulk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ users: jsonData })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                let msg = `Import Complete!\n✅ ${result.results.success} users added\n❌ ${result.results.failed} failed`;
+                if (result.results.errors.length > 0) {
+                    msg += '\n\nErrors:\n' + result.results.errors.slice(0, 5).map(e => `Row ${e.row}: ${e.error}`).join('\n');
+                    if (result.results.errors.length > 5) msg += `\n... and ${result.results.errors.length - 5} more`;
+                }
+                alert(msg);
+                fetchAllUsers();
+            } else {
+                alert('Import failed: ' + result.message);
+            }
+        } catch (error) {
+            alert('Error processing file: ' + error.message);
+        }
+
+        // Reset file input
+        document.getElementById('excel-file-input').value = '';
+        document.getElementById('excel-format-note').style.display = 'none';
+    }
 };

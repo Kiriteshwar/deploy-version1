@@ -15,6 +15,7 @@ import {
     addUser,
     updateUser,
     deleteUser,
+    bulkImportUsers,
     // Fee analytics
     getFeeAnalytics
 } from '../controllers/adminController.js';
@@ -43,6 +44,7 @@ router.get('/fee-analytics', getFeeAnalytics);
 // User management routes
 router.get('/users', getUsers);
 router.post('/users', addUser);
+router.post('/users/bulk', bulkImportUsers);
 router.put('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);
 

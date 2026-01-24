@@ -571,6 +571,107 @@ export const deleteUser = asyncHandler(async (req, res) => {
     res.json({ success: true });
 });
 
+// @desc    Bulk import users from array
+// @route   POST /api/admin/users/bulk
+// @access  Private (Admin only)
+export const bulkImportUsers = asyncHandler(async (req, res) => {
+    const { users } = req.body;
+
+    if (!users || !Array.isArray(users) || users.length === 0) {
+        return res.status(400).json({ success: false, message: 'No users data provided' });
+    }
+
+    const results = { success: 0, failed: 0, errors: [] };
+    const bcrypt = (await import('bcryptjs')).default;
+
+    for (let i = 0; i < users.length; i++) {
+        const row = users[i];
+        try {
+            // Validate required fields
+            if (!row.name || !row.email || !row.phone || !row.password || !row.role) {
+                results.failed++;
+                results.errors.push({ row: i + 2, error: 'Missing required fields (name, email, phone, password, role)' });
+                continue;
+            }
+
+            // Check if email already exists
+            const existingUser = await User.findOne({ email: row.email.toLowerCase() });
+            if (existingUser) {
+                results.failed++;
+                results.errors.push({ row: i + 2, error: `Email ${row.email} already exists` });
+                continue;
+            }
+
+            // Hash password
+            const hashedPassword = await bcrypt.hash(row.password, 10);
+
+            const userData = {
+                name: row.name,
+                email: row.email.toLowerCase(),
+                phone: row.phone,
+                password: hashedPassword,
+                role: row.role.toLowerCase()
+            };
+
+            // Handle student info
+            if (userData.role === 'student') {
+                if (!row.class || !row.section || !row.rollNumber) {
+                    results.failed++;
+                    results.errors.push({ row: i + 2, error: 'Students require class, section, and rollNumber' });
+                    continue;
+                }
+                userData.studentInfo = {
+                    class: row.class,
+                    section: row.section,
+                    rollNumber: row.rollNumber,
+                    guardianName: row.guardianName || '',
+                    fatherGuardianPhone: row.fatherGuardianPhone || row.phone,
+                    motherName: row.motherName || '',
+                    motherPhone: row.motherPhone || '',
+                    address: row.address || '',
+                    dateOfBirth: row.dateOfBirth ? new Date(row.dateOfBirth) : null,
+                    religion: row.religion || '',
+                    caste: row.caste || '',
+                    subCaste: row.subCaste || '',
+                    identificationMark1: row.identificationMark1 || '',
+                    identificationMark2: row.identificationMark2 || ''
+                };
+            }
+
+            // Handle teacher info
+            if (userData.role === 'teacher') {
+                userData.teacherInfo = {
+                    subjects: row.subjects ? row.subjects.split(',').map(s => s.trim()) : [],
+                    salary: parseInt(row.salary) || 0,
+                    classTeacher: {
+                        class: row.classTeacherClass || '',
+                        section: row.classTeacherSection || ''
+                    }
+                };
+            }
+
+            // Handle admin info
+            if (userData.role === 'admin') {
+                userData.adminInfo = {
+                    designation: row.designation || ''
+                };
+            }
+
+            await User.create(userData);
+            results.success++;
+        } catch (error) {
+            results.failed++;
+            results.errors.push({ row: i + 2, error: error.message });
+        }
+    }
+
+    res.json({
+        success: true,
+        message: `Imported ${results.success} users, ${results.failed} failed`,
+        results
+    });
+});
+
 // @desc    Get fee analytics for dashboard
 // @route   GET /api/admin/fee-analytics
 // @access  Private (Admin only)
