@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema({
             guardianPhone: String,
             address: String
         },
-        required: function() { return this.role === 'student'; }
+        required: function () { return this.role === 'student'; }
     },
     // Flat discount amount (applies only if role is student)
     discount: {
@@ -76,9 +76,13 @@ const userSchema = new mongoose.Schema({
             noticeSections: {
                 type: [String],
                 default: []
+            },
+            salary: {
+                type: Number,
+                default: 0
             }
         },
-        required: function() { return this.role === 'teacher'; }
+        required: function () { return this.role === 'teacher'; }
     },
 
     // Admin specific fields
@@ -87,7 +91,7 @@ const userSchema = new mongoose.Schema({
             designation: String,
             permissions: [String]
         },
-        required: function() { return this.role === 'admin'; }
+        required: function () { return this.role === 'admin'; }
     },
 
     // Common optional fields
@@ -106,7 +110,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Hash password before saving
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
     try {
         // Handle password hashing
         if (this.isModified('password')) {
@@ -132,7 +136,7 @@ userSchema.pre('save', async function(next) {
 });
 
 // Method to compare password
-userSchema.methods.matchPassword = async function(enteredPassword) {
+userSchema.methods.matchPassword = async function (enteredPassword) {
     try {
         if (!this.password) {
             throw new Error('Password field not selected');
@@ -145,7 +149,7 @@ userSchema.methods.matchPassword = async function(enteredPassword) {
 };
 
 // Generate password reset token
-userSchema.methods.createPasswordResetToken = function() {
+userSchema.methods.createPasswordResetToken = function () {
     const resetToken = crypto.randomBytes(32).toString('hex');
     this.passwordResetToken = crypto
         .createHash('sha256')
@@ -156,12 +160,12 @@ userSchema.methods.createPasswordResetToken = function() {
 };
 
 // Check if account is locked
-userSchema.methods.isLocked = function() {
+userSchema.methods.isLocked = function () {
     return !!(this.lockUntil && this.lockUntil > Date.now());
 };
 
 // Increment login attempts
-userSchema.methods.incrementLoginAttempts = async function() {
+userSchema.methods.incrementLoginAttempts = async function () {
     if (this.lockUntil && this.lockUntil < Date.now()) {
         return await this.updateOne({
             $set: { loginAttempts: 1 },
@@ -178,7 +182,7 @@ userSchema.methods.incrementLoginAttempts = async function() {
 };
 
 // Reset login attempts
-userSchema.methods.resetLoginAttempts = function() {
+userSchema.methods.resetLoginAttempts = function () {
     return this.updateOne({
         $set: { loginAttempts: 0 },
         $unset: { lockUntil: 1 }

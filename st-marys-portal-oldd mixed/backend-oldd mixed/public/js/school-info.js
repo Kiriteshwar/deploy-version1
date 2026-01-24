@@ -307,7 +307,8 @@ window.onload = () => {
                 classTeacher: {
                     class: document.getElementById('new-ct-class').value.trim(),
                     section: document.getElementById('new-ct-section').value.trim()
-                }
+                },
+                salary: parseInt(document.getElementById('new-salary').value) || 0
             };
         } else if (role === 'admin') {
             userData.adminInfo = { designation: document.getElementById('new-designation').value.trim() };
@@ -400,6 +401,7 @@ window.onload = () => {
             html += `<div class="section-title">Teacher Information</div>`;
             if (i.subjects?.length) html += `<div class="detail-row"><span class="detail-label">Subjects:</span><span class="detail-value">${i.subjects.join(', ')}</span></div>`;
             if (i.classTeacher) html += `<div class="detail-row"><span class="detail-label">Class Teacher:</span><span class="detail-value">${i.classTeacher.class || ''} ${i.classTeacher.section || ''}</span></div>`;
+            html += `<div class="detail-row"><span class="detail-label">Salary:</span><span class="detail-value" style="color:#1976d2; font-weight:600">${formatCurrency(i.salary || 0)}</span></div>`;
         }
 
         if (user.role === 'admin' && user.adminInfo) {
