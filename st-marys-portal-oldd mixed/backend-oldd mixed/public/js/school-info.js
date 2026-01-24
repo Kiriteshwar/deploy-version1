@@ -20,7 +20,7 @@ window.onload = () => {
 
     // Store data
     let allUsers = [];
-    let currentFeeFilters = { period: 'all', class: '' };
+    let currentFeeFilters = { period: 'all', class: '', section: '' };
 
     // Initialize
     fetchAllUsers();
@@ -115,6 +115,12 @@ window.onload = () => {
         fetchFeeAnalytics();
     });
 
+    // Section filter dropdown
+    document.getElementById('section-filter').addEventListener('change', (e) => {
+        currentFeeFilters.section = e.target.value;
+        fetchFeeAnalytics();
+    });
+
     // ========== FUNCTIONS ==========
 
     async function fetchAllUsers() {
@@ -180,6 +186,7 @@ window.onload = () => {
             const params = new URLSearchParams();
             if (currentFeeFilters.period && currentFeeFilters.period !== 'all') params.append('period', currentFeeFilters.period);
             if (currentFeeFilters.class) params.append('class', currentFeeFilters.class);
+            if (currentFeeFilters.section) params.append('section', currentFeeFilters.section);
 
             const response = await fetch(`/api/admin/fee-analytics?${params}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -190,6 +197,7 @@ window.onload = () => {
                 updateFeeStats(data.summary);
                 displayFeeBreakdown(data.breakdown);
                 populateClassFilter(data.availableClasses);
+                populateSectionFilter(data.availableSections);
             } else {
                 console.error('Fee analytics error:', data.message);
             }
@@ -228,7 +236,14 @@ window.onload = () => {
         const select = document.getElementById('class-filter');
         const currentValue = select.value;
         select.innerHTML = '<option value="">All Classes</option>' +
-            classes.map(c => `<option value="${c}" ${c === currentValue ? 'selected' : ''}>${c}</option>`).join('');
+            (classes || []).map(c => `<option value="${c}" ${c === currentValue ? 'selected' : ''}>${c}</option>`).join('');
+    }
+
+    function populateSectionFilter(sections) {
+        const select = document.getElementById('section-filter');
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">All Sections</option>' +
+            (sections || []).map(s => `<option value="${s}" ${s === currentValue ? 'selected' : ''}>${s}</option>`).join('');
     }
 
     function formatCurrency(amount) {

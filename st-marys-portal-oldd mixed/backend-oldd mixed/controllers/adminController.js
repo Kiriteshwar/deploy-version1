@@ -724,8 +724,9 @@ export const getFeeAnalytics = asyncHandler(async (req, res) => {
             return a.class.localeCompare(b.class);
         });
 
-        // Get unique classes for filter dropdown
-        const availableClasses = [...new Set(Object.keys(feeStructureMap))].sort();
+        // Get unique classes and sections from students (not fee structures)
+        const availableClasses = [...new Set(students.map(s => s.studentInfo?.class).filter(Boolean))].sort();
+        const availableSections = [...new Set(students.map(s => s.studentInfo?.section).filter(Boolean))].sort();
 
         res.json({
             success: true,
@@ -740,6 +741,7 @@ export const getFeeAnalytics = asyncHandler(async (req, res) => {
             },
             breakdown: breakdownArray,
             availableClasses,
+            availableSections,
             filters: {
                 class: className || null,
                 section: section || null,
