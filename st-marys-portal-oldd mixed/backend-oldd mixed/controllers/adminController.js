@@ -10,7 +10,7 @@ import bcrypt from 'bcryptjs';
 // @access  Private (Admin only)
 export const getTimetable = asyncHandler(async (req, res) => {
     const { class: className, section, dayOfWeek } = req.query;
-    
+
     const query = {};
     if (className) query.class = className;
     if (section) query.section = section;
@@ -49,8 +49,8 @@ export const getAvailableTeachers = asyncHandler(async (req, res) => {
     // Find all teachers except those who are busy or unavailable
     const availableTeachers = await User.find({
         role: 'teacher',
-        _id: { 
-            $nin: [...busyTeachers, ...unavailableTeachers] 
+        _id: {
+            $nin: [...busyTeachers, ...unavailableTeachers]
         }
     }).select('name email teacherInfo');
 
@@ -70,7 +70,7 @@ export const getAvailableTeachers = asyncHandler(async (req, res) => {
 // @route   POST /api/admin/assign-substitute
 // @access  Private (Admin only)
 export const assignSubstitute = asyncHandler(async (req, res) => {
-    const { 
+    const {
         date,
         period,
         class: className,
@@ -164,11 +164,11 @@ export const getTeacherAvailability = asyncHandler(async (req, res) => {
 // @access  Private (Admin only)
 export const searchStudents = asyncHandler(async (req, res) => {
     const { class: className, section, search } = req.query;
-    
+
     const query = { role: 'student' };
     if (className) query['studentInfo.class'] = className;
     if (section) query['studentInfo.section'] = section;
-    
+
     if (search) {
         query.$or = [
             { name: { $regex: search, $options: 'i' } },
@@ -193,18 +193,18 @@ export const getStudentFees = asyncHandler(async (req, res) => {
     }
 
     const currentYear = new Date().getFullYear().toString();
-    
+
     try {
         // Use centralized calculation method
         const feeData = await FeePayment.calculateFeeTotals(student._id, currentYear);
-        
+
         // Save the payment record if it's new or modified
         if (feeData.paymentRecord.isNew || feeData.paymentRecord.isModified()) {
             await feeData.paymentRecord.save();
         }
 
         // Get all payment records for history
-        const allRecords = await FeePayment.find({ 
+        const allRecords = await FeePayment.find({
             student: student._id,
             academicYear: currentYear
         }).populate('feeStructure').sort('-createdAt');
@@ -243,7 +243,7 @@ export const makePayment = asyncHandler(async (req, res) => {
 
     const { amount, paymentMode, transactionId } = req.body;
     const currentYear = new Date().getFullYear().toString();
-    
+
     const feeStructure = await FeeStructure.getFeeStructure(student.studentInfo.class, currentYear);
     if (!feeStructure) {
         return res.status(404).json({ error: 'Fee structure not found' });
@@ -281,7 +281,7 @@ export const makePayment = asyncHandler(async (req, res) => {
 // @access  Private (Admin only)
 export const updateDiscount = asyncHandler(async (req, res) => {
     const { discount } = req.body;
-    
+
     // Validate discount amount
     if (discount < 0) {
         return res.status(400).json({ error: 'Discount amount cannot be negative' });
@@ -299,15 +299,15 @@ export const updateDiscount = asyncHandler(async (req, res) => {
     // Get fee structure to validate discount
     const currentYear = new Date().getFullYear().toString();
     const feeStructure = await FeeStructure.getFeeStructure(student.studentInfo.class, currentYear);
-    
+
     if (!feeStructure) {
         return res.status(404).json({ error: 'Fee structure not found' });
     }
 
     // Validate discount doesn't exceed total fee
     if (discount > feeStructure.totalFee) {
-        return res.status(400).json({ 
-            error: `Discount amount (₹${discount}) cannot exceed total fee (₹${feeStructure.totalFee})` 
+        return res.status(400).json({
+            error: `Discount amount (₹${discount}) cannot exceed total fee (₹${feeStructure.totalFee})`
         });
     }
 
@@ -356,12 +356,12 @@ export const updateDiscount = asyncHandler(async (req, res) => {
 // @access  Private (Admin only)
 export const searchPayments = asyncHandler(async (req, res) => {
     const { search, startDate, endDate, class: className, section } = req.query;
-    
+
     const query = {};
-    
+
     if (className) query.class = className;
     if (section) query.section = section;
-    
+
     if (startDate || endDate) {
         query['payments.paymentDate'] = {};
         if (startDate) query['payments.paymentDate'].$gte = new Date(startDate);
@@ -373,7 +373,7 @@ export const searchPayments = asyncHandler(async (req, res) => {
             { 'payments.transactionId': { $regex: search, $options: 'i' } },
             { 'payments.receipt.number': { $regex: search, $options: 'i' } }
         ];
-        
+
         // Also search in student details
         const students = await User.find({
             role: 'student',
@@ -382,7 +382,7 @@ export const searchPayments = asyncHandler(async (req, res) => {
                 { 'studentInfo.rollNumber': { $regex: search, $options: 'i' } }
             ]
         }).select('_id');
-        
+
         if (students.length > 0) {
             query.$or.push({ student: { $in: students.map(s => s._id) } });
         }
@@ -400,7 +400,7 @@ export const searchPayments = asyncHandler(async (req, res) => {
 // @route   PUT /api/admin/fees/structure/:id
 // @access  Private (Admin only)
 export const updateFeeStructure = asyncHandler(async (req, res) => {
-    const { 
+    const {
         tuitionFee,
         libraryFee,
         laboratoryFee,
@@ -456,7 +456,7 @@ export const updatePaymentBalance = asyncHandler(async (req, res) => {
         totalToBePaid: payment.totalToBePaid,
         status: payment.status // Return updated status
     });
-}); 
+});
 
 // --- USER MANAGEMENT ENDPOINTS ---
 
@@ -466,9 +466,9 @@ export const updatePaymentBalance = asyncHandler(async (req, res) => {
 export const getUsers = asyncHandler(async (req, res) => {
     const { role, class: className, section, search } = req.query;
     const query = {};
-    
+
     if (role) query.role = role;
-    
+
     // Add filters for students
     if (role === 'student') {
         if (className) query['studentInfo.class'] = className;
@@ -481,7 +481,7 @@ export const getUsers = asyncHandler(async (req, res) => {
             ];
         }
     }
-    
+
     // Add search for teachers and admins
     if ((role === 'teacher' || role === 'admin') && search) {
         query.$or = [
@@ -489,7 +489,7 @@ export const getUsers = asyncHandler(async (req, res) => {
             { email: { $regex: search, $options: 'i' } }
         ];
     }
-    
+
     const users = await User.find(query).sort({ name: 1 });
     res.json({ success: true, users });
 });
@@ -498,18 +498,19 @@ export const getUsers = asyncHandler(async (req, res) => {
 // @route   POST /api/admin/users
 // @access  Private (Admin only)
 export const addUser = asyncHandler(async (req, res) => {
-    const { name, email, password, role, studentInfo, teacherInfo } = req.body;
-    if (!name || !email || !password || !role) {
-        return res.status(400).json({ success: false, message: 'Missing required fields' });
+    const { name, email, phone, password, role, studentInfo, teacherInfo, adminInfo } = req.body;
+    if (!name || !email || !phone || !password || !role) {
+        return res.status(400).json({ success: false, message: 'Missing required fields: name, email, phone, password, role' });
     }
     const existing = await User.findOne({ email });
     if (existing) {
         return res.status(400).json({ success: false, message: 'Email already exists' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword, role });
+    const user = new User({ name, email, phone, password: hashedPassword, role });
     if (role === 'student' && studentInfo) user.studentInfo = studentInfo;
     if (role === 'teacher' && teacherInfo) user.teacherInfo = teacherInfo;
+    if (role === 'admin' && adminInfo) user.adminInfo = adminInfo;
     await user.save();
     res.json({ success: true, user });
 });
@@ -522,11 +523,11 @@ export const updateUser = asyncHandler(async (req, res) => {
     const { name, email, password, studentInfo, teacherInfo, phone } = req.body;
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    
+
     if (name) user.name = name;
     if (email) user.email = email;
     if (password) user.password = await bcrypt.hash(password, 10);
-    
+
     // Handle studentInfo updates - preserve existing fields
     if (user.role === 'student' && studentInfo) {
         // Merge with existing studentInfo to preserve all fields
@@ -536,7 +537,7 @@ export const updateUser = asyncHandler(async (req, res) => {
         };
         console.log(`Updated studentInfo for ${user.name}:`, user.studentInfo);
     }
-    
+
     // Handle teacherInfo updates - preserve existing fields  
     if (user.role === 'teacher' && teacherInfo) {
         user.teacherInfo = {
@@ -544,18 +545,18 @@ export const updateUser = asyncHandler(async (req, res) => {
             ...teacherInfo        // Update with new fields
         };
     }
-    
+
     // Handle phone updates with sync for students
     if (phone) {
         user.phone = phone;
-        
+
         // For students, also update guardianPhone to keep them in sync
         if (user.role === 'student' && user.studentInfo) {
             user.studentInfo.guardianPhone = phone;
             console.log(`Syncing guardianPhone for student ${user.name}: ${phone}`);
         }
     }
-    
+
     await user.save();
     res.json({ success: true, user });
 });
