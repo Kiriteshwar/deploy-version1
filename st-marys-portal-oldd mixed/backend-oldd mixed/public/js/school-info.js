@@ -54,12 +54,25 @@ window.onload = () => {
     });
 
     // Setup Add User modal
-    document.getElementById('add-user-btn').addEventListener('click', openAddUserModal);
-    document.getElementById('add-modal-close').addEventListener('click', closeAddUserModal);
+    document.getElementById('add-user-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openAddUserModal();
+    });
+    document.getElementById('add-modal-close').addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeAddUserModal();
+    });
+    // Only close when clicking exactly on the overlay background
     document.getElementById('add-user-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'add-user-modal') {
+        if (e.target === document.getElementById('add-user-modal')) {
             closeAddUserModal();
         }
+    });
+    // Prevent modal content clicks from bubbling
+    document.querySelector('#add-user-modal .modal-content').addEventListener('click', (e) => {
+        e.stopPropagation();
     });
 
     // Role selection - show/hide relevant fields
@@ -212,22 +225,42 @@ window.onload = () => {
 
     async function addNewUser() {
         const role = document.getElementById('new-role').value;
+        const name = document.getElementById('new-name').value.trim();
+        const email = document.getElementById('new-email').value.trim();
+        const phone = document.getElementById('new-phone').value.trim();
+        const password = document.getElementById('new-password').value;
+
+        // Client-side validation
+        if (!name || !email || !phone || !password || !role) {
+            alert('Please fill in all required fields: Name, Email, Phone, Password, and Role');
+            return;
+        }
+
         const userData = {
-            name: document.getElementById('new-name').value.trim(),
-            email: document.getElementById('new-email').value.trim(),
-            phone: document.getElementById('new-phone').value.trim(),
-            password: document.getElementById('new-password').value,
+            name: name,
+            email: email,
+            phone: phone,
+            password: password,
             role: role
         };
 
         // Add role-specific data
         if (role === 'student') {
+            const studentClass = document.getElementById('new-class').value.trim();
+            const section = document.getElementById('new-section').value.trim();
+            const rollNumber = document.getElementById('new-roll').value.trim();
+
+            if (!studentClass || !section || !rollNumber) {
+                alert('Please fill in Class, Section, and Roll Number for student');
+                return;
+            }
+
             userData.studentInfo = {
-                class: document.getElementById('new-class').value.trim(),
-                section: document.getElementById('new-section').value.trim(),
-                rollNumber: document.getElementById('new-roll').value.trim(),
+                class: studentClass,
+                section: section,
+                rollNumber: rollNumber,
                 guardianName: document.getElementById('new-guardian').value.trim(),
-                guardianPhone: document.getElementById('new-guardian-phone').value.trim(),
+                guardianPhone: document.getElementById('new-guardian-phone').value.trim() || phone,
                 address: document.getElementById('new-address').value.trim()
             };
         } else if (role === 'teacher') {
@@ -252,6 +285,8 @@ window.onload = () => {
             document.getElementById('submit-user-btn').disabled = true;
             document.getElementById('submit-user-btn').textContent = 'Adding...';
 
+            console.log('Sending user data:', userData);
+
             const response = await fetch('/api/admin/users', {
                 method: 'POST',
                 headers: {
@@ -262,17 +297,20 @@ window.onload = () => {
             });
 
             const result = await response.json();
+            console.log('Server response:', result);
 
             if (response.ok && result.success) {
                 alert('User added successfully!');
                 closeAddUserModal();
                 fetchAllUsers(); // Refresh the list
             } else {
-                alert(result.message || 'Failed to add user');
+                // Show the actual error message from server
+                const errorMsg = result.message || result.error || JSON.stringify(result);
+                alert('Error: ' + errorMsg);
             }
         } catch (error) {
             console.error('Error adding user:', error);
-            alert('Failed to add user. Please try again.');
+            alert('Failed to add user: ' + error.message);
         } finally {
             document.getElementById('submit-user-btn').disabled = false;
             document.getElementById('submit-user-btn').textContent = 'Add User';
