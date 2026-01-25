@@ -576,39 +576,47 @@ window.onload = () => {
             <head>
                 <title>Study Certificate - ${user.name}</title>
                 <style>
-                    body { margin: 0; padding: 20px; font-family: 'Times New Roman', serif; box-sizing: border-box; }
+                    body { 
+                        margin: 0; 
+                        padding: 40px; 
+                        background: #eee; 
+                        font-family: 'Times New Roman', serif; 
+                        display: flex;
+                        justify-content: center;
+                    }
                     .certificate-border {
+                        width: 900px;
+                        height: 600px;
                         border: 5px double #1a237e;
                         padding: 40px;
                         position: relative;
-                        min-height: 600px;
                         background: #fff;
                         background-image: radial-gradient(#e8eaf6 1px, transparent 1px);
                         background-size: 20px 20px;
+                        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                        box-sizing: border-box;
                     }
-                    .header { text-align: center; color: #1a237e; margin-bottom: 30px; position: relative; }
+                    .header { text-align: center; color: #1a237e; margin-bottom: 25px; position: relative; }
                     .logo-placeholder { 
                         position: absolute; 
-                        left: 10px; 
+                        left: 20px; 
                         top: 0; 
-                        width: 80px; 
-                        height: 80px; 
-                        border: 1px dashed #1a237e; 
+                        width: 90px; 
+                        height: 90px; 
                         display: flex; 
                         align-items: center; 
                         justify-content: center; 
-                        font-size: 10px;
-                        border-radius: 50%;
                     }
-                    .school-name { font-size: 36px; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-                    .medium { font-size: 16px; font-weight: bold; margin: 5px 0; }
-                    .address { font-size: 15px; font-weight: bold; }
+                    .logo-placeholder img { width: 100%; height: 100%; object-fit: contain; }
+                    .school-name { font-size: 38px; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: 1px; color: #1a237e; }
+                    .medium { font-size: 16px; font-weight: bold; margin: 4px 0; }
+                    .address { font-size: 14px; font-weight: bold; }
                     .title-box {
                         border: 3px solid #1a237e;
                         display: inline-block;
-                        padding: 8px 30px;
-                        margin: 30px 0;
-                        font-size: 28px;
+                        padding: 6px 40px;
+                        margin: 20px 0;
+                        font-size: 24px;
                         font-weight: 900;
                         color: #1a237e;
                         text-transform: uppercase;
@@ -616,37 +624,65 @@ window.onload = () => {
                         box-shadow: 4px 4px 0px rgba(26, 35, 126, 0.2);
                     }
                     .content { 
-                        line-height: 2.8; 
-                        font-size: 20px; 
+                        line-height: 2.2; 
+                        font-size: 18px; 
                         color: #1a237e; 
-                        margin-top: 30px; 
+                        margin-top: 20px; 
                         text-align: justify; 
                         font-style: italic;
                         font-weight: 500;
+                        padding: 0 20px;
                     }
                     .fill-blank {
                         border-bottom: 2px dotted #1a237e;
                         display: inline-block;
-                        min-width: 100px;
+                        min-width: 80px;
                         text-align: center;
                         font-weight: bold;
                         color: #000;
-                        padding: 0 10px;
+                        padding: 0 5px;
                         font-style: normal;
                     }
-                    .footer { display: flex; justify-content: space-between; margin-top: 100px; padding: 0 20px; }
+                    .footer { display: flex; justify-content: space-between; margin-top: 60px; padding: 0 50px; }
                     .footer-item { text-align: center; font-weight: bold; color: #1a237e; min-width: 150px; }
                     .sign-line { margin-top: 40px; border-top: 1px solid #1a237e; width: 100%; display: block; }
+                    
+                    .print-btn {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #1976d2;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-family: sans-serif;
+                        font-weight: bold;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                    }
+                    .print-btn:hover { background: #1565c0; }
+
                     @media print {
-                        body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; }
-                        .certificate-border { height: 100vh; border: 5px double #1a237e !important; margin: 0; }
+                        body { margin: 0; padding: 0; background: none; }
+                        .certificate-border { 
+                            margin: 0 auto; 
+                            box-shadow: none; 
+                            border: 5px double #1a237e !important;
+                            height: 100%;
+                            width: 100%;
+                            page-break-inside: avoid;
+                        }
+                        .print-btn { display: none; }
+                        @page { margin: 10mm; size: landscape; }
                     }
                 </style>
             </head>
             <body>
+                <button class="print-btn" onclick="window.print()">🖨️ Print Certificate</button>
                 <div class="certificate-border">
                     <div class="header">
-                        <div class="logo-placeholder">${logo}</div>
+                        <div class="logo-placeholder"><img src="${logo}" alt="Logo" onerror="this.style.display='none'"></div>
                         <h1 class="school-name">ST. MARY'S HIGH SCHOOL</h1>
                         <div class="medium">(ENGLISH MEDIUM)</div>
                         <div class="address">HASANPARTHY - 506371, Warangal (Dist.) - T.S.</div>
@@ -677,7 +713,6 @@ window.onload = () => {
                         </div>
                     </div>
                 </div>
-                <!-- <script>window.onload = function() { window.print(); window.close(); }</script> -->
             </body>
             </html>
         `);
