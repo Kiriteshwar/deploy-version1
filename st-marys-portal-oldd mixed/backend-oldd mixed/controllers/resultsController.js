@@ -6,7 +6,7 @@ import { validateResult } from '../utils/validation.js';
 export const createOrUpdateResult = async (req, res) => {
     try {
         const { examId, studentId } = req.body;
-        
+
         // Check if exam exists and is active
         const exam = await Exam.findById(examId);
         if (!exam || !exam.isActive) {
@@ -64,7 +64,7 @@ export const createOrUpdateResult = async (req, res) => {
         console.log('Result data before save:', resultData);
         console.log('Final result before save:', result);
         await result.save();
-        await result.populate('student', 'name rollNumber');
+        await result.populate('student', 'name studentInfo');
 
         res.json({
             success: true,
@@ -116,7 +116,7 @@ export const getResultsByExam = async (req, res) => {
         if (section) filter.section = section;
 
         const results = await Result.find(filter)
-            .populate('student', 'name rollNumber')
+            .populate('student', 'name studentInfo')
             .populate('exam', 'name examType')
             .populate('declaredBy', 'name')
             .sort('-percentage');

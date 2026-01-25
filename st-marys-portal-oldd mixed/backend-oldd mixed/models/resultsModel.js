@@ -8,7 +8,7 @@ const resultSchema = new mongoose.Schema({
     },
     student: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Student',
+        ref: 'User',
         required: true
     },
     class: {
@@ -90,7 +90,7 @@ function calculateGrade(percentage) {
 // Pre-save middleware to calculate totals and grade
 
 // Static method to get results by student
-resultSchema.statics.getResultsByStudent = async function(studentId) {
+resultSchema.statics.getResultsByStudent = async function (studentId) {
     return this.find({ student: studentId })
         .populate('exam', 'name examType')
         .populate('declaredBy', 'name')
@@ -98,17 +98,17 @@ resultSchema.statics.getResultsByStudent = async function(studentId) {
 };
 
 // Static method to get class results
-resultSchema.statics.getClassResults = async function(examId, filter = {}) {
+resultSchema.statics.getClassResults = async function (examId, filter = {}) {
     return this.find({
         exam: examId,
         ...filter
     })
-    .populate('student', 'name rollNumber')
-    .sort('-percentage');
+        .populate('student', 'name rollNumber')
+        .sort('-percentage');
 };
 
 // Virtual for pass/fail status
-resultSchema.virtual('isPassed').get(function() {
+resultSchema.virtual('isPassed').get(function () {
     return this.marks.every(mark => mark.obtainedMarks >= mark.passingMarks);
 });
 
