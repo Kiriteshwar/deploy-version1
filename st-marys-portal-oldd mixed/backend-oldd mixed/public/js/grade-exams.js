@@ -7,10 +7,10 @@ if (!token) {
 }
 
 // Initialize the page
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Load user profile
     loadUserProfile();
-    
+
     // Load initial data
     loadExams();
 
@@ -38,7 +38,7 @@ async function loadUserProfile() {
             // Update profile information
             document.getElementById('dropdown-name').textContent = data.name || 'N/A';
             document.getElementById('dropdown-role').textContent = data.role || 'N/A';
-            
+
             if (data.roleData) {
                 document.getElementById('dropdown-class').textContent = data.roleData.classTeacherOf || 'N/A';
                 document.getElementById('dropdown-section').textContent = data.roleData.subjects?.join(', ') || 'N/A';
@@ -80,12 +80,12 @@ async function loadExams() {
 
 // Load classes for selected exam
 function loadClassesForExam(examId) {
-            const classSelect = document.getElementById('class-select');
-            const sectionSelect = document.getElementById('section-select');
-            const subjectSelect = document.getElementById('subject-select');
-            classSelect.innerHTML = '<option value="">Select Class</option>';
-            sectionSelect.innerHTML = '<option value="">Select Section</option>';
-            subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+    const classSelect = document.getElementById('class-select');
+    const sectionSelect = document.getElementById('section-select');
+    const subjectSelect = document.getElementById('subject-select');
+    classSelect.innerHTML = '<option value="">Select Class</option>';
+    sectionSelect.innerHTML = '<option value="">Select Section</option>';
+    subjectSelect.innerHTML = '<option value="">Select Subject</option>';
     if (!examId || !window.allExams) return;
     const exam = window.allExams.find(e => e._id === examId);
     if (!exam) return;
@@ -93,10 +93,10 @@ function loadClassesForExam(examId) {
     // Get unique classes
     const uniqueClasses = [...new Set((exam.classSections || []).map(cs => cs.class))];
     uniqueClasses.forEach(cls => {
-            const option = document.createElement('option');
+        const option = document.createElement('option');
         option.value = cls;
         option.textContent = cls;
-            classSelect.appendChild(option);
+        classSelect.appendChild(option);
     });
 }
 
@@ -128,7 +128,7 @@ function loadSubjectsForExam() {
         option.value = subject.name;
         option.textContent = `${subject.name} (Max: ${subject.maxMarks})`;
         subjectSelect.appendChild(option);
-            });
+    });
 }
 
 // Load students for selected class and section
@@ -158,14 +158,14 @@ async function loadStudents() {
         if (!response.ok) throw new Error('Failed to fetch students');
 
         const students = await response.json();
-            // Get existing results
-            const resultsResponse = await fetch(`/api/results/exam/${examId}?class=${className}&section=${section}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            const resultsData = await resultsResponse.json();
-            const results = resultsData.success ? resultsData.data : [];
+        // Get existing results
+        const resultsResponse = await fetch(`/api/results/exam/${examId}?class=${className}&section=${section}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const resultsData = await resultsResponse.json();
+        const results = resultsData.success ? resultsData.data : [];
 
         displayStudents(students, results, subject);
     } catch (error) {
@@ -366,75 +366,75 @@ async function saveAllMarks() {
 function setupEventListeners() {
     const examSelect = document.getElementById('exam-select');
     if (examSelect) {
-        examSelect.addEventListener('change', function() {
-        loadClassesForExam(this.value);
-        // Reset students and subjects
-        document.getElementById('student-list-body').innerHTML = '';
-        document.getElementById('student-table').style.display = 'none';
-        document.getElementById('no-data').style.display = 'none';
-    });
+        examSelect.addEventListener('change', function () {
+            loadClassesForExam(this.value);
+            // Reset students and subjects
+            document.getElementById('student-list-body').innerHTML = '';
+            document.getElementById('student-table').style.display = 'none';
+            document.getElementById('no-data').style.display = 'none';
+        });
     }
     const classSelect = document.getElementById('class-select');
     if (classSelect) {
-        classSelect.addEventListener('change', function() {
-        loadSectionsForClass();
-        // Reset students
-        document.getElementById('student-list-body').innerHTML = '';
-        document.getElementById('student-table').style.display = 'none';
-        document.getElementById('no-data').style.display = 'none';
-    });
+        classSelect.addEventListener('change', function () {
+            loadSectionsForClass();
+            // Reset students
+            document.getElementById('student-list-body').innerHTML = '';
+            document.getElementById('student-table').style.display = 'none';
+            document.getElementById('no-data').style.display = 'none';
+        });
     }
     const sectionSelect = document.getElementById('section-select');
     if (sectionSelect) {
-        sectionSelect.addEventListener('change', function() {
-        loadSubjectsForExam();
-        // Reset students
-        document.getElementById('student-list-body').innerHTML = '';
-        document.getElementById('student-table').style.display = 'none';
-        document.getElementById('no-data').style.display = 'none';
-    });
+        sectionSelect.addEventListener('change', function () {
+            loadSubjectsForExam();
+            // Reset students
+            document.getElementById('student-list-body').innerHTML = '';
+            document.getElementById('student-table').style.display = 'none';
+            document.getElementById('no-data').style.display = 'none';
+        });
     }
     const subjectSelect = document.getElementById('subject-select');
     if (subjectSelect) {
-        subjectSelect.addEventListener('change', function() {
-        loadStudents();
-    });
+        subjectSelect.addEventListener('change', function () {
+            loadStudents();
+        });
     }
 
     // Logout button
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('auth_token');
-        window.location.href = 'login.html';
-    });
+            localStorage.removeItem('auth_token');
+            window.location.href = 'login.html';
+        });
     }
 
     // Change password
     const changePasswordBtn = document.getElementById('change-password');
     if (changePasswordBtn) {
         changePasswordBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        alert('Change password functionality coming soon!');
-    });
+            e.preventDefault();
+            alert('Change password functionality coming soon!');
+        });
     }
 
     // Update info
     const updateInfoBtn = document.getElementById('update-info');
     if (updateInfoBtn) {
         updateInfoBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        alert('Update info functionality coming soon!');
-    });
+            e.preventDefault();
+            alert('Update info functionality coming soon!');
+        });
     }
 
     // Upload photo
     const uploadPhotoBtn = document.getElementById('upload-photo');
     if (uploadPhotoBtn) {
         uploadPhotoBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        alert('Upload photo functionality coming soon!');
-    });
+            e.preventDefault();
+            alert('Upload photo functionality coming soon!');
+        });
     }
 }
 
@@ -443,7 +443,10 @@ function showAlert(message, type = 'info') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type}`;
     alertDiv.innerHTML = message;
-    
+
+    // Add z-index to make sure it floats above
+    alertDiv.style.zIndex = '1000';
+
     const container = document.querySelector('.alert-container');
     container.appendChild(alertDiv);
 
@@ -451,4 +454,92 @@ function showAlert(message, type = 'info') {
     setTimeout(() => {
         alertDiv.remove();
     }, 5000);
+}
+
+// Excel Import Logic
+document.addEventListener('DOMContentLoaded', () => {
+    const importBtn = document.getElementById('import-btn');
+    const fileInput = document.getElementById('excel-file');
+
+    if (importBtn && fileInput) {
+        importBtn.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                showAlert('Please select a file first.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = e.target.result;
+                try {
+                    const workbook = XLSX.read(data, { type: 'binary' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet); // Array of objects
+
+                    if (jsonData.length === 0) {
+                        showAlert('File appears to be empty.', 'error');
+                        return;
+                    }
+
+                    // Normalize keys to lowercase for easier matching
+                    // Expect columns roughly like "Roll No" and "Marks"
+                    processImportData(jsonData);
+                } catch (error) {
+                    console.error("Excel parse error:", error);
+                    showAlert('Error parsing Excel file. Ensure it is a valid format.', 'error');
+                }
+            };
+            reader.readAsBinaryString(file);
+        });
+    }
+});
+
+function processImportData(data) {
+    const rows = document.querySelectorAll('#student-list-body tr');
+    if (rows.length === 0) {
+        showAlert('No students displayed. Please select Exam/Class first.', 'error');
+        return;
+    }
+
+    let updatedCount = 0;
+
+    // Create a map of Roll No -> Input Element
+    const studentMap = {};
+    rows.forEach(row => {
+        const rollCell = row.cells[0];
+        const marksInput = row.querySelector('.marks-input');
+        if (rollCell && marksInput) {
+            const rollNo = rollCell.textContent.trim().toLowerCase();
+            studentMap[rollNo] = marksInput;
+        }
+    });
+
+    data.forEach(row => {
+        // Find keys resembling roll no and marks
+        let rollKey = Object.keys(row).find(k => k.toLowerCase().includes('roll') || k.toLowerCase().includes('id'));
+        let marksKey = Object.keys(row).find(k => k.toLowerCase().includes('mark') || k.toLowerCase().includes('score'));
+
+        if (rollKey && marksKey) {
+            const rollVal = String(row[rollKey]).trim().toLowerCase();
+            const marksVal = row[marksKey]; // Keep as number or string
+
+            if (studentMap[rollVal]) {
+                const input = studentMap[rollVal];
+                if (!input.disabled) { // Don't update if disabled
+                    input.value = marksVal;
+                    input.style.backgroundColor = '#e8f5e9'; // Highlight green
+                    input.style.transition = 'background-color 0.5s';
+                    updatedCount++;
+                }
+            }
+        }
+    });
+
+    if (updatedCount > 0) {
+        showAlert(`Successfully filled marks for ${updatedCount} students! Please verify and click "Save All".`, 'success');
+        document.getElementById('excel-file').value = ''; // Reset input
+    } else {
+        showAlert('No matching students found in the file. Check "Roll No" column.', 'error');
+    }
 } 
