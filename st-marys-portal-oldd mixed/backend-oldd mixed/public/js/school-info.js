@@ -492,6 +492,17 @@ window.onload = () => {
         `;
 
         document.getElementById('modal-body').innerHTML = html;
+
+        // Show/Hide Certificate Button
+        const certBtn = document.getElementById('certificate-btn');
+        if (certBtn) {
+            if (user.role === 'student') {
+                certBtn.style.display = 'block';
+                certBtn.onclick = () => generateCertificate(user);
+            } else {
+                certBtn.style.display = 'none';
+            }
+        }
     };
 
     // Print user details function
@@ -543,6 +554,133 @@ window.onload = () => {
             </html>
         `);
         printWindow.document.close();
+    }
+
+    // Generate Study Certificate
+    function generateCertificate(user) {
+        if (!user || user.role !== 'student') return;
+
+        const info = user.studentInfo || {};
+        const dob = info.dateOfBirth ? new Date(info.dateOfBirth).toLocaleDateString('en-GB') : '__________';
+        const admissionNo = info.admissionNumber || '__________';
+        const fatherName = info.guardianName || '__________';
+        const className = info.class || '__________';
+        const currentYear = new Date().getFullYear();
+        const joinYear = user.joinDate ? new Date(user.joinDate).getFullYear() : currentYear;
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Study Certificate - ${user.name}</title>
+                <style>
+                    body { margin: 0; padding: 20px; font-family: 'Times New Roman', serif; box-sizing: border-box; }
+                    .certificate-border {
+                        border: 5px double #1a237e;
+                        padding: 40px;
+                        position: relative;
+                        min-height: 600px;
+                        background: #fff;
+                        background-image: radial-gradient(#e8eaf6 1px, transparent 1px);
+                        background-size: 20px 20px;
+                    }
+                    .header { text-align: center; color: #1a237e; margin-bottom: 30px; position: relative; }
+                    .logo-placeholder { 
+                        position: absolute; 
+                        left: 10px; 
+                        top: 0; 
+                        width: 80px; 
+                        height: 80px; 
+                        border: 1px dashed #1a237e; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 10px;
+                        border-radius: 50%;
+                    }
+                    .school-name { font-size: 36px; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+                    .medium { font-size: 16px; font-weight: bold; margin: 5px 0; }
+                    .address { font-size: 15px; font-weight: bold; }
+                    .title-box {
+                        border: 3px solid #1a237e;
+                        display: inline-block;
+                        padding: 8px 30px;
+                        margin: 30px 0;
+                        font-size: 28px;
+                        font-weight: 900;
+                        color: #1a237e;
+                        text-transform: uppercase;
+                        background: #fff;
+                        box-shadow: 4px 4px 0px rgba(26, 35, 126, 0.2);
+                    }
+                    .content { 
+                        line-height: 2.8; 
+                        font-size: 20px; 
+                        color: #1a237e; 
+                        margin-top: 30px; 
+                        text-align: justify; 
+                        font-style: italic;
+                        font-weight: 500;
+                    }
+                    .fill-blank {
+                        border-bottom: 2px dotted #1a237e;
+                        display: inline-block;
+                        min-width: 100px;
+                        text-align: center;
+                        font-weight: bold;
+                        color: #000;
+                        padding: 0 10px;
+                        font-style: normal;
+                    }
+                    .footer { display: flex; justify-content: space-between; margin-top: 100px; padding: 0 20px; }
+                    .footer-item { text-align: center; font-weight: bold; color: #1a237e; min-width: 150px; }
+                    .sign-line { margin-top: 40px; border-top: 1px solid #1a237e; width: 100%; display: block; }
+                    @media print {
+                        body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; }
+                        .certificate-border { height: 100vh; border: 5px double #1a237e !important; margin: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="certificate-border">
+                    <div class="header">
+                        <div class="logo-placeholder">LOGO</div>
+                        <h1 class="school-name">ST. MARY'S HIGH SCHOOL</h1>
+                        <div class="medium">(ENGLISH MEDIUM)</div>
+                        <div class="address">HASANPARTHY - 506 371, Warangal (Dist.) - T.S.</div>
+                        <div class="title-box">STUDY CERTIFICATE</div>
+                    </div>
+                    
+                    <div class="content">
+                        This is to certify that <span class="fill-blank" style="min-width:250px">${user.name}</span><br>
+                        D/o. / S/o. Sri <span class="fill-blank" style="min-width:250px">${fatherName}</span>
+                        was / is a student of this Institution Studying in Classes <span class="fill-blank">${className}</span>
+                        from <span class="fill-blank">${joinYear}</span> to <span class="fill-blank">${currentYear}</span>.<br>
+                        His / Her Admission Number is <span class="fill-blank">${admissionNo}</span>
+                        and Date of Birth according to our school record is <span class="fill-blank" style="min-width:150px">${dob}</span>.<br>
+                        During the period his / her character and conduct have been satisfactory.
+                    </div>
+                    
+                    <div class="footer">
+                        <div class="footer-item" style="text-align:left">
+                            Date: <span style="text-decoration:underline">${new Date().toLocaleDateString('en-GB')}</span>
+                        </div>
+                        <div class="footer-item">
+                            <span class="sign-line"></span>        
+                            Admission Incharge
+                        </div>
+                        <div class="footer-item">
+                            <span class="sign-line"></span>
+                            Principal
+                        </div>
+                    </div>
+                </div>
+                <!-- <script>window.onload = function() { window.print(); window.close(); }</script> -->
+            </body>
+            </html>
+        `);
+        // printWindow.document.close();
     }
 
     // Download Excel template
