@@ -542,7 +542,7 @@ export const addUser = asyncHandler(async (req, res) => {
 // @access  Private (Admin only)
 export const updateUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { name, email, password, studentInfo, teacherInfo, phone } = req.body;
+    const { name, email, password, studentInfo, teacherInfo, phone, totalFee } = req.body;
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
@@ -550,22 +550,39 @@ export const updateUser = asyncHandler(async (req, res) => {
     if (email) user.email = email;
     if (password) user.password = await bcrypt.hash(password, 10);
 
-    // Handle studentInfo updates - preserve existing fields
+    // Handle studentInfo updates
     if (user.role === 'student' && studentInfo) {
-        // Merge with existing studentInfo to preserve all fields
         user.studentInfo = {
-            ...user.studentInfo,  // Keep existing fields
-            ...studentInfo        // Update with new fields
+            ...user.studentInfo,
+            ...studentInfo
         };
-        console.log(`Updated studentInfo for ${user.name}:`, user.studentInfo);
+        user.markModified('studentInfo');
+
+        // Handle totalFee update -> recalculate discount
+        if (totalFee) {
+            const currentYear = new Date().getFullYear().toString();
+            // Try to find fee structure matching class
+            const cls = studentInfo.class || user.studentInfo.class;
+            if (cls) {
+                const feeStructures = await FeeStructure.find({
+                    class: cls,
+                    // academicYear: currentYear // Optional: enforce year
+                });
+                const feeStructure = feeStructures.length > 0 ? feeStructures[0] : null;
+                if (feeStructure) {
+                    user.discount = Math.max(0, feeStructure.totalFee - parseInt(totalFee));
+                }
+            }
+        }
     }
 
-    // Handle teacherInfo updates - preserve existing fields  
+    // Handle teacherInfo updates
     if (user.role === 'teacher' && teacherInfo) {
         user.teacherInfo = {
-            ...user.teacherInfo,  // Keep existing fields
-            ...teacherInfo        // Update with new fields
+            ...user.teacherInfo,
+            ...teacherInfo
         };
+        user.markModified('teacherInfo');
     }
 
     // Handle phone updates with sync for students
@@ -575,7 +592,7 @@ export const updateUser = asyncHandler(async (req, res) => {
         // For students, also update fatherGuardianPhone to keep them in sync
         if (user.role === 'student' && user.studentInfo) {
             user.studentInfo.fatherGuardianPhone = phone;
-            console.log(`Syncing fatherGuardianPhone for student ${user.name}: ${phone}`);
+            user.markModified('studentInfo');
         }
     }
 

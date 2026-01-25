@@ -469,14 +469,38 @@
                 gap: 0;
             }
         }
+
+        /* Navbar Styles */
+        .dashboard-nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .dashboard-nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .dashboard-nav-link i {
+            transition: transform 0.2s;
+        }
+
+        .dashboard-nav-link:hover i {
+            transform: translateX(-4px);
+        }
     </style>
 </head>
 
 <body>
     <nav
         style="background-color: #1976d2; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <a href="dashboard.html"
-            style="color: white; text-decoration: none; font-weight: 500; display: flex; align-items: center; font-size: 14px;">
+        <a href="dashboard.html" class="dashboard-nav-link">
             <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Return to Dashboard
         </a>
         <div style="font-weight: 600; font-size: 16px; display: flex; align-items: center;">

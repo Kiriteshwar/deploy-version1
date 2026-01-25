@@ -332,11 +332,15 @@ function showEditUserModal(user) {
                 <div><label>Sub-Caste</label><input type="text" name="subCaste" value="${info.subCaste || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
                 <div><label>ID Mark 1</label><input type="text" name="identificationMark1" value="${info.identificationMark1 || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
                 <div><label>ID Mark 2</label><input type="text" name="identificationMark2" value="${info.identificationMark2 || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                
+                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Fee Info</div>
+                <div><label>Update Total Fee (Optional)</label><input type="number" name="totalFee" placeholder="Enter new fee amount to update discount" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
                 ` : ''}
 
                 ${isTeacher ? `
                 <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Teacher Info</div>
                 <div style="grid-column: span 2;"><label>Subjects (comma separated)</label><input type="text" name="subjects" value="${user.teacherInfo?.subjects?.join(', ') || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Salary</label><input type="number" name="salary" value="${user.teacherInfo?.salary || 0}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
                 ` : ''}
 
                 <div style="grid-column: span 2; margin-top:20px; text-align:right;">
@@ -354,7 +358,9 @@ function showEditUserModal(user) {
             name: form.name.value,
             email: form.email.value,
             phone: form.phone.value,
-            gender: form.gender.value
+            gender: form.gender.value,
+            studentInfo: isStudent ? {} : undefined,
+            teacherInfo: isTeacher ? {} : undefined
         };
 
         if (isStudent) {
@@ -376,9 +382,11 @@ function showEditUserModal(user) {
                 identificationMark1: form.identificationMark1.value,
                 identificationMark2: form.identificationMark2.value
             };
+            if (form.totalFee.value) updatedUser.totalFee = form.totalFee.value;
         } else if (isTeacher) {
             updatedUser.teacherInfo = {
-                subjects: form.subjects.value.split(',').map(s => s.trim()).filter(Boolean)
+                subjects: form.subjects.value.split(',').map(s => s.trim()).filter(Boolean),
+                salary: form.salary.value
             };
         }
 
