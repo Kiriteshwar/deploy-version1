@@ -473,12 +473,20 @@
 </head>
 
 <body>
-    <div class="school-info-container">
-        <div class="page-header">
-            <h1>🏫 School Info</h1>
-            <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back</button>
+    <nav
+        style="background-color: #1976d2; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <a href="dashboard.html"
+            style="color: white; text-decoration: none; font-weight: 500; display: flex; align-items: center; font-size: 14px;">
+            <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Return to Dashboard
+        </a>
+        <div style="font-weight: 600; font-size: 16px; display: flex; align-items: center;">
+            <i class="fas fa-bullhorn" style="margin-right: 8px;"></i> Notice Board
         </div>
+    </nav>
 
+    <div class="school-info-container">
+        <!-- Header removed as per new design -->
+        <h1 style="margin-bottom: 20px; color: #333;">School Information</h1>
         <!-- Tabs -->
         <div class="tabs-container">
             <button class="tab-btn active" data-tab="users">👥 Users</button>

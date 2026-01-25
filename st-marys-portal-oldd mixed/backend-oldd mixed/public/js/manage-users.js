@@ -128,7 +128,7 @@ function renderBulkDeleteButton() {
         bulkBtn.style.display = 'inline-block';
         container.appendChild(bulkBtn);
     }
-    bulkBtn.onclick = async function() {
+    bulkBtn.onclick = async function () {
         const checked = Array.from(document.querySelectorAll('.user-select-checkbox:checked'));
         if (checked.length === 0) {
             showAlert('No users selected.', 'error');
@@ -233,7 +233,7 @@ function showAddUserModal() {
     roleSelect.addEventListener('change', updateFields);
     updateFields(); // Initial call
 
-    document.getElementById('addUserForm').onsubmit = async function(e) {
+    document.getElementById('addUserForm').onsubmit = async function (e) {
         e.preventDefault();
         const form = e.target;
         const user = {
@@ -274,94 +274,131 @@ function showAddUserModal() {
 function showEditUserModal(user) {
     const modal = document.getElementById('addUserModal');
     modal.style.display = 'block';
-    // Determine fields based on role
+
     const isStudent = user.role === 'student';
     const isTeacher = user.role === 'teacher';
     const isAdmin = user.role === 'admin';
-    const classVal = isStudent && user.studentInfo ? user.studentInfo.class || '' : '';
-    const sectionVal = isStudent && user.studentInfo ? user.studentInfo.section || '' : '';
-    const subjectsVal = isTeacher && user.teacherInfo ? (Array.isArray(user.teacherInfo.subjects) ? user.teacherInfo.subjects.join(', ') : user.teacherInfo.subjects || '') : '';
-    const phoneVal = user.phone || '';
+    const info = user.studentInfo || {};
+
+    // Helper to format date for input (YYYY-MM-DD)
+    const formatDate = (d) => {
+        if (!d) return '';
+        try { return new Date(d).toISOString().split('T')[0]; } catch (e) { return ''; }
+    };
+
+    const dobVal = formatDate(info.dateOfBirth);
+    const dolVal = formatDate(info.dateOfLeaving);
+
     modal.innerHTML = `
-        <div style="background: #fff; padding: 2rem; border-radius: 12px; max-width: 400px; margin: 2rem auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-            <h2>Edit User</h2>
-            <form id="editUserForm">
-                <div style="margin-bottom:1rem;">
-                    <label>Name:</label><br>
-                    <input type="text" name="name" value="${user.name || ''}" required style="width:100%;padding:0.5rem;">
-                </div>
-                <div style="margin-bottom:1rem;">
-                    <label>Email:</label><br>
-                    <input type="email" name="email" value="${user.email || ''}" required style="width:100%;padding:0.5rem;">
-                </div>
-                <div style="margin-bottom:1rem;">
-                    <label>Role:</label><br>
-                    <select name="role" id="editRoleSelect" required style="width:100%;padding:0.5rem;" disabled>
-                        <option value="student" ${isStudent ? 'selected' : ''}>Student</option>
-                        <option value="teacher" ${isTeacher ? 'selected' : ''}>Teacher</option>
-                        <option value="admin" ${isAdmin ? 'selected' : ''}>Admin</option>
+        <div style="background: #fff; padding: 2rem; border-radius: 12px; max-width: 800px; margin: 2rem auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08); max-height:90vh; overflow-y:auto;">
+            <h2 style="border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:20px;">Edit User: ${user.name}</h2>
+            <form id="editUserForm" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Basic Info</div>
+                
+                <div><label>Name</label><input type="text" name="name" value="${user.name || ''}" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Email</label><input type="email" name="email" value="${user.email || ''}" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Phone</label><input type="text" name="phone" value="${user.phone || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Role</label><input type="text" value="${user.role}" disabled style="width:100%;padding:8px;background:#f9f9f9;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Gender</label>
+                    <select name="gender" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                        <option value="">Select</option>
+                        <option value="Male" ${user.gender === 'Male' ? 'selected' : ''}>Male</option>
+                        <option value="Female" ${user.gender === 'Female' ? 'selected' : ''}>Female</option>
+                        <option value="Other" ${user.gender === 'Other' ? 'selected' : ''}>Other</option>
                     </select>
                 </div>
-                <div id="editStudentFields" style="display:${isStudent ? '' : 'none'};">
-                    <div style="margin-bottom:1rem;">
-                        <label>Class:</label><br>
-                        <input type="text" name="class" value="${classVal}" style="width:100%;padding:0.5rem;">
-                    </div>
-                    <div style="margin-bottom:1rem;">
-                        <label>Section:</label><br>
-                        <input type="text" name="section" value="${sectionVal}" style="width:100%;padding:0.5rem;">
-                    </div>
+
+                ${isStudent ? `
+                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Academic Info</div>
+                <div><label>Class</label><input type="text" name="class" value="${info.class || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Section</label><input type="text" name="section" value="${info.section || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Roll Number</label><input type="text" name="rollNumber" value="${info.rollNumber || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Admission Number</label><input type="text" name="admissionNumber" value="${info.admissionNumber || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                
+                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Dates</div>
+                <div><label>Date of Birth</label><input type="date" name="dateOfBirth" value="${dobVal}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label style="color:#c62828;">Date of Leaving</label><input type="date" name="dateOfLeaving" value="${dolVal}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+
+                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Parent/Guardian</div>
+                <div><label>Father/Guardian Name</label><input type="text" name="guardianName" value="${info.guardianName || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Father/Guardian Phone</label><input type="text" name="fatherGuardianPhone" value="${info.fatherGuardianPhone || info.guardianPhone || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Mother Name</label><input type="text" name="motherName" value="${info.motherName || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Mother Phone</label><input type="text" name="motherPhone" value="${info.motherPhone || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div style="grid-column: span 2;"><label>Address</label><input type="text" name="address" value="${info.address || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+
+                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Personal Details</div>
+                <div><label>Religion</label><input type="text" name="religion" value="${info.religion || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Caste</label><input type="text" name="caste" value="${info.caste || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>Sub-Caste</label><input type="text" name="subCaste" value="${info.subCaste || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>ID Mark 1</label><input type="text" name="identificationMark1" value="${info.identificationMark1 || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                <div><label>ID Mark 2</label><input type="text" name="identificationMark2" value="${info.identificationMark2 || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                ` : ''}
+
+                ${isTeacher ? `
+                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Teacher Info</div>
+                <div style="grid-column: span 2;"><label>Subjects (comma separated)</label><input type="text" name="subjects" value="${user.teacherInfo?.subjects?.join(', ') || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+                ` : ''}
+
+                <div style="grid-column: span 2; margin-top:20px; text-align:right;">
+                    <button type="button" onclick="document.getElementById('addUserModal').style.display='none'" style="padding:10px 20px; border:1px solid #ddd; background:white; cursor:pointer; margin-right:10px;">Cancel</button>
+                    <button type="submit" style="background:#007bff;color:#fff;padding:10px 20px;border:none;border-radius:4px;cursor:pointer;">Save Changes</button>
                 </div>
-                <div id="editTeacherFields" style="display:${isTeacher ? '' : 'none'};">
-                    <div style="margin-bottom:1rem;">
-                        <label>Subjects (comma separated):</label><br>
-                        <input type="text" name="subjects" value="${subjectsVal}" style="width:100%;padding:0.5rem;">
-                    </div>
-                </div>
-                <div id="editPhoneField" style="display:${isStudent || isTeacher ? '' : 'none'};margin-bottom:1rem;">
-                    <label>Phone:</label><br>
-                    <input type="text" name="phone" value="${phoneVal}" style="width:100%;padding:0.5rem;">
-                </div>
-                <button type="submit" style="background:#007bff;color:#fff;padding:0.5rem 1.5rem;border:none;border-radius:4px;">Save</button>
-                <button type="button" onclick="document.getElementById('addUserModal').style.display='none'" style="margin-left:1rem;">Cancel</button>
             </form>
         </div>
     `;
-    // No need to show/hide fields on role change since role is disabled
-    document.getElementById('editUserForm').onsubmit = async function(e) {
+
+    document.getElementById('editUserForm').onsubmit = async function (e) {
         e.preventDefault();
         const form = e.target;
         const updatedUser = {
             name: form.name.value,
             email: form.email.value,
-            // role: user.role // role is not editable
+            phone: form.phone.value,
+            gender: form.gender.value
         };
+
         if (isStudent) {
             updatedUser.studentInfo = {
                 class: form.class.value,
-                section: form.section.value
+                section: form.section.value,
+                rollNumber: form.rollNumber.value,
+                admissionNumber: form.admissionNumber.value,
+                dateOfBirth: form.dateOfBirth.value,
+                dateOfLeaving: form.dateOfLeaving.value,
+                guardianName: form.guardianName.value,
+                fatherGuardianPhone: form.fatherGuardianPhone.value,
+                motherName: form.motherName.value,
+                motherPhone: form.motherPhone.value,
+                address: form.address.value,
+                religion: form.religion.value,
+                caste: form.caste.value,
+                subCaste: form.subCaste.value,
+                identificationMark1: form.identificationMark1.value,
+                identificationMark2: form.identificationMark2.value
             };
-            updatedUser.phone = form.phone.value;
         } else if (isTeacher) {
             updatedUser.teacherInfo = {
                 subjects: form.subjects.value.split(',').map(s => s.trim()).filter(Boolean)
             };
-            updatedUser.phone = form.phone.value;
         }
-        // For admin, no extra fields
+
         const token = localStorage.getItem('auth_token');
-        const res = await fetch(`/api/admin/users/${user._id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-            body: JSON.stringify(updatedUser)
-        });
-        const data = await res.json();
-        if (data.success) {
-            modal.style.display = 'none';
-            showAlert('User updated successfully!', 'success');
-            fetchAndRenderUsers();
-        } else {
-            alert(data.message || 'Failed to update user');
+        try {
+            const res = await fetch(`/api/admin/users/${user._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify(updatedUser)
+            });
+            const data = await res.json();
+            if (data.success) {
+                modal.style.display = 'none';
+                showAlert('User updated successfully!', 'success');
+                fetchAndRenderUsers();
+            } else {
+                alert(data.message || 'Failed to update user');
+            }
+        } catch (err) {
+            alert('Error updating user');
         }
     };
 }
@@ -370,7 +407,7 @@ function showEditUserModal(user) {
 function showAlert(message, type = 'success') {
     const alertContainer = document.querySelector('.alert-container');
     if (!alertContainer) return;
-    alertContainer.innerHTML = `<div class="alert alert-${type}" style="background:${type==='success'?'#d4edda':'#f8d7da'};color:${type==='success'?'#155724':'#721c24'};padding:1rem;border-radius:6px;margin-bottom:1rem;">${message}</div>`;
+    alertContainer.innerHTML = `<div class="alert alert-${type}" style="background:${type === 'success' ? '#d4edda' : '#f8d7da'};color:${type === 'success' ? '#155724' : '#721c24'};padding:1rem;border-radius:6px;margin-bottom:1rem;">${message}</div>`;
     setTimeout(() => { alertContainer.innerHTML = ''; }, 3000);
 }
 
@@ -391,7 +428,7 @@ function setupFilterListeners() {
         loadSectionOptions();
         applyFilters();
     });
-    
+
     document.getElementById('sectionFilter').addEventListener('change', applyFilters);
     document.getElementById('searchFilter').addEventListener('input', debounce(applyFilters, 300));
     document.getElementById('clearFilters').addEventListener('click', clearFilters);
@@ -404,10 +441,10 @@ async function loadClassOptions() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
-        
+
         const classFilter = document.getElementById('classFilter');
         classFilter.innerHTML = '<option value="">All Classes</option>';
-        
+
         if (data.classes && Array.isArray(data.classes)) {
             data.classes.forEach(cls => {
                 const option = document.createElement('option');
@@ -424,18 +461,18 @@ async function loadClassOptions() {
 async function loadSectionOptions() {
     const selectedClass = document.getElementById('classFilter').value;
     const sectionFilter = document.getElementById('sectionFilter');
-    
+
     sectionFilter.innerHTML = '<option value="">All Sections</option>';
-    
+
     if (!selectedClass) return;
-    
+
     try {
         const token = localStorage.getItem('auth_token');
         const response = await fetch(`/api/teacher/sections/${selectedClass}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const sections = await response.json();
-        
+
         if (Array.isArray(sections)) {
             sections.forEach(section => {
                 const option = document.createElement('option');
@@ -453,37 +490,37 @@ async function applyFilters() {
     const className = document.getElementById('classFilter').value;
     const section = document.getElementById('sectionFilter').value;
     const search = document.getElementById('searchFilter').value;
-    
+
     const tbody = document.getElementById('user-table-body');
     tbody.innerHTML = `<tr><td colspan="7">Loading...</td></tr>`;
-    
+
     try {
         const token = localStorage.getItem('auth_token');
         const params = new URLSearchParams({ role: currentRole });
-        
+
         if (className) params.append('class', className);
         if (section) params.append('section', section);
         if (search) params.append('search', search);
-        
+
         const response = await fetch(`/api/admin/users?${params.toString()}`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token
             }
         });
-        
+
         const data = await response.json();
-        
+
         if (!data.success || !Array.isArray(data.users) || data.users.length === 0) {
             tbody.innerHTML = `<tr class="no-users"><td colspan="7">No users found matching the criteria.</td></tr>`;
             return;
         }
-        
+
         tbody.innerHTML = '';
         data.users.forEach(user => {
             tbody.appendChild(renderUserRow(user));
         });
-        
+
     } catch (error) {
         tbody.innerHTML = `<tr><td colspan="7">Failed to load users.</td></tr>`;
     }
