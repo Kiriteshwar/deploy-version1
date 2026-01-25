@@ -108,10 +108,39 @@
 //     });
 //   };
 /// more neww jss////
+
+// ===== Render Backend Keep Alive =====
+let keepAliveInterval = null;
+const BACKEND = "https://stmarys-f2k3.onrender.com";
+
+function startKeepAlive() {
+    if (keepAliveInterval) return;
+
+    keepAliveInterval = setInterval(() => {
+        fetch(`${BACKEND}/api/health`, { cache: "no-store" })
+            .catch(() => {});
+    }, 9 * 60 * 1000); // every 9 minutes
+
+    console.log("✅ Backend keep-alive started");
+}
+
+function stopKeepAlive() {
+    if (keepAliveInterval) {
+        clearInterval(keepAliveInterval);
+        keepAliveInterval = null;
+        console.log("🛑 Backend keep-alive stopped");
+    }
+}
+
+
 window.onload = () => {
     const token = localStorage.getItem("auth_token");
     const userData = JSON.parse(localStorage.getItem("user_data") || "{}");
-    
+
+    if (token) {
+        startKeepAlive();
+    }
+
     if (!token) {
         window.location.href = "login.html";
         return;
@@ -403,6 +432,8 @@ window.onload = () => {
     });
     // Logout
     document.getElementById('logout-btn').addEventListener('click', () => {
+        stopKeepAlive();
+
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user_data');
         localStorage.removeItem('user_name');
