@@ -1,13 +1,13 @@
 // Get authentication token and user role
 const token = localStorage.getItem('auth_token');
 const userRole = localStorage.getItem('user_role');
-const userId = localStorage.getItem('user_id'); 
+const userId = localStorage.getItem('user_id');
 
 // Initialize global variables
 let currentExamId = null;
 
 // Initialize the page
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
     if (token) {
         try {
             const { exp } = JSON.parse(atob(token.split('.')[1]));
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         window.location.href = '/dashboard.html';
         return;
     }
-    
+
     loadClassSectionGrid();
     setupSubjectsSection();
     setupDateInputs();
@@ -208,13 +208,13 @@ function setupExamTypeOptions() {
     examTypeSelect.appendChild(defaultOption);
 
     // Define exam types based on role
-    const examTypes = userRole === 'admin' ? 
+    const examTypes = userRole === 'admin' ?
         [
             { value: 'unit_test', label: 'Unit Test' },
             { value: 'mid_term', label: 'Mid Term' },
             { value: 'final_term', label: 'Final Term' },
             { value: 'practical', label: 'Practical' }
-        ] : 
+        ] :
         [
             { value: 'unit_test', label: 'Unit Test' },
             { value: 'practical', label: 'Practical' }
@@ -265,8 +265,8 @@ async function loadClassSectionGrid() {
             fetch(`/api/teacher/sections/${cls}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
-            .then(res => res.ok ? res.json() : [])
-            .then(sections => ({ class: cls, sections }))
+                .then(res => res.ok ? res.json() : [])
+                .then(sections => ({ class: cls, sections }))
         );
         const classSections = await Promise.all(sectionPromises);
 
@@ -342,11 +342,11 @@ function showAlert(message, type = 'success') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type}`;
     alertDiv.textContent = message;
-    
+
     const container = document.querySelector('.alert-container');
     container.innerHTML = '';
     container.appendChild(alertDiv);
-    
+
     setTimeout(() => alertDiv.remove(), 5000);
 }
 
@@ -366,7 +366,19 @@ async function loadExamList() {
             container.innerHTML = '<div>No exams found.</div>';
             return;
         }
-        let html = '<table class="exam-list-table"><thead><tr><th>Name</th><th>Type</th><th>Class-Section(s)</th><th>Start Date</th><th>End Date</th></tr></thead><tbody>';
+        const isAdmin = localStorage.getItem('user_role') === 'admin';
+        let html = `<table class="exam-list-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Class-Section(s)</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    ${isAdmin ? '<th>Actions</th>' : ''}
+                </tr>
+            </thead>
+            <tbody>`;
         data.data.forEach(exam => {
             html += `<tr>
                 <td>${exam.name}</td>
@@ -374,12 +386,46 @@ async function loadExamList() {
                 <td>${(exam.classSections || []).map(cs => `${cs.class}-${cs.section}`).join(', ')}</td>
                 <td>${exam.startDate ? new Date(exam.startDate).toLocaleDateString() : ''}</td>
                 <td>${exam.endDate ? new Date(exam.endDate).toLocaleDateString() : ''}</td>
+                ${isAdmin ? `
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteExamById('${exam._id}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                ` : ''}
             </tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
     } catch (error) {
         container.innerHTML = `<div style="color:red;">Failed to load exams: ${error.message}</div>`;
+    }
+}
+
+// Global function to delete exam
+async function deleteExamById(id) {
+    if (!confirm('Are you sure you want to delete this exam? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/exams/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to delete exam');
+        }
+
+        showAlert('Exam deleted successfully', 'success');
+        await loadExamList();
+    } catch (error) {
+        console.error('Delete error:', error);
+        showAlert('Error: ' + error.message, 'error');
     }
 }
 
@@ -419,7 +465,7 @@ async function loadExamList() {
 
 document.getElementById('examForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const formData = new FormData(e.target);
     const selectedClassSections = getSelectedClassSections();
     if (selectedClassSections.length === 0) {

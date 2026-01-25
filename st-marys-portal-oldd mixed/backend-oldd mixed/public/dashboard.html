@@ -285,8 +285,14 @@
 
   <div class="dashboard-wrapper">
     <header class="dashboard-header" style="display: flex; align-items: center; justify-content: space-between;">
-      <h2 style="margin: 0 1.5rem 0 0; font-weight: bold;">Welcome, <span id="user-name"
-          class="highlight-username">User</span></h2>
+      <div style="display: flex; flex-direction: column;">
+        <h2 style="margin: 0; font-weight: bold;">Welcome, <span id="user-name" class="highlight-username">User</span>
+        </h2>
+        <div id="fee-due-alert"
+          style="color: #dc3545; font-weight: bold; margin-top: 2px; font-size: 0.9em; display: none;">
+          fee is due
+        </div>
+      </div>
       <div class="profile-dropdown" id="profileDropdown">
         <div class="profile-collapsed" id="profileCollapsed">
           <img src="default-avatar.jpg" alt="Profile" id="profile-pic-collapsed" class="profile-pic-collapsed">
@@ -370,40 +376,7 @@
 
     <!-- Container to load feature data dynamically -->
     <div id="feature-data" class="feature-container"></div>
-    <!-- <div id="smhs-footer" 
-         style="
-            margin: 40px auto 0 auto;
-            padding: 18px 0 10px 0;
-            text-align: center;
-            font-size: 1.15rem;
-            font-weight: bold;
-            font-style: italic;
-            color: #111;
-            letter-spacing: 0.5px;
-            border-radius: 8px;
-            background: #f7f7f7;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            max-width: 600px;
-         ">
-      Made with <span style="color:#e25555;">&#10084;&#65039;</span> by SMHS<br>
-      &copy; 2025 SMHS. All rights reserved.
-    </div> -->
-    <div id="smhs-footer" style="
-        margin: 40px auto 0 auto;
-        padding: 18px 0 10px 0;
-        text-align: center;
-        max-width: 600px;
-        background: #f7f7f7;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-      ">
-      <div style="font-size: 1.15rem; font-weight: bold; font-style: italic; color: #111;">
-        Made with <span style="color:#e25555;">&#10084;&#65039;</span> by SMHS
-      </div>
-      <div style="font-size: 1rem; font-weight: 400; color: #222121; margin-top: 2px;">
-        &copy; 2025 SMHS. All rights reserved.
-      </div>
-    </div>
+
   </div>
 
   <script src="js/dashboard.js"></script>

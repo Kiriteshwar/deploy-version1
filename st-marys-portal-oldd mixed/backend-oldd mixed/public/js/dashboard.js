@@ -36,7 +36,7 @@
 //new js
 // window.onload = () => {
 //     const token = localStorage.getItem("auth_token");
-  
+
 //     if (!token) {
 //       window.location.href = "login.html";
 //       return;
@@ -57,10 +57,10 @@
 //       if (data.user) {
 //         document.getElementById("user-name").textContent = data.user.name;
 //         document.getElementById("user-email").textContent = data.user.email;
-  
+
 //         // Store student ID to use in API requests
 //         const studentId = data.user.id;
-    
+
 //         // Attendance card click handler
 //         const attendanceCard = document.getElementById("attendance-card");
 //         if (attendanceCard) {
@@ -100,7 +100,7 @@
 //       console.error("Error:", error);
 //       alert("Something went wrong.");
 //     });
-  
+
 //     // Logout
 //     document.getElementById("logout-btn").addEventListener("click", () => {
 //       localStorage.removeItem("auth_token");
@@ -118,7 +118,7 @@ function startKeepAlive() {
 
     keepAliveInterval = setInterval(() => {
         fetch(`${BACKEND}/api/health`, { cache: "no-store" })
-            .catch(() => {});
+            .catch(() => { });
     }, 9 * 60 * 1000); // every 9 minutes
 
     console.log("✅ Backend keep-alive started");
@@ -245,84 +245,99 @@ window.onload = () => {
         },
         cache: "no-store" // <-- Add this line
     })
-    .then(response => {
-        if (response.status === 304) {
-            // Optionally, use cached data or show a message
-            throw new Error('Profile not modified, no new data.');
-        }
-        if (!response.ok) {
-            throw new Error('Profile fetch failed');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("Profile data:", data);
-        // Update welcome message and dropdown name
-        if (data.name) {
-            const userNameEl = document.getElementById("user-name");
-            if (userNameEl) userNameEl.textContent = data.name;
-            localStorage.setItem("user_name", data.name);
-        }
-
-        setProfileInfo(data); // <-- Ensure profile info is updated for all users
-
-        // Handle role-specific UI elements
-        if (data.role === 'student') {
-            document.querySelectorAll('.student-only').forEach(el => el.style.display = 'block');
-            document.querySelectorAll('.teacher-only').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-            if (data.roleData) {
-                const classEl = document.getElementById("profile-class");
-                if (classEl) classEl.textContent = 'Class: ' + (data.roleData.class || 'N/A');
-                const sectionEl = document.getElementById("profile-section");
-                if (sectionEl) sectionEl.textContent = 'Section: ' + (data.roleData.section || 'N/A');
-                const rollEl = document.getElementById("profile-roll");
-                if (rollEl) rollEl.textContent = 'Roll: ' + (data.roleData.rollNumber || 'N/A');
+        .then(response => {
+            if (response.status === 304) {
+                // Optionally, use cached data or show a message
+                throw new Error('Profile not modified, no new data.');
             }
-        } else if (data.role === 'teacher') {
-            document.querySelectorAll('.student-only').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.teacher-only').forEach(el => el.style.display = 'block');
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-            if (data.roleData) {
-                const classEl = document.getElementById("profile-class");
-                if (classEl) classEl.textContent = 'Class: ' + (data.roleData.classTeacherOf || 'N/A');
-                const sectionEl = document.getElementById("profile-section");
-                if (sectionEl) sectionEl.textContent = 'Section: ' + (Array.isArray(data.roleData.subjects) ? data.roleData.subjects.join(', ') : data.roleData.subjects || 'N/A');
-                const rollEl = document.getElementById("profile-roll");
-                if (rollEl) rollEl.textContent = 'Roll: ' + (data.roleData.employeeId || 'N/A');
+            if (!response.ok) {
+                throw new Error('Profile fetch failed');
             }
-        } else if (data.role === 'admin') {
-            document.querySelectorAll('.student-only').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.teacher-only').forEach(el => el.style.display = 'none');
-            addAdminCards();
-        }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Profile data:", data);
+            // Update welcome message and dropdown name
+            if (data.name) {
+                const userNameEl = document.getElementById("user-name");
+                if (userNameEl) userNameEl.textContent = data.name;
+                localStorage.setItem("user_name", data.name);
+            }
 
-        // Update profile info in dropdown and collapsed
-        const collapsedName = document.getElementById("profile-name-collapsed");
-        if (collapsedName) collapsedName.textContent = data?.name || 'User';
-        const expandedName = document.getElementById("profile-name");
-        if (expandedName) expandedName.textContent = data?.name || 'User';
-        // Profile pictures (use real one if available, else fallback to ui-avatars.com)
-        let picUrl = data?.profilePicUrl || 'default-avatar.jpg';
-        if (!data?.profilePicUrl && data?.name) {
-            picUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=E0E7EF&color=1976d2&size=128`;
-        }
-        const picCollapsed = document.getElementById("profile-pic-collapsed");
-        if (picCollapsed) picCollapsed.src = picUrl;
-        const picLarge = document.getElementById("profile-pic");
-        if (picLarge) picLarge.src = picUrl;
-        
-        // Remove loading overlay after profile is loaded
-        const overlay = document.getElementById('authLoadingOverlay');
-        if (overlay) overlay.style.display = 'none';
-    })
-    .catch(error => {
-        console.error('Error fetching profile:', error);
-        alert('Failed to load user profile data');
-        // Remove loading overlay even on error
-        const overlay = document.getElementById('authLoadingOverlay');
-        if (overlay) overlay.style.display = 'none';
-    });
+            setProfileInfo(data); // <-- Ensure profile info is updated for all users
+
+            // Handle role-specific UI elements
+            if (data.role === 'student') {
+                document.querySelectorAll('.student-only').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.teacher-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+
+                // Check fees for student
+                fetch("/api/fees", {
+                    headers: { "Authorization": `Bearer ${token}` }
+                })
+                    .then(res => res.json())
+                    .then(feeData => {
+                        const latestPayment = feeData.payments && feeData.payments[0];
+                        if (latestPayment && latestPayment.balance > 0) {
+                            const feeAlert = document.getElementById('fee-due-alert');
+                            if (feeAlert) feeAlert.style.display = 'block';
+                        }
+                    })
+                    .catch(err => console.error('Fee check failed:', err));
+
+                if (data.roleData) {
+                    const classEl = document.getElementById("profile-class");
+                    if (classEl) classEl.textContent = 'Class: ' + (data.roleData.class || 'N/A');
+                    const sectionEl = document.getElementById("profile-section");
+                    if (sectionEl) sectionEl.textContent = 'Section: ' + (data.roleData.section || 'N/A');
+                    const rollEl = document.getElementById("profile-roll");
+                    if (rollEl) rollEl.textContent = 'Roll: ' + (data.roleData.rollNumber || 'N/A');
+                }
+            } else if (data.role === 'teacher') {
+                document.querySelectorAll('.student-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.teacher-only').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+                if (data.roleData) {
+                    const classEl = document.getElementById("profile-class");
+                    if (classEl) classEl.textContent = 'Class: ' + (data.roleData.classTeacherOf || 'N/A');
+                    const sectionEl = document.getElementById("profile-section");
+                    if (sectionEl) sectionEl.textContent = 'Section: ' + (Array.isArray(data.roleData.subjects) ? data.roleData.subjects.join(', ') : data.roleData.subjects || 'N/A');
+                    const rollEl = document.getElementById("profile-roll");
+                    if (rollEl) rollEl.textContent = 'Roll: ' + (data.roleData.employeeId || 'N/A');
+                }
+            } else if (data.role === 'admin') {
+                document.querySelectorAll('.student-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.teacher-only').forEach(el => el.style.display = 'none');
+                addAdminCards();
+            }
+
+            // Update profile info in dropdown and collapsed
+            const collapsedName = document.getElementById("profile-name-collapsed");
+            if (collapsedName) collapsedName.textContent = data?.name || 'User';
+            const expandedName = document.getElementById("profile-name");
+            if (expandedName) expandedName.textContent = data?.name || 'User';
+            // Profile pictures (use real one if available, else fallback to ui-avatars.com)
+            let picUrl = data?.profilePicUrl || 'default-avatar.jpg';
+            if (!data?.profilePicUrl && data?.name) {
+                picUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=E0E7EF&color=1976d2&size=128`;
+            }
+            const picCollapsed = document.getElementById("profile-pic-collapsed");
+            if (picCollapsed) picCollapsed.src = picUrl;
+            const picLarge = document.getElementById("profile-pic");
+            if (picLarge) picLarge.src = picUrl;
+
+            // Remove loading overlay after profile is loaded
+            const overlay = document.getElementById('authLoadingOverlay');
+            if (overlay) overlay.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error fetching profile:', error);
+            alert('Failed to load user profile data');
+            // Remove loading overlay even on error
+            const overlay = document.getElementById('authLoadingOverlay');
+            if (overlay) overlay.style.display = 'none';
+        });
 
     // Attach event listeners to cards
 
@@ -381,7 +396,7 @@ window.onload = () => {
             window.location.href = "view-submissions.html";
         });
     }
-    
+
     // Add manage exams card handler (for teachers)
     const manageExamsCard = document.getElementById("manage-exams-card");
     if (manageExamsCard) {
@@ -389,7 +404,7 @@ window.onload = () => {
             window.location.href = "manage-exams.html";
         });
     }
-    
+
     // Add grade exams card handler (for teachers)
     const gradeExamsCard = document.getElementById("grade-exams-card");
     if (gradeExamsCard) {
@@ -453,9 +468,9 @@ window.onload = () => {
 
     // Global dark mode support
     if (localStorage.getItem('dark_mode') === 'true') {
-      document.body.classList.add('dark-mode');
+        document.body.classList.add('dark-mode');
     } else {
-      document.body.classList.remove('dark-mode');
+        document.body.classList.remove('dark-mode');
     }
 
 
@@ -465,10 +480,10 @@ window.onload = () => {
 function addAdminCards() {
     const cardContainer = document.querySelector('.card-container');
     if (!cardContainer) return;
-    
+
     // Show admin-only cards that are already in the HTML
     document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-    
+
     // Array of admin card definitions
     const adminCards = [
         {
@@ -508,7 +523,7 @@ function addAdminCards() {
             action: () => { window.location.href = 'school-info.html'; }
         }
     ];
-    
+
     // Create and add each admin card
     adminCards.forEach(cardInfo => {
         // Check if card already exists (to avoid duplicates)
@@ -517,15 +532,15 @@ function addAdminCards() {
             card.className = 'dashboard-card';
             card.id = cardInfo.id;
             card.textContent = `${cardInfo.icon} ${cardInfo.title}`;
-            
+
             // Add click handler
             card.addEventListener('click', cardInfo.action);
-            
+
             // Add card to container
             cardContainer.appendChild(card);
         }
     });
-    
+
     // Show all admin cards
     document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
 }
