@@ -193,7 +193,7 @@ function displayStudents(students, results, subject) {
     students.forEach(student => {
         // Defensive check for result.student
         const result = results.find(r => r.student && r.student._id === student._id);
-        const subjectResult = result?.subjects.find(s => s.name === subject);
+        const subjectResult = result?.marks?.find(s => s.subjectName === subject);
 
         const row = document.createElement('tr');
         row.innerHTML = `
