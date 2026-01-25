@@ -188,6 +188,11 @@ function displayStudents(students, results, subject) {
         noData.innerHTML = '<p>No students found in this class</p>';
         return;
     }
+    console.log("Student:", students.name);
+    console.log("Result:", results);
+    console.log("Marks:", results?.marks);
+    console.log("Subject:", subject);
+
 
     tableBody.innerHTML = '';
     students.forEach(student => {
