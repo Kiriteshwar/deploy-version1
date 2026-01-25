@@ -498,17 +498,39 @@ export const getUsers = asyncHandler(async (req, res) => {
 // @route   POST /api/admin/users
 // @access  Private (Admin only)
 export const addUser = asyncHandler(async (req, res) => {
-    const { name, email, phone, password, role, studentInfo, teacherInfo, adminInfo } = req.body;
+    const { name, email, phone, password, role, studentInfo, teacherInfo, adminInfo, totalFee, gender } = req.body;
     if (!name || !email || !phone || !password || !role) {
-        return res.status(400).json({ success: false, message: 'Missing required fields: name, email, phone, password, role' });
+        return res.status(404).json({ success: false, message: 'Missing required fields: name, email, phone, password, role' });
     }
     const existing = await User.findOne({ email });
     if (existing) {
         return res.status(400).json({ success: false, message: 'Email already exists' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, phone, password: hashedPassword, role });
-    if (role === 'student' && studentInfo) user.studentInfo = studentInfo;
+    const user = new User({ name, email, phone, password: hashedPassword, role, gender });
+
+    if (role === 'student' && studentInfo) {
+        user.studentInfo = studentInfo;
+
+        // Calculate discount if totalFee is provided
+        if (totalFee) {
+            const currentYear = new Date().getFullYear().toString();
+            // Find ALL fee structures for this class for the current year (or any valid one if specific year logic needed)
+            // Using logic similar to getFeeAnalytics to pick the relevant one if multiple exist
+            const feeStructures = await FeeStructure.find({
+                class: studentInfo.class,
+                academicYear: currentYear
+            });
+
+            // If multiple, pick the one with highest fee or just the first one? 
+            // Usually there's one per class per year.
+            const feeStructure = feeStructures.length > 0 ? feeStructures[0] : null;
+
+            if (feeStructure) {
+                user.discount = Math.max(0, feeStructure.totalFee - parseInt(totalFee));
+            }
+        }
+    }
     if (role === 'teacher' && teacherInfo) user.teacherInfo = teacherInfo;
     if (role === 'admin' && adminInfo) user.adminInfo = adminInfo;
     await user.save();
@@ -610,7 +632,8 @@ export const bulkImportUsers = asyncHandler(async (req, res) => {
                 email: row.email.toLowerCase(),
                 phone: row.phone,
                 password: hashedPassword,
-                role: row.role.toLowerCase()
+                role: row.role.toLowerCase(),
+                gender: row.gender || ''
             };
 
             // Handle student info
@@ -620,9 +643,16 @@ export const bulkImportUsers = asyncHandler(async (req, res) => {
                     results.errors.push({ row: i + 2, error: 'Students require class, section, and rollNumber' });
                     continue;
                 }
+
+                if (row.admissionNumber && !/^\d+$/.test(row.admissionNumber)) {
+                    results.failed++;
+                    results.errors.push({ row: i + 2, error: 'Admission number must contain only digits' });
+                    continue;
+                }
                 userData.studentInfo = {
                     class: row.class,
                     section: row.section,
+                    admissionNumber: row.admissionNumber || '',
                     rollNumber: row.rollNumber,
                     guardianName: row.guardianName || '',
                     fatherGuardianPhone: row.fatherGuardianPhone || row.phone,
@@ -636,6 +666,20 @@ export const bulkImportUsers = asyncHandler(async (req, res) => {
                     identificationMark1: row.identificationMark1 || '',
                     identificationMark2: row.identificationMark2 || ''
                 };
+
+                // Calculate discount if totalFee is provided in Excel
+                if (row.totalFee) {
+                    const currentYear = new Date().getFullYear().toString();
+                    const feeStructures = await FeeStructure.find({
+                        class: row.class,
+                        academicYear: currentYear
+                    });
+                    const feeStructure = feeStructures.length > 0 ? feeStructures[0] : null;
+
+                    if (feeStructure) {
+                        userData.discount = Math.max(0, feeStructure.totalFee - parseInt(row.totalFee));
+                    }
+                }
             }
 
             // Handle teacher info

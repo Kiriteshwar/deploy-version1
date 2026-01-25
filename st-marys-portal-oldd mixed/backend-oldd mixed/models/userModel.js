@@ -42,6 +42,11 @@ const userSchema = new mongoose.Schema({
         type: {
             class: String,
             section: String,
+            admissionNumber: {
+                type: String,
+                unique: true,
+                sparse: true
+            },
             rollNumber: {
                 type: String,
                 unique: true,

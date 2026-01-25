@@ -522,8 +522,9 @@
                     <div>
                         <strong>Students:</strong>
                         <ul style="margin:5px 0; padding-left:20px; font-size:0.85rem;">
-                            <li>name* | email* | phone* | password* | role* (student)</li>
-                            <li>class* | section* | rollNumber*</li>
+                            <li>name* | email* | phone* | password* | role* (student) | gender</li>
+                            <li>class* | section* | admissionNumber* | rollNumber*</li>
+                            <li>totalFee (to calculate discount)</li>
                             <li>guardianName | fatherGuardianPhone | motherName | motherPhone</li>
                             <li>address | dateOfBirth (YYYY-MM-DD) | religion | caste | subCaste</li>
                             <li>identificationMark1 | identificationMark2</li>
@@ -532,7 +533,7 @@
                     <div>
                         <strong>Teachers:</strong>
                         <ul style="margin:5px 0; padding-left:20px; font-size:0.85rem;">
-                            <li>name* | email* | phone* | password* | role* (teacher)</li>
+                            <li>name* | email* | phone* | password* | role* (teacher) | gender</li>
                             <li>subjects (comma-separated) | salary</li>
                             <li>classTeacherClass | classTeacherSection</li>
                         </ul>
@@ -672,6 +673,14 @@
                         <div class="form-group"><label>Password *</label><input type="password" id="new-password"
                                 required></div>
                     </div>
+                    <div class="form-group"><label>Gender</label>
+                        <select id="new-gender">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
                     <div class="form-group"><label>Role *</label>
                         <select id="new-role" required>
                             <option value="">Select Role</option>
@@ -687,9 +696,13 @@
                             <div class="form-group"><label>Section *</label><input type="text" id="new-section"></div>
                         </div>
                         <div class="form-row">
+                            <div class="form-group"><label>Admission Number *</label><input type="text"
+                                    id="new-admission-no"></div>
                             <div class="form-group"><label>Roll Number *</label><input type="text" id="new-roll"></div>
-                            <div class="form-group"><label>Date of Birth</label><input type="date" id="new-dob"></div>
                         </div>
+                        <div class="form-group"><label>Total Fee To Be Paid (₹)</label><input type="number"
+                                id="new-total-fee" placeholder="Leave empty for default fee structure"></div>
+                        <div class="form-group"><label>Date of Birth</label><input type="date" id="new-dob"></div>
                         <div class="form-row">
                             <div class="form-group"><label>Religion</label><input type="text" id="new-religion"
                                     placeholder="e.g. Hindu, Muslim, Christian"></div>

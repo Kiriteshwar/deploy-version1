@@ -307,26 +307,35 @@ window.onload = () => {
         const email = document.getElementById('new-email').value.trim();
         const phone = document.getElementById('new-phone').value.trim();
         const password = document.getElementById('new-password').value;
+        const gender = document.getElementById('new-gender').value;
 
         if (!name || !email || !phone || !password || !role) {
             alert('Please fill all required fields');
             return;
         }
 
-        const userData = { name, email, phone, password, role };
+        const userData = { name, email, phone, password, role, gender };
 
         if (role === 'student') {
             const cls = document.getElementById('new-class').value.trim();
             const sec = document.getElementById('new-section').value.trim();
             const roll = document.getElementById('new-roll').value.trim();
-            if (!cls || !sec || !roll) {
-                alert('Please fill Class, Section, and Roll Number');
+            const admissionNo = document.getElementById('new-admission-no').value.trim();
+
+            if (!cls || !sec || !roll || !admissionNo) {
+                alert('Please fill Class, Section, Roll Number, and Admission Number');
+                return;
+            }
+
+            if (!/^\d+$/.test(admissionNo)) {
+                alert('Admission Number must contain only digits');
                 return;
             }
             userData.studentInfo = {
                 class: cls,
                 section: sec,
                 rollNumber: roll,
+                admissionNumber: admissionNo,
                 guardianName: document.getElementById('new-guardian').value.trim(),
                 fatherGuardianPhone: document.getElementById('new-guardian-phone').value.trim() || phone,
                 motherName: document.getElementById('new-mother-name').value.trim(),
@@ -340,6 +349,11 @@ window.onload = () => {
                 identificationMark1: document.getElementById('new-id-mark1').value.trim(),
                 identificationMark2: document.getElementById('new-id-mark2').value.trim()
             };
+
+            const totalFee = document.getElementById('new-total-fee').value;
+            if (totalFee) {
+                userData.totalFee = parseInt(totalFee);
+            }
         } else if (role === 'teacher') {
             userData.teacherInfo = {
                 subjects: document.getElementById('new-subjects').value.split(',').map(s => s.trim()).filter(s => s),
@@ -393,6 +407,7 @@ window.onload = () => {
             <div class="detail-row"><span class="detail-label">Name:</span><span class="detail-value">${escapeHtml(user.name)}</span></div>
             <div class="detail-row"><span class="detail-label">Email:</span><span class="detail-value">${escapeHtml(user.email)}</span></div>
             <div class="detail-row"><span class="detail-label">Phone:</span><span class="detail-value">${escapeHtml(user.phone) || 'N/A'}</span></div>
+            <div class="detail-row"><span class="detail-label">Gender:</span><span class="detail-value">${escapeHtml(user.gender) || 'N/A'}</span></div>
             <div class="detail-row"><span class="detail-label">Role:</span><span class="detail-value"><span class="role-badge ${user.role}">${user.role}</span></span></div>
             <div class="detail-row"><span class="detail-label">Status:</span><span class="detail-value">${user.isActive !== false ? '✅ Active' : '❌ Inactive'}</span></div>
         `;
@@ -401,6 +416,7 @@ window.onload = () => {
             const i = user.studentInfo;
             html += `
                 <div class="section-title">Student Information</div>
+                <div class="detail-row"><span class="detail-label">Admission Number:</span><span class="detail-value">${i.admissionNumber || 'N/A'}</span></div>
                 <div class="detail-row"><span class="detail-label">Roll Number:</span><span class="detail-value">${i.rollNumber || 'N/A'}</span></div>
                 <div class="detail-row"><span class="detail-label">Class:</span><span class="detail-value">${i.class || 'N/A'}</span></div>
                 <div class="detail-row"><span class="detail-label">Section:</span><span class="detail-value">${i.section || 'N/A'}</span></div>
@@ -532,10 +548,10 @@ window.onload = () => {
     // Download Excel template
     function downloadExcelTemplate() {
         // CSV format template
-        const studentHeaders = 'name,email,phone,password,role,class,section,rollNumber,guardianName,fatherGuardianPhone,motherName,motherPhone,address,dateOfBirth,religion,caste,subCaste,identificationMark1,identificationMark2';
-        const teacherHeaders = 'name,email,phone,password,role,subjects,salary,classTeacherClass,classTeacherSection';
+        const studentHeaders = 'name,email,phone,password,role,gender,class,section,admissionNumber,rollNumber,totalFee,guardianName,fatherGuardianPhone,motherName,motherPhone,address,dateOfBirth,religion,caste,subCaste,identificationMark1,identificationMark2';
+        const teacherHeaders = 'name,email,phone,password,role,gender,subjects,salary,classTeacherClass,classTeacherSection';
 
-        const templateContent = `STUDENT TEMPLATE\n${studentHeaders}\nJohn Doe,john@example.com,9876543210,password123,student,X,A,STU001,Father Name,9876543210,Mother Name,9876543211,123 Main Street,2010-05-15,Hindu,General,,Mole on left arm,\n\nTEACHER TEMPLATE\n${teacherHeaders}\nJane Teacher,jane@example.com,9876543212,password123,teacher,"Math,Science",50000,X,A`;
+        const templateContent = `STUDENT TEMPLATE\n${studentHeaders}\nJohn Doe,john@example.com,9876543210,password123,student,Male,X,A,ADM001,STU001,50000,Father Name,9876543210,Mother Name,9876543211,123 Main Street,2010-05-15,Hindu,General,,Mole on left arm,\n\nTEACHER TEMPLATE\n${teacherHeaders}\nJane Teacher,jane@example.com,9876543212,password123,teacher,Female,"Math,Science",50000,X,A`;
 
         const blob = new Blob([templateContent], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
