@@ -552,22 +552,28 @@ export const updateUser = asyncHandler(async (req, res) => {
 
     // Handle studentInfo updates
     if (user.role === 'student' && studentInfo) {
-        user.studentInfo = {
-            ...user.studentInfo,
-            ...studentInfo
-        };
+        // Ensure studentInfo exists
+        if (!user.studentInfo) user.studentInfo = {};
+
+        // Manually update fields to ensure tracking
+        // Mongoose subdocuments work best with direct assignment or set()
+        Object.keys(studentInfo).forEach(key => {
+            // Handle Dates: empty string -> null
+            if (['dateOfBirth', 'dateOfLeaving'].includes(key) && studentInfo[key] === '') {
+                user.studentInfo[key] = null;
+            } else {
+                user.studentInfo[key] = studentInfo[key];
+            }
+        });
+
         user.markModified('studentInfo');
 
         // Handle totalFee update -> recalculate discount
         if (totalFee) {
             const currentYear = new Date().getFullYear().toString();
-            // Try to find fee structure matching class
             const cls = studentInfo.class || user.studentInfo.class;
             if (cls) {
-                const feeStructures = await FeeStructure.find({
-                    class: cls,
-                    // academicYear: currentYear // Optional: enforce year
-                });
+                const feeStructures = await FeeStructure.find({ class: cls });
                 const feeStructure = feeStructures.length > 0 ? feeStructures[0] : null;
                 if (feeStructure) {
                     user.discount = Math.max(0, feeStructure.totalFee - parseInt(totalFee));
@@ -578,10 +584,10 @@ export const updateUser = asyncHandler(async (req, res) => {
 
     // Handle teacherInfo updates
     if (user.role === 'teacher' && teacherInfo) {
-        user.teacherInfo = {
-            ...user.teacherInfo,
-            ...teacherInfo
-        };
+        if (!user.teacherInfo) user.teacherInfo = {};
+        Object.keys(teacherInfo).forEach(key => {
+            user.teacherInfo[key] = teacherInfo[key];
+        });
         user.markModified('teacherInfo');
     }
 
@@ -590,7 +596,8 @@ export const updateUser = asyncHandler(async (req, res) => {
         user.phone = phone;
 
         // For students, also update fatherGuardianPhone to keep them in sync
-        if (user.role === 'student' && user.studentInfo) {
+        if (user.role === 'student') {
+            if (!user.studentInfo) user.studentInfo = {};
             user.studentInfo.fatherGuardianPhone = phone;
             user.markModified('studentInfo');
         }
