@@ -690,8 +690,8 @@ window.onload = () => {
                     <div class="content">
                         This is to certify that <span class="fill-blank" style="min-width:200px">${user.name}</span><br>
                         D/o. / S/o. Sri <span class="fill-blank" style="min-width:200px">${fatherName}</span>
-                        was / is a student of this Institution Studying in Classes <span class="fill-blank">${className}</span>
-                        from <span class="fill-blank">20&nbsp;&nbsp;&nbsp;-20&nbsp;&nbsp;&nbsp;</span> to <span class="fill-blank">20&nbsp;&nbsp;&nbsp;-20&nbsp;&nbsp;&nbsp;</span>.
+                        was / is a student of this Institution Studying in Classes <span class="fill-blank" style="padding-left: 13px">${className}</span>
+                        from <span class="fill-blank">20&nbsp;&nbsp;&nbsp;&nbsp;-20&nbsp;&nbsp;&nbsp;&nbsp;</span> to <span class="fill-blank">20&nbsp;&nbsp;&nbsp;&nbsp;-20&nbsp;&nbsp;&nbsp;&nbsp;</span>.
                         His / Her Admission Number is <span class="fill-blank">${admissionNo}</span>
                         and Date of Birth according to our school record is <span class="fill-blank" style="min-width:120px">${dob}</span>.<br>
                         During the period his / her character and conduct have been satisfactory.
