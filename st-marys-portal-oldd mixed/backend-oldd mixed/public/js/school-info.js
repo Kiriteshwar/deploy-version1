@@ -567,6 +567,7 @@ window.onload = () => {
         const className = info.class || '__________';
         const currentYear = new Date().getFullYear();
         const joinYear = user.joinDate ? new Date(user.joinDate).getFullYear() : currentYear;
+        const logo = '../images/logo.png';
 
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
@@ -645,10 +646,10 @@ window.onload = () => {
             <body>
                 <div class="certificate-border">
                     <div class="header">
-                        <div class="logo-placeholder">LOGO</div>
+                        <div class="logo-placeholder">${logo}</div>
                         <h1 class="school-name">ST. MARY'S HIGH SCHOOL</h1>
                         <div class="medium">(ENGLISH MEDIUM)</div>
-                        <div class="address">HASANPARTHY - 506 371, Warangal (Dist.) - T.S.</div>
+                        <div class="address">HASANPARTHY - 506371, Warangal (Dist.) - T.S.</div>
                         <div class="title-box">STUDY CERTIFICATE</div>
                     </div>
                     
@@ -656,7 +657,7 @@ window.onload = () => {
                         This is to certify that <span class="fill-blank" style="min-width:250px">${user.name}</span><br>
                         D/o. / S/o. Sri <span class="fill-blank" style="min-width:250px">${fatherName}</span>
                         was / is a student of this Institution Studying in Classes <span class="fill-blank">${className}</span>
-                        from <span class="fill-blank">${joinYear}</span> to <span class="fill-blank">${currentYear}</span>.<br>
+                        from <span class="fill-blank">20  -20  </span> to <span class="fill-blank">20  -20  </span>.<br>
                         His / Her Admission Number is <span class="fill-blank">${admissionNo}</span>
                         and Date of Birth according to our school record is <span class="fill-blank" style="min-width:150px">${dob}</span>.<br>
                         During the period his / her character and conduct have been satisfactory.
@@ -664,7 +665,7 @@ window.onload = () => {
                     
                     <div class="footer">
                         <div class="footer-item" style="text-align:left">
-                            Date: <span style="text-decoration:underline">${new Date().toLocaleDateString('en-GB')}</span>
+                            Date: <span style="text-decoration:none">${new Date().toLocaleDateString('en-GB')}</span>
                         </div>
                         <div class="footer-item">
                             <span class="sign-line"></span>        
