@@ -196,17 +196,19 @@ function displayStudents(students, results, subject) {
             r.student &&
             r.student.toString() === student._id.toString()
         );
-        const subjectResult = result?.marks?.find(s => s.subjectName === subject);
+        const subjectResult = result?.marks?.find(
+            s => s.subjectName.trim().toLowerCase() === subject.trim().toLowerCase()
+        );
 
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${student.studentInfo && student.studentInfo.rollNumber ? student.studentInfo.rollNumber : 'N/A'}</td>
+            <td>${student.studentInfo?.rollNumber ?? 'N/A'}</td>
             <td>${student.name}</td>
             <td>
-                <input type="number" 
-                       class="marks-input" 
-                       data-student-id="${student._id}"
-                       value="${subjectResult ? subjectResult.obtainedMarks : ''}"
+                <input type="number"
+                        class="marks-input"
+                        data-student-id="${student._id}"
+                        value="${subjectResult?.obtainedMarks ?? ''}"
                        min="0"
                        max="${getMaxMarks()}"
                        ${result?.exam.resultDeclared ? 'disabled' : ''}>
