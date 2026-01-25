@@ -78,6 +78,7 @@ function calculateGrade(subjects, percentage) {
     if (percentage >= 70) return 'B';
     if (percentage >= 60) return 'C';
     if (percentage >= 50) return 'D';
+    if (percentage >= 46) return 'E';
     return 'F';
 }
 
