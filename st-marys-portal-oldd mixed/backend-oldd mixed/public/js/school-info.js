@@ -308,13 +308,14 @@ window.onload = () => {
         const phone = document.getElementById('new-phone').value.trim();
         const password = document.getElementById('new-password').value;
         const gender = document.getElementById('new-gender').value;
+        const joinDate = document.getElementById('new-join-date').value;
 
         if (!name || !email || !phone || !password || !role) {
             alert('Please fill all required fields');
             return;
         }
 
-        const userData = { name, email, phone, password, role, gender };
+        const userData = { name, email, phone, password, role, gender, joinDate: joinDate || undefined };
 
         if (role === 'student') {
             const cls = document.getElementById('new-class').value.trim();
@@ -720,10 +721,10 @@ window.onload = () => {
     // Download Excel template
     function downloadExcelTemplate() {
         // CSV format template
-        const studentHeaders = 'name,email,phone,password,role,gender,class,section,admissionNumber,rollNumber,totalFee,guardianName,fatherGuardianPhone,motherName,motherPhone,address,dateOfBirth,religion,caste,subCaste,identificationMark1,identificationMark2';
-        const teacherHeaders = 'name,email,phone,password,role,gender,subjects,salary,classTeacherClass,classTeacherSection';
+        const studentHeaders = 'name,email,phone,password,role,gender,joinDate,class,section,admissionNumber,rollNumber,totalFee,guardianName,fatherGuardianPhone,motherName,motherPhone,address,dateOfBirth,religion,caste,subCaste,identificationMark1,identificationMark2';
+        const teacherHeaders = 'name,email,phone,password,role,gender,joinDate,subjects,salary,classTeacherClass,classTeacherSection';
 
-        const templateContent = `STUDENT TEMPLATE\n${studentHeaders}\nJohn Doe,john@example.com,9876543210,password123,student,Male,X,A,ADM001,STU001,50000,Father Name,9876543210,Mother Name,9876543211,123 Main Street,2010-05-15,Hindu,General,,Mole on left arm,\n\nTEACHER TEMPLATE\n${teacherHeaders}\nJane Teacher,jane@example.com,9876543212,password123,teacher,Female,"Math,Science",50000,X,A`;
+        const templateContent = `STUDENT TEMPLATE\n${studentHeaders}\nJohn Doe,john@example.com,9876543210,password123,student,Male,2024-01-01,X,A,ADM001,STU001,50000,Father Name,9876543210,Mother Name,9876543211,123 Main Street,2010-05-15,Hindu,General,,Mole on left arm,\n\nTEACHER TEMPLATE\n${teacherHeaders}\nJane Teacher,jane@example.com,9876543212,password123,teacher,Female,2024-01-01,"Math,Science",50000,X,A`;
 
         const blob = new Blob([templateContent], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
@@ -751,7 +752,8 @@ window.onload = () => {
         }
     }
 
-    function excelDOBToISO(value) {
+    function excelDateToISO(value) {
+        if (!value) return null;
         // Case 1: Excel serial number
         if (typeof value === 'number') {
             const excelEpoch = new Date(Date.UTC(1899, 11, 30));
@@ -759,15 +761,21 @@ window.onload = () => {
             return date.toISOString();
         }
 
-        // Case 2: dd-mm-yy OR dd-mm-yyyy string
+        // Case 2: dd-mm-yy OR dd-mm-yyyy string OR yyyy-mm-dd
         if (typeof value === 'string') {
-            const parts = value.split('-');
+            const parts = value.split(/[-/]/);
             if (parts.length === 3) {
-                let [dd, mm, yy] = parts;
-
-                // Convert 2-digit year → 4-digit year
-                if (yy.length === 2) {
-                    yy = Number(yy) > 30 ? `19${yy}` : `20${yy}`;
+                let dd, mm, yy;
+                if (parts[0].length === 4) {
+                    // yyyy-mm-dd
+                    [yy, mm, dd] = parts;
+                } else {
+                    // dd-mm-yy
+                    [dd, mm, yy] = parts;
+                    // Convert 2-digit year → 4-digit year
+                    if (yy.length === 2) {
+                        yy = Number(yy) > 30 ? `19${yy}` : `20${yy}`;
+                    }
                 }
 
                 const date = new Date(Date.UTC(yy, mm - 1, dd));
@@ -802,7 +810,8 @@ window.onload = () => {
             // Send to backend
             const transformedUsers = jsonData.map(row => ({
                 ...row,
-                dateOfBirth: excelDOBToISO(row.dateOfBirth)
+                dateOfBirth: excelDateToISO(row.dateOfBirth),
+                joinDate: excelDateToISO(row.joinDate)
             }));
 
             const response = await fetch('/api/admin/users/bulk', {

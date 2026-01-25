@@ -205,6 +205,10 @@ function showAddUserModal() {
                     <label>Phone:</label><br>
                     <input type="text" name="phone" style="width:100%;padding:0.5rem;">
                 </div>
+                <div style="margin-bottom:1rem;">
+                    <label>Date of Joining:</label><br>
+                    <input type="date" name="joinDate" style="width:100%;padding:0.5rem;">
+                </div>
                 <button type="submit" style="background:#28a745;color:#fff;padding:0.5rem 1.5rem;border:none;border-radius:4px;">Add</button>
                 <button type="button" onclick="document.getElementById('addUserModal').style.display='none'" style="margin-left:1rem;">Cancel</button>
             </form>
@@ -254,6 +258,7 @@ function showAddUserModal() {
             };
             user.phone = form.phone.value;
         }
+        if (form.joinDate.value) user.joinDate = form.joinDate.value;
         // For admin, no extra fields
         const token = localStorage.getItem('auth_token');
         const res = await fetch('/api/admin/users', {
@@ -307,6 +312,7 @@ function showEditUserModal(user) {
                         <option value="Other" ${user.gender === 'Other' ? 'selected' : ''}>Other</option>
                     </select>
                 </div>
+                <div><label>Date of Joining</label><input type="date" name="joinDate" value="${formatDate(user.joinDate)}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
 
                 ${isStudent ? `
                 <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Academic Info</div>
@@ -359,6 +365,7 @@ function showEditUserModal(user) {
             email: form.email.value,
             phone: form.phone.value,
             gender: form.gender.value,
+            joinDate: form.joinDate.value,
             studentInfo: isStudent ? {} : undefined,
             teacherInfo: isTeacher ? {} : undefined
         };

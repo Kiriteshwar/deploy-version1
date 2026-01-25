@@ -554,7 +554,7 @@
                     <div>
                         <strong>Students:</strong>
                         <ul style="margin:5px 0; padding-left:20px; font-size:0.85rem;">
-                            <li>name* | email* | phone* | password* | role* (student) | gender</li>
+                            <li>name* | email* | phone* | password* | role* (student) | gender | joinDate</li>
                             <li>class* | section* | admissionNumber* | rollNumber*</li>
                             <li>totalFee (to calculate discount)</li>
                             <li>guardianName | fatherGuardianPhone | motherName | motherPhone</li>
@@ -565,7 +565,7 @@
                     <div>
                         <strong>Teachers:</strong>
                         <ul style="margin:5px 0; padding-left:20px; font-size:0.85rem;">
-                            <li>name* | email* | phone* | password* | role* (teacher) | gender</li>
+                            <li>name* | email* | phone* | password* | role* (teacher) | gender | joinDate</li>
                             <li>subjects (comma-separated) | salary</li>
                             <li>classTeacherClass | classTeacherSection</li>
                         </ul>
@@ -715,6 +715,8 @@
                             <option value="Other">Other</option>
                         </select>
                     </div>
+                    <div class="form-group"><label>Date of Joining</label><input type="date" id="new-join-date"
+                            placeholder="Default is current day"></div>
                     <div class="form-group"><label>Role *</label>
                         <select id="new-role" required>
                             <option value="">Select Role</option>

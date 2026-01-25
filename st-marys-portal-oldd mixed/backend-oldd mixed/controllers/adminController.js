@@ -498,7 +498,7 @@ export const getUsers = asyncHandler(async (req, res) => {
 // @route   POST /api/admin/users
 // @access  Private (Admin only)
 export const addUser = asyncHandler(async (req, res) => {
-    const { name, email, phone, password, role, studentInfo, teacherInfo, adminInfo, totalFee, gender } = req.body;
+    const { name, email, phone, password, role, studentInfo, teacherInfo, adminInfo, totalFee, gender, joinDate } = req.body;
     if (!name || !email || !phone || !password || !role) {
         return res.status(404).json({ success: false, message: 'Missing required fields: name, email, phone, password, role' });
     }
@@ -507,7 +507,7 @@ export const addUser = asyncHandler(async (req, res) => {
         return res.status(400).json({ success: false, message: 'Email already exists' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, phone, password: hashedPassword, role, gender });
+    const user = new User({ name, email, phone, password: hashedPassword, role, gender, joinDate: joinDate || undefined });
 
     if (role === 'student' && studentInfo) {
         user.studentInfo = studentInfo;
@@ -542,13 +542,14 @@ export const addUser = asyncHandler(async (req, res) => {
 // @access  Private (Admin only)
 export const updateUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { name, email, password, studentInfo, teacherInfo, phone, totalFee } = req.body;
+    const { name, email, password, studentInfo, teacherInfo, phone, totalFee, joinDate } = req.body;
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
     if (name) user.name = name;
     if (email) user.email = email;
     if (password) user.password = await bcrypt.hash(password, 10);
+    if (joinDate) user.joinDate = joinDate;
 
     // Handle studentInfo updates
     if (user.role === 'student' && studentInfo) {
@@ -657,7 +658,8 @@ export const bulkImportUsers = asyncHandler(async (req, res) => {
                 phone: row.phone,
                 password: hashedPassword,
                 role: row.role.toLowerCase(),
-                gender: row.gender || ''
+                gender: row.gender || '',
+                joinDate: row.joinDate ? new Date(row.joinDate) : new Date()
             };
 
             // Handle student info
