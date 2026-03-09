@@ -56,7 +56,7 @@
     <!-- RIGHT: IMAGES -->
     <div class="event-gallery">
         <div class="gallery-hero">
-            <img id="mainImage" alt="Event highlight">
+            <img id="mainImage" loading="lazy" alt="Event highlight">
         </div>
 
         <div class="gallery-grid" id="gallery"></div>
@@ -96,22 +96,98 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 const events = {
+  "national-science-day": {
+  title: "National Science Day",
+  shortDesc: "Celebrating curiosity, innovation, and scientific thinking.",
+  longDesc: "National Science Day was celebrated with enthusiasm to inspire curiosity and scientific thinking among students. The event featured creative science models, experiments, and presentations that encouraged innovation and hands-on learning.\n\nStudents demonstrated scientific concepts through working models, charts, and explanations, helping them connect classroom knowledge with real-world applications. Teachers guided students in exploring different scientific ideas and encouraged analytical thinking.\n\nThe celebration created an exciting learning environment that motivated students to develop interest in science and discovery while building confidence, creativity, and teamwork.",
+  
+  images: [
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-1_gjgugj",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-2_p0xjbf",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-3_tmkq3b",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-4_hlincg",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-5_iauqsr",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-6_lymb9l",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-7_wkkt8v",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-8_ufbk1l",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-9_vjzxfv",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-10_ihdwio",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-11_qcuvyy",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-12_qabtge",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-13_chtu9i",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-14_vpxojr",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-15_li0kws",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-16_tvoanh",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-17_yy3eyy",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-18_xvug41",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-19_kc5he8",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-20_movmgp",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/nsd-21_tjb86t"
+  ]
+  },
+  "prize-distribution": {
+  title: "Prize Distribution Ceremony",
+  shortDesc: "Honoring student achievements and celebrating excellence.",
+  longDesc: "The Prize Distribution Ceremony was a proud occasion dedicated to recognizing and celebrating the achievements of students in academics, sports, and co-curricular activities. The event highlighted the dedication, hard work, and talents of students across different classes.\n\nAwards and certificates were presented to students who demonstrated excellence in various fields. Teachers and school management congratulated the winners and encouraged all students to continue striving for success.\n\nThe ceremony motivated students to work harder, build confidence, and take pride in their accomplishments, creating a memorable moment for the entire school community.",
+  
+  images: [
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-20_wqff2l"
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-1_swphhy",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-2_tldh0r",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-3_odaxhn",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-4_bhekc0",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-5_hork7g",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-6_zw33em",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-7_n5nj8n",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-8_be5yyc",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-9_vcwrwh",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-10_hksigr",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-11_dk6fzy",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-12_yvrols",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-13_m4qqpy",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-14_sj5bdg",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-15_inwteg",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-16_wcbnqg",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-17_cess8k",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-18_irzls6",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-19_n2cbjt"
+  ]
+  },
+  "skill-fest": {
+  title: "Skill Fest",
+  shortDesc: "Showcasing creativity, talent, and student skills.",
+  longDesc: "Skill Fest was an exciting event that provided students with a platform to showcase their talents, creativity, and abilities across different activities. Students enthusiastically participated in various competitions and presentations that highlighted their unique skills.\n\nThe event encouraged confidence, teamwork, and innovation while allowing students to explore their interests beyond academics. Teachers supported and guided students throughout the activities, ensuring a fun and enriching learning experience.\n\nSkill Fest created an energetic atmosphere across the campus and helped students build self-confidence while celebrating their creativity and talents.",
+  
+  images: [
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/sf-1_ev7oyf",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/sf-2_eqdvss",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/sf-3_hrdqcb",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/sf-4_scvw9v",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/sf-5_jqiu5u",
+  "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/sf-6_xux0pn"
+  ]
+  },
   "sankranti-2026": {
     title: "Sankranti Celebrations 2026",
     shortDesc: "A vibrant celebration of culture, tradition, and joy.",
     longDesc: "Sankranti Celebrations 2026 was a grand and joyful cultural festival celebrated with great enthusiasm by students, teachers, and staff. The event highlighted the essence of Indian tradition, unity, and gratitude, marking the harvest season with vibrant decorations and meaningful activities. The school campus was transformed into a festive space adorned with colorful kites, traditional rangoli designs, banana leaves, and beautifully crafted banners reflecting the spirit of Sankranti.\n\nStudents actively participated in a wide range of cultural and traditional programs, including folk dances, festive songs, and group performances that showcased regional heritage and creativity. Special emphasis was placed on educating students about the cultural significance of Sankranti, promoting respect for traditions and values passed down through generations.\n\nThe celebrations fostered a sense of togetherness, teamwork, and cultural pride among students. Teachers and staff guided students throughout the event, ensuring active participation and joyful learning. Sankranti Celebrations 2026 was not only a festive occasion but also a memorable experience that strengthened cultural awareness, student engagement, and community bonding within the school.",
-    images: ["../images/events/s-5.jpeg","../images/events/s-2.jpeg","../images/events/s-6.jpeg","../images/events/children.jpeg","../images/events/s-4.jpeg"]
+    images: ["https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/s-5_bwi3pu",
+             "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/s-2_emtjuq",
+             "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/s-6_avdwk8",
+             "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/children_asketu",
+             "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/s-4_lxsvw8"
+            ]
     },
    "traditional-epic": {
     title: "Traditional Epic Celebration 2025–26",
     shortDesc: "A cultural showcase inspired by Indian epics and spiritual values.",
     longDesc: "The Traditional Epic Celebration 2025–26 was a culturally enriching event that brought India’s timeless epics and spiritual heritage to life through student performances. Students dressed as characters from great Indian epics, beautifully portraying mythological stories that emphasize values such as truth, courage, devotion, and righteousness.\n\nThe event provided students with an opportunity to understand and appreciate the moral teachings and cultural significance of Indian epics. Through creative costumes, expressive performances, and guided narration, students showcased their talents while learning important life lessons rooted in tradition.\n\nTeachers guided students throughout the preparation and presentation, ensuring both learning and enjoyment. The celebration encouraged cultural awareness, confidence, and respect for Indian heritage, making it a meaningful and memorable experience for everyone present.",
-    images: [
-        "../images/events/t-5.jpeg",
-        "../images/events/t-1.jpeg",
-        "../images/events/t-4.jpeg",
-        "../images/events/t-2.jpeg",
-        "../images/events/t-3.jpeg",
+   images: [
+          "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/t-5_itjwcr",
+          "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/t-1_ocnjxc",
+          "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/t-4_sr5ukf",
+          "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/t-2_uw1kfv",
+          "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/t-3_fnqkpa"
     ]
     },
    "national-mathematics-day": {
@@ -119,9 +195,9 @@ const events = {
     shortDesc: "Celebrating the joy of numbers, logic, and mathematical thinking.",
     longDesc: "National Mathematics Day 2025 was celebrated with enthusiasm to promote interest and understanding of mathematics among students. The event featured creative activities, visual displays, and student presentations that highlighted mathematical concepts in an engaging and enjoyable manner.\n\nStudents actively participated by showcasing charts, models, and concept-based demonstrations that simplified complex ideas and encouraged logical thinking. The celebration emphasized the importance of mathematics in daily life and academic learning, inspiring curiosity and problem-solving skills.\n\nTeachers guided students throughout the activities, ensuring meaningful learning experiences. National Mathematics Day fostered confidence, analytical skills, and a positive attitude towards mathematics, making it both educational and enjoyable for students.",
     images: [
-        "../images/events/m-3.jpeg",
-        "../images/events/m-1.jpeg",
-        "../images/events/m-2.jpeg",
+      "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/m-3_xv6wbg",
+      "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/m-1_gfmryw",
+      "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/m-2_tpqvnt"
     ]
     },
     "twins-day-2025": {
@@ -129,12 +205,12 @@ const events = {
     shortDesc: "A joyful celebration highlighting unity, creativity, and togetherness.",
     longDesc: "Twins Day Celebration 2025–26 was a fun-filled and engaging event that celebrated togetherness, coordination, and creativity among students. Children participated in pairs, dressed in matching outfits, symbolizing unity and harmony while expressing their individuality through coordinated performances.\n\nThe celebration encouraged teamwork, confidence, and joyful interaction among students. Activities and presentations were designed to promote friendship, cooperation, and positive peer relationships in a cheerful and inclusive environment.\n\nTeachers played an active role in guiding students and organizing the event smoothly. Twins Day Celebration brought smiles, laughter, and memorable moments, strengthening bonds among students and creating a lively atmosphere across the campus.",
     images: [
-        "../images/events/tw-7.jpeg",
-        "../images/events/tw-5.jpeg",
-        "../images/events/tw-1.jpeg",
-        "../images/events/tw-8.jpeg",
-        "../images/events/tw-6.jpeg",
-        "../images/events/tw-4.jpeg",
+      "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/tw-7_nwxw0n",
+      "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/tw-5_mtvi8g",
+      "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/tw-1_tgm7cg",
+      "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/tw-8_ukyopm",
+      "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/tw-6_owmjov",
+      "https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/tw-4_tgt1vh"
     ]
     }
 
@@ -174,4 +250,5 @@ function closeLightbox() {
 </script>
 
 </body>
+
 </html>
