@@ -1,173 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Events | St. Mary's High School</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/stylesHomeEvents.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Events | St. Mary's High School</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/stylesHomeEvents.css">
 </head>
+
 <body>
 
-  <!-- NAVBAR -->
-  <header>
-    <div class="nav-container">
-      <div class="brand">
-        <img src="../images/logo.jpg" alt="SMHS Logo">
-        <span>St. Mary’s High School</span>
-      </div>
+<!-- NAVBAR -->
+<header>
+<div class="nav-container">
 
-      
-      <button class="mobile-nav-toggle" aria-label="Toggle Menu">
-        ☰
-      </button>
+<div class="brand">
+<img src="../images/logo.jpg" alt="SMHS Logo">
+<span>St. Mary’s High School</span>
+</div>
+
+<button class="mobile-nav-toggle" aria-label="Toggle Menu">
+☰
+</button>
+
+<nav class="nav-links">
+<a href="/">Home</a>
+<a href="/events.html" class="active">Events</a>
+<a href="/admissions.html">Admissions</a>
+</nav>
+
+<a href="/login.html" class="login-btn">Login</a>
+
+</div>
+</header>
 
 
-      <nav class="nav-links">
-        <a href="/">Home</a>
-        <a href="/events.html" class="active">Events</a>
-        <a href="/admissions.html">Admissions</a>
-      </nav>
+<!-- PAGE HERO -->
+<section class="page-hero">
+<h1>School Events</h1>
 
-      <a href="/login.html" class="login-btn">Login</a>
-    </div>
-  </header>
+<p>
+Celebrating academic excellence, cultural heritage, and student achievements
+through meaningful events and activities.
+</p>
 
-  <!-- PAGE HERO -->
-  <section class="page-hero">
-    <h1>School Events</h1>
-    <p>
-      Celebrating academic excellence, cultural heritage, and student achievements
-      through meaningful events and activities.
-    </p>
-  </section>
-
-  <!-- FEATURED EVENT -->
-<section class="featured-event">
-  <div class="featured-content">
-    <div class="featured-text">
-      <span class="featured-badge">Featured Event</span>
-        <h2>Sankranti Celebrations 2026</h2>
-        <p>
-        A joyful cultural celebration of Sankranti showcasing traditions,
-        festive decorations, student participation, and vibrant performances.
-        </p>
-
-        <a href="event.html?id=sankranti-2026" class="btn-primary">
-        View Event Gallery
-        </a>
-
-    </div>
-
-    <div class="featured-image">
-      <img src="../images/events/s-1.png" alt="Sankranti Celebrations 2026">
-    </div>
-  </div>
 </section>
+
+
+
+<!-- FEATURED EVENT -->
+<section class="featured-event">
+
+<div class="featured-content">
+
+<div class="featured-text">
+
+<span class="featured-badge">Featured Event</span>
+
+<h2>National Science Day</h2>
+
+<p>
+National Science Day was celebrated with enthusiasm through science
+models, experiments, and student presentations encouraging curiosity,
+innovation, and scientific thinking.
+</p>
+
+<a href="event.html?id=national-science-day" class="btn-primary">
+View Event Gallery
+</a>
+
+</div>
+
+
+<div class="featured-image">
+
+<img src="https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/sf-7_wse2a3" loading="lazy" alt="National Science Day">
+
+</div>
+
+</div>
+
+</section>
+
 
 
 <!-- EVENTS -->
 <section class="events-wrapper">
-  <div class="main-content">
-    <h2 class="section-title">All Events</h2>
-    <p class="section-subtitle">
-      Moments that reflect learning, culture, sports, and student achievements.
-    </p>
 
-    <div class="events-grid">
+<div class="main-content">
 
-      <!-- Event: Traditional Epic Celebration -->
-        <div class="event-card">
-            <a href="event.html?id=traditional-epic" class="event-card-link"></a>
+<h2 class="section-title">All Events</h2>
 
-            <div class="event-image">
-                <img src="../images/events/t-1.jpeg" alt="Traditional Epic Celebration">
-            </div>
+<p class="section-subtitle">
+Moments that reflect learning, culture, sports, and student achievements.
+</p>
 
-            <div class="event-content">
-                <div class="event-date">2025–26</div>
-                <div class="event-title">Traditional Epic Celebration</div>
-                <div class="event-description">
-                Students showcased characters from Indian epics through
-                creative costumes and performances, highlighting cultural
-                values and spiritual heritage.
-                </div>
 
-                <div class="event-footer">
-                <span class="event-btn">View Event</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Event: National Mathematics Day -->
-        <div class="event-card">
-            <a href="event.html?id=national-mathematics-day" class="event-card-link"></a>
-            
-            <div class="event-image">
-                <img src="../images/events/m-1.jpeg" alt="National Mathematics Day">
-            </div>
-            
-            <div class="event-content">
-                <div class="event-date">22 December 2025</div>
-                <div class="event-title">National Mathematics Day</div>
-                <div class="event-description">
-                    Students celebrated mathematics through creative displays,
-                    concept-based activities, and presentations that made
-                    learning engaging and enjoyable.
-                </div>
-                
-                <div class="event-footer">
-                    <span class="event-btn">View Event</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Event: Twins Day Celebration -->
-        <div class="event-card">
-            <a href="event.html?id=twins-day-2025" class="event-card-link"></a>
+<div class="events-grid">
 
-            <div class="event-image">
-                <img src="../images/events/tw-7.jpeg" alt="Twins Day Celebration">
-            </div>
 
-            <div class="event-content">
-                <div class="event-date">18 December 2025</div>
-                <div class="event-title">Twins Day Celebration</div>
-                <div class="event-description">
-                A joyful celebration where students participated in pairs,
-                dressed alike to promote togetherness, creativity, and
-                cheerful bonding.
-                </div>
 
-                <div class="event-footer">
-                <span class="event-btn">View Event</span>
-                </div>
-            </div>
-        </div>
+<!-- Sankranti Event -->
+<div class="event-card">
 
-    </div>
-  </div>
+<a href="event.html?id=sankranti-2026" class="event-card-link"></a>
+
+<div class="event-image">
+<img src="https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/s-1_ebb9gh" loading="lazy" alt="Sankranti Celebrations">
+</div>
+
+<div class="event-content">
+
+<div class="event-date">January 2026</div>
+
+<div class="event-title">Sankranti Celebrations</div>
+
+<div class="event-description">
+A vibrant cultural celebration of Sankranti with traditional
+decorations, student performances, and festive activities.
+</div>
+
+<div class="event-footer">
+<span class="event-btn">View Event</span>
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<!-- Skill Fest -->
+<div class="event-card">
+
+<a href="event.html?id=skill-fest" class="event-card-link"></a>
+
+<div class="event-image">
+<img src="https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/sf-2_jll0xg" loading="lazy" alt="Skill Fest">
+</div>
+
+<div class="event-content">
+
+<div class="event-date">2026</div>
+
+<div class="event-title">Skill Fest</div>
+
+<div class="event-description">
+Students showcased creativity and talent through competitions,
+activities, and presentations highlighting diverse skills.
+</div>
+
+<div class="event-footer">
+<span class="event-btn">View Event</span>
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<!-- Prize Distribution -->
+<div class="event-card">
+
+<a href="event.html?id=prize-distribution" class="event-card-link"></a>
+
+<div class="event-image">
+<img src="https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/pd-16_urcndm" loading="lazy" alt="Prize Distribution">
+</div>
+
+<div class="event-content">
+
+<div class="event-date">2026</div>
+
+<div class="event-title">Prize Distribution</div>
+
+<div class="event-description">
+A proud moment celebrating student achievements and honoring
+academic excellence, talent, and outstanding performances.
+</div>
+
+<div class="event-footer">
+<span class="event-btn">View Event</span>
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<!-- Traditional Epic -->
+<div class="event-card">
+
+<a href="event.html?id=traditional-epic" class="event-card-link"></a>
+
+<div class="event-image">
+<img src="https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/t-1_ft0jwb" loading="lazy" alt="Traditional Epic">
+</div>
+
+<div class="event-content">
+
+<div class="event-date">2025–26</div>
+
+<div class="event-title">Traditional Epic Celebration</div>
+
+<div class="event-description">
+Students portrayed characters from Indian epics highlighting
+cultural heritage, traditions, and moral values.
+</div>
+
+<div class="event-footer">
+<span class="event-btn">View Event</span>
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<!-- Mathematics Day -->
+<div class="event-card">
+
+<a href="event.html?id=national-mathematics-day" class="event-card-link"></a>
+
+<div class="event-image">
+<img src="https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/m-1_mcsicm" loading="lazy" alt="National Mathematics Day">
+</div>
+
+<div class="event-content">
+
+<div class="event-date">22 December 2025</div>
+
+<div class="event-title">National Mathematics Day</div>
+
+<div class="event-description">
+Students celebrated mathematics through activities,
+presentations, and concept displays encouraging logical thinking.
+</div>
+
+<div class="event-footer">
+<span class="event-btn">View Event</span>
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<!-- Twins Day -->
+<div class="event-card">
+
+<a href="event.html?id=twins-day-2025" class="event-card-link"></a>
+
+<div class="event-image">
+<img src="https://res.cloudinary.com/dq5qkca11/image/upload/f_auto,q_auto/tw-7_gzsxun" loading="lazy" alt="Twins Day">
+</div>
+
+<div class="event-content">
+
+<div class="event-date">18 December 2025</div>
+
+<div class="event-title">Twins Day Celebration</div>
+
+<div class="event-description">
+Students participated in pairs wearing matching outfits
+promoting unity, fun, and joyful participation.
+</div>
+
+<div class="event-footer">
+<span class="event-btn">View Event</span>
+</div>
+
+</div>
+
+</div>
+
+
+
+
+</div>
+</div>
 </section>
+
 
 
 <!-- FOOTER -->
 <footer class="ev-footer">
-  <div style="font-size: 1rem; font-weight: 400; margin-top: 2px;">
-    <a href="/terms.html" class="copyright-link">© 2026 St.Mary's High School</a>. All rights reserved.
-  </div>
+
+<div style="font-size:1rem;font-weight:400;margin-top:2px;">
+<a href="/terms.html" class="copyright-link">
+© 2026 St.Mary's High School
+</a>. All rights reserved.
+</div>
+
 </footer>
+
+
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const toggle = document.querySelector(".mobile-nav-toggle");
-  const nav = document.querySelector(".nav-links");
 
-  if (!toggle || !nav) return;
+const toggle = document.querySelector(".mobile-nav-toggle");
+const nav = document.querySelector(".nav-links");
 
-  toggle.addEventListener("click", () => {
-    nav.classList.toggle("show");
-    toggle.textContent = nav.classList.contains("show") ? "✕" : "☰";
-  });
+if (!toggle || !nav) return;
+
+toggle.addEventListener("click", () => {
+
+nav.classList.toggle("show");
+
+toggle.textContent = nav.classList.contains("show") ? "✕" : "☰";
+
+});
+
 });
 </script>
 
