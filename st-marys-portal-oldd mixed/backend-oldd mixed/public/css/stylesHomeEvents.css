@@ -1487,74 +1487,248 @@ footer {
   bottom: 24px;
   right: 24px;
   z-index: 200;
-  max-width: 300px;
+  max-width: 340px;
   width: calc(100% - 40px);
-  background: white;
-  border-radius: 18px;
-  box-shadow: 0 20px 55px rgba(15, 42, 68, 0.22);
-  border: 2px solid rgba(244, 180, 0, 0.5);
-  padding: 20px 44px 20px 20px;
-  transform: translateX(120%);
+  background: linear-gradient(165deg, #ffffff 0%, #f8fafc 55%, #f1f5f9 100%);
+  border-radius: 22px;
+  box-shadow:
+    0 4px 6px rgba(15, 42, 68, 0.04),
+    0 24px 60px rgba(15, 42, 68, 0.18),
+    0 0 0 1px rgba(30, 111, 185, 0.08);
+  overflow: hidden;
+  padding: 0 0 16px;
+  transform: translateX(110%) scale(0.96);
   opacity: 0;
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease;
   pointer-events: none;
+  backdrop-filter: blur(12px);
 }
 
 .floating-results-promo.is-visible {
-  transform: translateX(0);
+  transform: translateX(0) scale(1);
   opacity: 1;
   pointer-events: auto;
 }
 
+.floating-results-promo.is-dismissed {
+  pointer-events: none;
+}
+
 .floating-promo-close {
   position: absolute;
-  top: 10px;
+  top: 12px;
   right: 12px;
-  width: 28px;
-  height: 28px;
+  z-index: 3;
+  width: 30px;
+  height: 30px;
   border: none;
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   line-height: 1;
   cursor: pointer;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 700;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .floating-promo-close:hover {
-  background: #e2e8f0;
-  color: var(--primary);
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.08);
+}
+
+.floating-promo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 48px 16px 18px;
+  background: linear-gradient(135deg, #0b1f33 0%, #0f2a44 45%, #1e6fb9 100%);
+  position: relative;
+}
+
+.floating-promo-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 85% 20%, rgba(244, 180, 0, 0.25), transparent 50%);
+  pointer-events: none;
+}
+
+.floating-promo-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  background: rgba(244, 180, 0, 0.2);
+  border: 1px solid rgba(244, 180, 0, 0.45);
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  animation: promoIconPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes promoIconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+.floating-promo-headline {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.floating-promo-eyebrow {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(244, 180, 0, 0.95);
+  margin-bottom: 2px;
 }
 
 .floating-promo-title {
   font-weight: 800;
-  color: var(--primary);
-  font-size: 1rem;
-  margin-bottom: 12px;
+  color: #ffffff;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  margin: 0;
 }
 
-.floating-promo-stat {
-  font-size: 0.92rem;
-  color: var(--text);
-  margin-bottom: 6px;
-  font-weight: 600;
+.floating-promo-year {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #1f2933;
+  box-shadow: 0 4px 12px rgba(244, 180, 0, 0.4);
+}
+
+.floating-promo-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 14px 16px 4px;
+}
+
+.floating-mini-stat {
+  background: white;
+  border-radius: 14px;
+  padding: 12px 12px 10px;
+  border: 1px solid rgba(30, 111, 185, 0.1);
+  box-shadow: 0 6px 18px rgba(15, 42, 68, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.floating-mini-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 42, 68, 0.1);
+}
+
+.floating-mini-stat--featured {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(30, 111, 185, 0.06), rgba(244, 180, 0, 0.12));
+  border-color: rgba(244, 180, 0, 0.35);
+}
+
+.mini-stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.mini-stat-icon {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.mini-stat-value {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: var(--secondary);
+  line-height: 1;
+}
+
+.floating-mini-stat--featured .mini-stat-value {
+  font-size: 1.6rem;
+  color: var(--primary);
+}
+
+.mini-stat-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mini-stat-bar {
+  margin-top: 8px;
+  height: 5px;
+  background: rgba(15, 42, 68, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.mini-stat-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--secondary), var(--accent));
+  border-radius: 999px;
+  animation: miniBarGrow 1s ease-out 0.3s both;
+}
+
+@keyframes miniBarGrow {
+  from { width: 0 !important; }
 }
 
 .floating-promo-link {
-  display: inline-block;
-  margin-top: 14px;
-  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 12px 16px 0;
+  background: linear-gradient(135deg, #f4b400, #ffcf4a);
   color: #1f2933;
-  padding: 10px 18px;
-  border-radius: 30px;
-  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 14px;
+  font-weight: 800;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  box-shadow: 0 8px 24px rgba(244, 180, 0, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .floating-promo-link:hover {
-  filter: brightness(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(244, 180, 0, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-promo-icon {
+    animation: none;
+  }
+
+  .mini-stat-fill {
+    animation: none;
+  }
+
+  .floating-results-promo {
+    transition: opacity 0.2s ease;
+  }
 }
 
 @media (max-width: 900px) {
@@ -1577,11 +1751,20 @@ footer {
     bottom: 16px;
     max-width: none;
     width: auto;
-    transform: translateY(120%);
+    transform: translateY(110%) scale(0.96);
   }
 
   .floating-results-promo.is-visible {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+  }
+
+  .floating-promo-stats {
+    gap: 8px;
+    padding: 12px 14px 2px;
+  }
+
+  .mini-stat-value {
+    font-size: 1.2rem;
   }
 }
 
