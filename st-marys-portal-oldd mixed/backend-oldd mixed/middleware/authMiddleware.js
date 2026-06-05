@@ -45,6 +45,12 @@ export const protect = asyncHandler(async (req, res, next) => {
                 throw new Error('User not found');
             }
 
+            // Block inactive students from accessing any protected route
+            if ((req.user.role === 'student' || req.user.role === 'teacher') && req.user.isActive === false) {
+                res.status(403);
+                throw new Error('Account inactive');
+            }
+
             next();
         } catch (error) {
             res.status(401);

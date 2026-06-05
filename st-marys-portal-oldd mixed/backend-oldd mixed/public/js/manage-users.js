@@ -81,31 +81,85 @@ function renderUserRow(user) {
     if (user.role === 'teacher' && user.teacherInfo) {
         subjects = Array.isArray(user.teacherInfo.subjects) ? user.teacherInfo.subjects.join(', ') : user.teacherInfo.subjects || '';
     }
+    const isActive = user.isActive !== false; // default true if not set
+    const statusText = isActive ? 'Active' : 'Left';
+    const statusColor = isActive ? '#2e7d32' : '#c62828';
+    const dateOfLeaving = user.studentInfo?.dateOfLeaving ? new Date(user.studentInfo.dateOfLeaving).toLocaleDateString('en-GB') : '';
     tr.innerHTML = `
         <td><input type="checkbox" class="user-select-checkbox" data-id="${user._id}"></td>
         <td>${user.name || ''}</td>
         <td>${user.email || ''}</td>
         <td>${capitalize(user.role)}</td>
         <td>${classSection}</td>
+        <td style="color:${statusColor}; font-weight:500;">${statusText}${dateOfLeaving ? ' (' + dateOfLeaving + ')' : ''}</td>
         <td>${subjects}</td>
         <td class="user-actions">
             <button class="user-action-btn edit" title="Edit"><i class="fas fa-edit"></i></button>
-            <button class="user-action-btn delete" title="Delete"><i class="fas fa-trash"></i></button>
+            ${user.role === 'student' 
+                ? (isActive 
+                    ? `<button class="user-action-btn mark-left" title="Mark as Left" style="background:#ff9800;"><i class="fas fa-user-times"></i></button>`
+                    : `<button class="user-action-btn restore" title="Restore" style="background:#4caf50;"><i class="fas fa-user-check"></i></button>`)
+                : `<button class="user-action-btn delete" title="Delete"><i class="fas fa-trash"></i></button>`
+            }
         </td>
     `;
     // Edit event
     tr.querySelector('.edit').addEventListener('click', () => {
         showEditUserModal(user);
     });
-    // Delete event
-    tr.querySelector('.delete').addEventListener('click', async () => {
-        if (confirm(`Are you sure you want to delete ${user.name}?`)) {
-            await deleteUser(user._id);
-            showAlert('User deleted successfully!', 'success');
-            fetchAndRenderUsers();
-        }
-    });
+    // Mark as Left / Restore event (for students)
+    const markLeftBtn = tr.querySelector('.mark-left');
+    const restoreBtn = tr.querySelector('.restore');
+    const deleteBtn = tr.querySelector('.delete');
+    
+    if (markLeftBtn) {
+        markLeftBtn.addEventListener('click', async () => {
+            if (confirm(`Are you sure you want to mark ${user.name} as LEFT? They will no longer be able to log in or appear in operational screens.`)) {
+                await updateUserStatus(user._id, false);
+                showAlert(`${user.name} marked as left successfully!`, 'success');
+                fetchAndRenderUsers();
+            }
+        });
+    }
+    if (restoreBtn) {
+        restoreBtn.addEventListener('click', async () => {
+            if (confirm(`Restore ${user.name}? They will immediately become visible in all operational screens.`)) {
+                await updateUserStatus(user._id, true);
+                showAlert(`${user.name} restored successfully!`, 'success');
+                fetchAndRenderUsers();
+            }
+        });
+    }
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', async () => {
+            if (confirm(`Are you sure you want to delete ${user.name}?`)) {
+                await deleteUser(user._id);
+                showAlert('User deleted successfully!', 'success');
+                fetchAndRenderUsers();
+            }
+        });
+    }
     return tr;
+}
+
+async function updateUserStatus(userId, isActive) {
+    try {
+        const token = localStorage.getItem('auth_token');
+        const res = await fetch(`/api/admin/users/${userId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ isActive })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || 'Failed to update status');
+        return data;
+    } catch (e) {
+        alert('Failed to update student status: ' + e.message);
+        throw e;
+    }
 }
 
 // Render or update the bulk delete button

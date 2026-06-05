@@ -46,8 +46,8 @@ router.get('/', protect, async (req, res) => {
 // Get all sections (for teacher visibility settings)
 router.get('/sections', protect, async (req, res) => {
     try {
-        // Find all unique sections in the system by checking student records
-        const students = await User.find({ role: 'student' });
+        // Find all unique sections in the system by checking active student records
+        const students = await User.find({ role: 'student', isActive: true });
         const sections = new Set();
         
         students.forEach(student => {

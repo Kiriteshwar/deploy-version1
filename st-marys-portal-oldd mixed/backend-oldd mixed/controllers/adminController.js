@@ -46,9 +46,10 @@ export const getAvailableTeachers = asyncHandler(async (req, res) => {
         availabilityStatus: { $ne: 'available' }
     }).distinct('teacher');
 
-    // Find all teachers except those who are busy or unavailable
+    // Find all teachers except those who are busy or unavailable (active only)
     const availableTeachers = await User.find({
         role: 'teacher',
+        isActive: true,
         _id: {
             $nin: [...busyTeachers, ...unavailableTeachers]
         }
@@ -616,6 +617,65 @@ export const deleteUser = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndDelete(id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true });
+});
+
+// @desc    Update user status (Mark as Left / Restore)
+// @route   PUT /api/admin/users/:id/status
+// @access  Private (Admin only)
+export const updateUserStatus = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    if (typeof isActive !== 'boolean') {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'isActive must be a boolean value' 
+        });
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Only students can be marked as left/restored via this endpoint
+    if (user.role !== 'student') {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Only student accounts can be marked as left or restored' 
+        });
+    }
+
+    user.isActive = isActive;
+
+    if (isActive === false) {
+        // Marking as left: set dateOfLeaving
+        if (!user.studentInfo) user.studentInfo = {};
+        user.studentInfo.dateOfLeaving = new Date();
+        user.markModified('studentInfo');
+    } else {
+        // Restoring: clear dateOfLeaving
+        if (user.studentInfo) {
+            user.studentInfo.dateOfLeaving = null;
+            user.markModified('studentInfo');
+        }
+    }
+
+    await user.save();
+
+    res.json({
+        success: true,
+        message: isActive === false 
+            ? `Student "${user.name}" marked as left successfully` 
+            : `Student "${user.name}" restored successfully`,
+        user: {
+            _id: user._id,
+            name: user.name,
+            role: user.role,
+            isActive: user.isActive,
+            studentInfo: user.studentInfo
+        }
+    });
 });
 
 // @desc    Bulk import users from array

@@ -120,7 +120,7 @@ async function allClassesMarkedAttendance(period, date) {
         
         // Get all unique class-section combinations that actually exist in the system
         const classSectionCombos = await User.aggregate([
-            { $match: { role: 'student' } },
+            { $match: { role: 'student', isActive: true } },
             { 
                 $group: {
                     _id: {
@@ -325,10 +325,11 @@ export const markAttendance = asyncHandler(async (req, res) => {
                     continue;
                 }
                 
-                // Validate student exists
+                // Validate student exists and is active
                 const student = await User.findOne({ 
                     _id: record.student, 
-                    role: 'student'
+                    role: 'student',
+                    isActive: true
                 });
 
                 if (!student) {
@@ -536,9 +537,9 @@ export const getClassAttendance = asyncHandler(async (req, res) => {
 // @route   GET /api/attendance/teacher/classes
 // @access  Private (Teachers only)
 export const getTeacherClasses = asyncHandler(async (req, res) => {
-    // Only include classes that are currently assigned to at least one student or teacher
-    const studentClasses = await User.find({ role: 'student' }).distinct('studentInfo.class');
-    const teacherClasses = await User.find({ role: 'teacher' }).distinct('teacherInfo.classTeacher.class');
+    // Only include classes that are currently assigned to at least one active student or teacher
+    const studentClasses = await User.find({ role: 'student', isActive: true }).distinct('studentInfo.class');
+    const teacherClasses = await User.find({ role: 'teacher', isActive: true }).distinct('teacherInfo.classTeacher.class');
     const classes = Array.from(new Set([...studentClasses, ...teacherClasses])).filter(Boolean);
 
     // Optionally, you can also update sections/subjects logic similarly if needed
@@ -551,9 +552,9 @@ export const getTeacherClasses = asyncHandler(async (req, res) => {
 export const getSections = asyncHandler(async (req, res) => {
     const { class: className } = req.params;
 
-    // Get sections from both students and teachers
-    const studentSections = await User.find({ role: 'student', 'studentInfo.class': className }).distinct('studentInfo.section');
-    const teacherSections = await User.find({ role: 'teacher', 'teacherInfo.classTeacher.class': className }).distinct('teacherInfo.classTeacher.section');
+    // Get sections from active students and teachers only
+    const studentSections = await User.find({ role: 'student', isActive: true, 'studentInfo.class': className }).distinct('studentInfo.section');
+    const teacherSections = await User.find({ role: 'teacher', isActive: true, 'teacherInfo.classTeacher.class': className }).distinct('teacherInfo.classTeacher.section');
     
     // Combine and remove duplicates and empty values
     const allSections = Array.from(new Set([...studentSections, ...teacherSections])).filter(Boolean);
@@ -564,11 +565,12 @@ export const getSections = asyncHandler(async (req, res) => {
     res.json(allSections);
 });
 
-// Get students by class and section
+// Get students by class and section (active students only for attendance)
 export const getStudentsByClass = asyncHandler(async (req, res) => {
     const { class: className, section } = req.params;
     const students = await User.find({
         role: 'student',
+        isActive: true,
         'studentInfo.class': className,
         'studentInfo.section': section
     }).select('name studentInfo.rollNumber');

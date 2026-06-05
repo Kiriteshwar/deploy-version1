@@ -56,6 +56,15 @@ export const login = asyncHandler(async (req, res) => {
         // Reset login attempts on successful login
         await user.resetLoginAttempts();
 
+        // Check if student account is inactive (soft-deleted)
+          if ((user.role === 'student' || user.role === 'teacher') && user.isActive === false) {
+            console.log('Inactive student login blocked:', email);
+            return res.status(403).json({
+                success: false,
+                message: 'Your account is no longer active. Please contact administration.'
+            });
+        }
+
         // Generate token
         const token = generateToken(user._id);
         console.log('Token generated successfully');

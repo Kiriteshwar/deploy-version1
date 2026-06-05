@@ -130,10 +130,10 @@ export const getTeacherClasses = async (req, res) => {
         const teacherId = req.user._id;
         console.log('Fetching classes for teacher ID:', teacherId);
         
-        // Query the database for distinct classes using User model
+        // Query the database for distinct classes using User model (active only)
         const User = mongoose.model('User');
-        const studentClasses = await User.find({ role: 'student' }).distinct('studentInfo.class');
-        const teacherClasses = await User.find({ role: 'teacher' }).distinct('teacherInfo.classTeacher.class');
+        const studentClasses = await User.find({ role: 'student', isActive: true }).distinct('studentInfo.class');
+        const teacherClasses = await User.find({ role: 'teacher', isActive: true }).distinct('teacherInfo.classTeacher.class');
         const usedClasses = Array.from(new Set([...studentClasses, ...teacherClasses])).filter(Boolean);
 
         // Optionally, include homework classes only if they are also in use
@@ -210,9 +210,9 @@ export const getTeacherSections = async (req, res) => {
         const { class: className } = req.params;
         const User = mongoose.model('User');
         
-        // Get sections from both students and teachers
-        const studentSections = await User.find({ role: 'student', 'studentInfo.class': className }).distinct('studentInfo.section');
-        const teacherSections = await User.find({ role: 'teacher', 'teacherInfo.classTeacher.class': className }).distinct('teacherInfo.classTeacher.section');
+        // Get sections from active students and teachers only
+        const studentSections = await User.find({ role: 'student', isActive: true, 'studentInfo.class': className }).distinct('studentInfo.section');
+        const teacherSections = await User.find({ role: 'teacher', isActive: true, 'teacherInfo.classTeacher.class': className }).distinct('teacherInfo.classTeacher.section');
         
         // Combine and remove duplicates and empty values
         const allSections = Array.from(new Set([...studentSections, ...teacherSections])).filter(Boolean);
@@ -232,10 +232,11 @@ export const getClassStudents = async (req, res) => {
     try {
         const { classId: className, section } = req.params;
         
-        // Query the database for students in this class/section
+        // Query the database for active students in this class/section
         const User = mongoose.model('User');
         const students = await User.find({
             role: 'student',
+            isActive: true,
             'studentInfo.class': className,
             'studentInfo.section': section
         }).select('name studentInfo.rollNumber');
@@ -262,7 +263,7 @@ export const getAllTeachers = asyncHandler(async (req, res) => {
         console.log('Fetching all teachers');
         
         // Get all users with role 'teacher' with complete teacherInfo
-        const teachers = await User.find({ role: 'teacher' })
+    const teachers = await User.find({ role: 'teacher', isActive: true })
             .select('_id name email teacherInfo')
             .sort('name');
         

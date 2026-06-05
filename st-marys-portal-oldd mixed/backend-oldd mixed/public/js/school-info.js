@@ -168,7 +168,10 @@ window.onload = () => {
 
     function updateUserStats() {
         document.getElementById('total-count').textContent = allUsers.length;
-        document.getElementById('students-count').textContent = allUsers.filter(u => u.role === 'student').length;
+        const activeStudents = allUsers.filter(u => u.role === 'student' && u.isActive !== false);
+        const formerStudents = allUsers.filter(u => u.role === 'student' && u.isActive === false);
+        document.getElementById('students-count').textContent = activeStudents.length;
+        document.getElementById('former-students-count').textContent = formerStudents.length;
         document.getElementById('teachers-count').textContent = allUsers.filter(u => u.role === 'teacher').length;
         document.getElementById('admins-count').textContent = allUsers.filter(u => u.role === 'admin').length;
     }
