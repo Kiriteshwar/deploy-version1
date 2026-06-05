@@ -786,7 +786,7 @@ export const getAdminTimetable = asyncHandler(async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const teachers = await User.find({ role: 'teacher' })
+    const teachers = await User.find({ role: 'teacher', isActive: true })
         .select('name email');
     
     const attendanceRecords = await TeacherAttendance.find({

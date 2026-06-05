@@ -33,7 +33,7 @@ router.get("/all", protect, getAllTeachers);
 // Get all teachers for the dropdown
 router.get('/', protect, async (req, res) => {
     try {
-        const teachers = await User.find({ role: 'teacher' })
+        const teachers = await User.find({ role: 'teacher', isActive: true })
             .select('name email')
             .sort('name');
         res.json(teachers);

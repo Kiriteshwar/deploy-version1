@@ -401,8 +401,8 @@ export const getAllTeachersAttendance = asyncHandler(async (req, res) => {
         queryDate.setHours(0, 0, 0, 0);
         
         // Get all teachers
-        const teachers = await User.find({ role: 'teacher' })
-            .select('name email');
+    const teachers = await User.find({ role: 'teacher', isActive: true })
+        .select('name email');
         
         // Get attendance records for the date
         const attendanceRecords = await TeacherAttendance.find({

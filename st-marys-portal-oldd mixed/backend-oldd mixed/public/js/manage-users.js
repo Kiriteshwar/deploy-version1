@@ -43,7 +43,7 @@ console.log("Calling fetchAndRenderUsers")
 async function fetchAndRenderUsers() {
     console.log("Calling fetchAndRenderUsers");
     const tbody = document.getElementById('user-table-body');
-    tbody.innerHTML = `<tr><td colspan="7">Loading...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8">Loading...</td></tr>`;
     try {
         console.log("Fetching:", `/api/admin/users?role=${currentRole}`);
         const token = localStorage.getItem('auth_token');
@@ -55,7 +55,7 @@ async function fetchAndRenderUsers() {
         });
         const data = await response.json();
         if (!data.success || !Array.isArray(data.users) || data.users.length === 0) {
-            tbody.innerHTML = `<tr class="no-users"><td colspan="7">No users to display.</td></tr>`;
+            tbody.innerHTML = `<tr class="no-users"><td colspan="8">No users to display.</td></tr>`;
             renderBulkDeleteButton();
             return;
         }
@@ -65,14 +65,13 @@ async function fetchAndRenderUsers() {
         });
         renderBulkDeleteButton();
     } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="7">Failed to load users.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8">Failed to load users.</td></tr>`;
         renderBulkDeleteButton();
     }
 }
 
 function renderUserRow(user) {
     const tr = document.createElement('tr');
-    // For students, show class/section; for teachers, show subjects; for admins, leave blank
     let classSection = '';
     let subjects = '';
     if (user.role === 'student' && user.studentInfo) {
@@ -81,10 +80,33 @@ function renderUserRow(user) {
     if (user.role === 'teacher' && user.teacherInfo) {
         subjects = Array.isArray(user.teacherInfo.subjects) ? user.teacherInfo.subjects.join(', ') : user.teacherInfo.subjects || '';
     }
-    const isActive = user.isActive !== false; // default true if not set
+    const isActive = user.isActive !== false;
     const statusText = isActive ? 'Active' : 'Left';
     const statusColor = isActive ? '#2e7d32' : '#c62828';
     const dateOfLeaving = user.studentInfo?.dateOfLeaving ? new Date(user.studentInfo.dateOfLeaving).toLocaleDateString('en-GB') : '';
+
+    // Students get Mark as Left / Restore instead of Delete
+    let actionButtons = '';
+    if (user.role === 'student') {
+        if (isActive) {
+            actionButtons = `
+                <button class="user-action-btn edit" title="Edit"><i class="fas fa-edit"></i></button>
+                <button class="user-action-btn mark-left" title="Mark as Left" style="background:#ff9800;"><i class="fas fa-user-times"></i></button>
+            `;
+        } else {
+            actionButtons = `
+                <button class="user-action-btn edit" title="Edit"><i class="fas fa-edit"></i></button>
+                <button class="user-action-btn restore" title="Restore" style="background:#4caf50;"><i class="fas fa-user-check"></i></button>
+            `;
+        }
+    } else {
+        // Teachers/Admins still have Edit + Delete
+        actionButtons = `
+            <button class="user-action-btn edit" title="Edit"><i class="fas fa-edit"></i></button>
+            <button class="user-action-btn delete" title="Delete"><i class="fas fa-trash"></i></button>
+        `;
+    }
+
     tr.innerHTML = `
         <td><input type="checkbox" class="user-select-checkbox" data-id="${user._id}"></td>
         <td>${user.name || ''}</td>
@@ -93,25 +115,16 @@ function renderUserRow(user) {
         <td>${classSection}</td>
         <td style="color:${statusColor}; font-weight:500;">${statusText}${dateOfLeaving ? ' (' + dateOfLeaving + ')' : ''}</td>
         <td>${subjects}</td>
-        <td class="user-actions">
-            <button class="user-action-btn edit" title="Edit"><i class="fas fa-edit"></i></button>
-            ${user.role === 'student' 
-                ? (isActive 
-                    ? `<button class="user-action-btn mark-left" title="Mark as Left" style="background:#ff9800;"><i class="fas fa-user-times"></i></button>`
-                    : `<button class="user-action-btn restore" title="Restore" style="background:#4caf50;"><i class="fas fa-user-check"></i></button>`)
-                : `<button class="user-action-btn delete" title="Delete"><i class="fas fa-trash"></i></button>`
-            }
-        </td>
+        <td class="user-actions">${actionButtons}</td>
     `;
+
     // Edit event
     tr.querySelector('.edit').addEventListener('click', () => {
         showEditUserModal(user);
     });
-    // Mark as Left / Restore event (for students)
+
+    // Mark as Left (students only)
     const markLeftBtn = tr.querySelector('.mark-left');
-    const restoreBtn = tr.querySelector('.restore');
-    const deleteBtn = tr.querySelector('.delete');
-    
     if (markLeftBtn) {
         markLeftBtn.addEventListener('click', async () => {
             if (confirm(`Are you sure you want to mark ${user.name} as LEFT? They will no longer be able to log in or appear in operational screens.`)) {
@@ -121,6 +134,9 @@ function renderUserRow(user) {
             }
         });
     }
+
+    // Restore (students only)
+    const restoreBtn = tr.querySelector('.restore');
     if (restoreBtn) {
         restoreBtn.addEventListener('click', async () => {
             if (confirm(`Restore ${user.name}? They will immediately become visible in all operational screens.`)) {
@@ -130,6 +146,9 @@ function renderUserRow(user) {
             }
         });
     }
+
+    // Delete (teachers/admins only - NOT students)
+    const deleteBtn = tr.querySelector('.delete');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', async () => {
             if (confirm(`Are you sure you want to delete ${user.name}?`)) {
@@ -139,6 +158,7 @@ function renderUserRow(user) {
             }
         });
     }
+
     return tr;
 }
 
@@ -190,7 +210,9 @@ function renderBulkDeleteButton() {
         }
         if (!confirm(`Are you sure you want to delete ${checked.length} user(s)?`)) return;
         for (const cb of checked) {
-            await deleteUser(cb.getAttribute('data-id'));
+            // Only delete non-student users via bulk delete
+            const userId = cb.getAttribute('data-id');
+            await deleteUser(userId);
         }
         showAlert('Selected users deleted successfully!', 'success');
         fetchAndRenderUsers();
@@ -561,7 +583,7 @@ async function applyFilters() {
     const search = document.getElementById('searchFilter').value;
 
     const tbody = document.getElementById('user-table-body');
-    tbody.innerHTML = `<tr><td colspan="7">Loading...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8">Loading...</td></tr>`;
 
     try {
         const token = localStorage.getItem('auth_token');
@@ -581,7 +603,7 @@ async function applyFilters() {
         const data = await response.json();
 
         if (!data.success || !Array.isArray(data.users) || data.users.length === 0) {
-            tbody.innerHTML = `<tr class="no-users"><td colspan="7">No users found matching the criteria.</td></tr>`;
+            tbody.innerHTML = `<tr class="no-users"><td colspan="8">No users found matching the criteria.</td></tr>`;
             return;
         }
 
@@ -591,7 +613,7 @@ async function applyFilters() {
         });
 
     } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="7">Failed to load users.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8">Failed to load users.</td></tr>`;
     }
 }
 
