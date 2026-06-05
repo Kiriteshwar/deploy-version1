@@ -22,8 +22,9 @@ window.onload = () => {
     let allUsers = [];
     let currentFeeFilters = { period: 'all', class: '', section: '' };
 
-    // Initialize
-    fetchAllUsers();
+    // Initialize fetchAllUsers after a short delay to ensure DOM is ready
+    // Removed duplicate inline fetchAllUsers() call — only this setTimeout triggers it
+    setTimeout(() => fetchAllUsers(), 200);
 
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -151,28 +152,63 @@ window.onload = () => {
 
     // ========== FUNCTIONS ==========
 
+    // FIX for Issue 6: Ensure initial load works
     async function fetchAllUsers() {
         try {
+            console.log('Fetching all users...');
             const response = await fetch('/api/admin/users', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
             const data = await response.json();
             allUsers = data.users || [];
+            console.log(`Loaded ${allUsers.length} users`);
             updateUserStats();
             filterAndDisplayUsers();
         } catch (error) {
-            console.error('Error fetching users:', error);
-            document.getElementById('users-table-body').innerHTML = '<tr><td colspan="6" class="no-data">Failed to load users.</td></tr>';
+            console.error('Error fetching users:', error.message);
+            const tbody = document.getElementById('users-table-body');
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="10" class="no-data">Failed to load users. ' + error.message + '</td></tr>';
+            }
         }
     }
 
+    // Issue 7: Enhanced stats with active/former + teacher breakdown
     function updateUserStats() {
         document.getElementById('total-count').textContent = allUsers.length;
+
         const activeStudents = allUsers.filter(u => u.role === 'student' && u.isActive !== false);
         const formerStudents = allUsers.filter(u => u.role === 'student' && u.isActive === false);
-        document.getElementById('students-count').textContent = activeStudents.length;
-        document.getElementById('former-students-count').textContent = formerStudents.length;
-        document.getElementById('teachers-count').textContent = allUsers.filter(u => u.role === 'teacher').length;
+        const activeTeachers = allUsers.filter(u => u.role === 'teacher' && u.isActive !== false);
+        const formerTeachers = allUsers.filter(u => u.role === 'teacher' && u.isActive === false);
+
+        // Student stats
+        const studentsCountEl = document.getElementById('students-count');
+        const formerStudentsCountEl = document.getElementById('former-students-count');
+        if (studentsCountEl) studentsCountEl.textContent = activeStudents.length;
+        if (formerStudentsCountEl) formerStudentsCountEl.textContent = formerStudents.length;
+
+        // Total students
+        const totalStudentsEl = document.getElementById('total-students-count');
+        if (totalStudentsEl) {
+            totalStudentsEl.textContent = activeStudents.length + formerStudents.length;
+        }
+
+        // Teacher stats
+        const teachersCountEl = document.getElementById('teachers-count');
+        const formerTeachersCountEl = document.getElementById('former-teachers-count');
+        if (teachersCountEl) teachersCountEl.textContent = activeTeachers.length;
+        if (formerTeachersCountEl) formerTeachersCountEl.textContent = formerTeachers.length;
+
+        // Total teachers
+        const totalTeachersEl = document.getElementById('total-teachers-count');
+        if (totalTeachersEl) {
+            totalTeachersEl.textContent = activeTeachers.length + formerTeachers.length;
+        }
+
         document.getElementById('admins-count').textContent = allUsers.filter(u => u.role === 'admin').length;
     }
 
@@ -193,25 +229,35 @@ window.onload = () => {
         displayUsers(filtered);
     }
 
+    // Issue 8: Status badge in user table
     function displayUsers(users) {
         const tbody = document.getElementById('users-table-body');
         if (!users.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="no-data">No users found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="no-data">No users found.</td></tr>';
             return;
         }
-        tbody.innerHTML = users.map((u, i) => `
-            <tr>
-                <td>${u.studentInfo?.rollNumber || '-'}</td>
-                <td><strong>${escapeHtml(u.name)}</strong></td>
-                <td>${escapeHtml(u.email)}</td>
-                <td>${escapeHtml(u.phone || '-')}</td>
-                <td><span class="role-badge ${u.role}">${u.role}</span></td>
-                <td><button class="view-btn" onclick="showUserDetails(${i})">View Details</button></td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = users.map((u, i) => {
+            const isActive = u.isActive !== false;
+            const statusBadge = u.role === 'student'
+                ? `<span class="role-badge" style="background:${isActive ? '#e8f5e9' : '#fce4ec'}; color:${isActive ? '#2e7d32' : '#c62828'};">${isActive ? '✅ Active' : '❌ Former'}</span>`
+                : '';
+            const dateOfLeaving = u.studentInfo?.dateOfLeaving ? new Date(u.studentInfo.dateOfLeaving).toLocaleDateString('en-GB') : '';
+            return `
+                <tr>
+                    <td>${u.studentInfo?.rollNumber || '-'}</td>
+                    <td><strong>${escapeHtml(u.name)}</strong></td>
+                    <td>${escapeHtml(u.email)}</td>
+                    <td>${escapeHtml(u.phone || '-')}</td>
+                    <td><span class="role-badge ${u.role}">${u.role}</span></td>
+                    <td>${statusBadge}${dateOfLeaving ? '<br><small style="color:#c62828;">Left: ' + dateOfLeaving + '</small>' : ''}</td>
+                    <td><button class="view-btn" onclick="showUserDetails(${i})">View Details</button></td>
+                </tr>
+            `;
+        }).join('');
         window.currentUsers = users;
     }
 
+    // Fee analytics (unchanged core logic)
     async function fetchFeeAnalytics() {
         try {
             const params = new URLSearchParams();
@@ -222,6 +268,7 @@ window.onload = () => {
             const response = await fetch(`/api/admin/fee-analytics?${params}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
 
             if (data.success) {
@@ -229,12 +276,15 @@ window.onload = () => {
                 displayFeeBreakdown(data.breakdown);
                 populateClassFilter(data.availableClasses);
                 populateSectionFilter(data.availableSections);
+                // Also populate fee defaulter class/section filters
+                populateFeeDefaultersClassFilter(data.availableClasses);
+                populateFeeDefaultersSectionFilter(data.availableSections);
             } else {
                 console.error('Fee analytics error:', data.message);
             }
         } catch (error) {
             console.error('Error fetching fee analytics:', error);
-            document.getElementById('fee-table-body').innerHTML = '<tr><td colspan="6" class="no-data">Failed to load fee data.</td></tr>';
+            document.getElementById('fee-table-body').innerHTML = '<tr><td colspan="10" class="no-data">Failed to load fee data.</td></tr>';
         }
     }
 
@@ -248,7 +298,7 @@ window.onload = () => {
     function displayFeeBreakdown(breakdown) {
         const tbody = document.getElementById('fee-table-body');
         if (!breakdown.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="no-data">No fee data available.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="no-data">No fee data available.</td></tr>';
             return;
         }
         tbody.innerHTML = breakdown.map(row => `
@@ -276,6 +326,110 @@ window.onload = () => {
         select.innerHTML = '<option value="">All Sections</option>' +
             (sections || []).map(s => `<option value="${s}" ${s === currentValue ? 'selected' : ''}>${s}</option>`).join('');
     }
+
+    // Fee defaulter filters
+    let feeDefaultersClass = '';
+    let feeDefaultersSection = '';
+
+    function populateFeeDefaultersClassFilter(classes) {
+        const select = document.getElementById('defaulter-class-filter');
+        if (!select) return;
+        select.innerHTML = '<option value="">All Classes</option>' +
+            (classes || []).map(c => `<option value="${c}">${c}</option>`).join('');
+        select.addEventListener('change', (e) => {
+            feeDefaultersClass = e.target.value;
+            loadFeeDefaulters();
+        });
+    }
+
+    function populateFeeDefaultersSectionFilter(sections) {
+        const select = document.getElementById('defaulter-section-filter');
+        if (!select) return;
+        select.innerHTML = '<option value="">All Sections</option>' +
+            (sections || []).map(s => `<option value="${s}">${s}</option>`).join('');
+        select.addEventListener('change', (e) => {
+            feeDefaultersSection = e.target.value;
+            loadFeeDefaulters();
+        });
+    }
+
+    // Load fee defaulters via single backend aggregation endpoint (Issue 10)
+    async function loadFeeDefaulters() {
+        const defaultersBody = document.getElementById('defaulters-table-body');
+        const topPendingBody = document.getElementById('top-pending-body');
+        if (!defaultersBody) return;
+
+        try {
+            const params = new URLSearchParams();
+            if (feeDefaultersClass) params.append('class', feeDefaultersClass);
+            if (feeDefaultersSection) params.append('section', feeDefaultersSection);
+
+            const response = await fetch(`/api/admin/fees/defaulters?${params}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to load defaulters');
+            }
+
+            // Update summary cards
+            const paidEl = document.getElementById('paid-students-count');
+            const unpaidEl = document.getElementById('unpaid-students-count');
+            const partialEl = document.getElementById('partial-paid-count');
+            if (paidEl) paidEl.textContent = data.summary.paidCount;
+            if (unpaidEl) unpaidEl.textContent = data.summary.unpaidCount;
+            if (partialEl) partialEl.textContent = data.summary.partialCount;
+
+            // Render defaulters table
+            if (data.defaulters.length === 0) {
+                defaultersBody.innerHTML = '<tr><td colspan="9" class="no-data">No defaulters found.</td></tr>';
+            } else {
+                defaultersBody.innerHTML = data.defaulters.map(d => {
+                    const si = d.student.studentInfo || {};
+                    return `
+                        <tr>
+                            <td>${si.rollNumber || '-'}</td>
+                            <td>${si.admissionNumber || '-'}</td>
+                            <td>${escapeHtml(d.student.name)}</td>
+                            <td>${si.class || '-'}</td>
+                            <td>${si.section || '-'}</td>
+                            <td class="currency">${formatCurrency(d.totalFee)}</td>
+                            <td class="currency" style="color:#2e7d32">${formatCurrency(d.paid)}</td>
+                            <td class="currency" style="color:#c62828; font-weight:600">${formatCurrency(d.pending)}</td>
+                            ${d.discount > 0 ? `<td class="currency" style="color:#4caf50">${formatCurrency(d.discount)}</td>` : '<td>-</td>'}
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Render top 10 pending from backend
+            if (topPendingBody) {
+                if (data.topPending.length === 0) {
+                    topPendingBody.innerHTML = '<tr><td colspan="5" class="no-data">No pending fees.</td></tr>';
+                } else {
+                    topPendingBody.innerHTML = data.topPending.map((d, i) => {
+                        const si = d.student.studentInfo || {};
+                        return `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td>${escapeHtml(d.student.name)}</td>
+                                <td>${si.class || '-'} - ${si.section || '-'}</td>
+                                <td>${si.rollNumber || '-'}</td>
+                                <td class="currency" style="color:#c62828; font-weight:600">${formatCurrency(d.pending)}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+        } catch (error) {
+            console.error('Error loading defaulters:', error);
+            defaultersBody.innerHTML = '<tr><td colspan="9" class="no-data">Error: ' + error.message + '</td></tr>';
+        }
+    }
+
+    // ========== UI HELPERS ==========
 
     function formatCurrency(amount) {
         return '₹' + (amount || 0).toLocaleString('en-IN');
@@ -305,6 +459,7 @@ window.onload = () => {
     }
 
     async function addNewUser() {
+        // ... full add user code here (unchanged from original)
         const role = document.getElementById('new-role').value;
         const name = document.getElementById('new-name').value.trim();
         const email = document.getElementById('new-email').value.trim();
@@ -330,7 +485,6 @@ window.onload = () => {
                 alert('Please fill Class, Section, Roll Number, and Admission Number');
                 return;
             }
-
             if (!/^\d+$/.test(admissionNo)) {
                 alert('Admission Number must contain only digits');
                 return;
@@ -353,18 +507,12 @@ window.onload = () => {
                 identificationMark1: document.getElementById('new-id-mark1').value.trim(),
                 identificationMark2: document.getElementById('new-id-mark2').value.trim()
             };
-
             const totalFee = document.getElementById('new-total-fee').value;
-            if (totalFee) {
-                userData.totalFee = parseInt(totalFee);
-            }
+            if (totalFee) userData.totalFee = parseInt(totalFee);
         } else if (role === 'teacher') {
             userData.teacherInfo = {
                 subjects: document.getElementById('new-subjects').value.split(',').map(s => s.trim()).filter(s => s),
-                classTeacher: {
-                    class: document.getElementById('new-ct-class').value.trim(),
-                    section: document.getElementById('new-ct-section').value.trim()
-                },
+                classTeacher: { class: document.getElementById('new-ct-class').value.trim(), section: document.getElementById('new-ct-section').value.trim() },
                 salary: parseInt(document.getElementById('new-salary').value) || 0
             };
         } else if (role === 'admin') {
@@ -374,14 +522,12 @@ window.onload = () => {
         try {
             document.getElementById('submit-user-btn').disabled = true;
             document.getElementById('submit-user-btn').textContent = 'Adding...';
-
             const response = await fetch('/api/admin/users', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(userData)
             });
             const result = await response.json();
-
             if (result.success) {
                 alert('User added successfully!');
                 closeAddUserModal();
@@ -397,7 +543,7 @@ window.onload = () => {
         }
     }
 
-    // Global function for View Details
+    // Global function for View Details (unchanged but uses window.currentUsers)
     window.showUserDetails = async function (index) {
         const user = window.currentUsers[index];
         if (!user) return;
@@ -440,7 +586,7 @@ window.onload = () => {
                 ${i.dateOfLeaving ? `<div class="detail-row"><span class="detail-label">Date of Leaving:</span><span class="detail-value" style="color:#c62828">${formatDate(i.dateOfLeaving)}</span></div>` : ''}
             `;
 
-            // Fetch fee details for student
+            // Fetch fee details
             try {
                 const feeResponse = await fetch(`/api/admin/fees/student/${user._id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -457,9 +603,7 @@ window.onload = () => {
                     if (feeData.payments && feeData.payments.length > 0) {
                         amountPaid = feeData.payments.reduce((sum, p) => sum + (p.totalPaid || 0), 0);
                     }
-
                     const remaining = (totalFromStructure - discount) - amountPaid;
-
                     html += `
                         <div class="section-title">Fee Details</div>
                         <div class="detail-row"><span class="detail-label">Fee (Structure):</span><span class="detail-value" style="font-weight:600">${formatCurrency(totalFromStructure)}</span></div>
@@ -467,8 +611,6 @@ window.onload = () => {
                         <div class="detail-row"><span class="detail-label">Amount Paid:</span><span class="detail-value" style="color:#1976d2">${formatCurrency(amountPaid)}</span></div>
                         <div class="detail-row"><span class="detail-label">Remaining:</span><span class="detail-value" style="color:${remaining > 0 ? '#c62828' : '#2e7d32'}; font-weight:600">${formatCurrency(remaining)}</span></div>
                     `;
-                } else if (feeData.error) {
-                    console.error('Fee API error:', feeData.error);
                 }
             } catch (err) {
                 console.error('Error fetching fee details:', err);
@@ -484,16 +626,12 @@ window.onload = () => {
         }
 
         if (user.role === 'admin' && user.adminInfo) {
-            html += `
-                <div class="section-title">Admin Information</div>
-                <div class="detail-row"><span class="detail-label">Designation:</span><span class="detail-value">${escapeHtml(user.adminInfo.designation) || 'N/A'}</span></div>
-            `;
+            html += `<div class="section-title">Admin Information</div>
+                <div class="detail-row"><span class="detail-label">Designation:</span><span class="detail-value">${escapeHtml(user.adminInfo.designation) || 'N/A'}</span></div>`;
         }
 
-        html += `
-            <div class="section-title">Additional Information</div>
-            <div class="detail-row"><span class="detail-label">Join Date:</span><span class="detail-value">${formatDate(user.joinDate)}</span></div>
-        `;
+        html += `<div class="section-title">Additional Information</div>
+            <div class="detail-row"><span class="detail-label">Join Date:</span><span class="detail-value">${formatDate(user.joinDate)}</span></div>`;
 
         document.getElementById('modal-body').innerHTML = html;
 
@@ -520,42 +658,31 @@ window.onload = () => {
         const feeStart = content.indexOf('<div class="section-title">Fee Details');
         if (feeStart !== -1) {
             const nextSection = content.indexOf('<div class="section-title">', feeStart + 1);
-            if (nextSection !== -1) {
-                content = content.substring(0, feeStart) + content.substring(nextSection);
-            } else {
-                content = content.substring(0, feeStart);
-            }
+            if (nextSection !== -1) content = content.substring(0, feeStart) + content.substring(nextSection);
+            else content = content.substring(0, feeStart);
         }
-
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>${title} - Print</title>
-                <style>
-                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; max-width: 800px; margin: auto; }
-                    .section-title { font-weight: 700; color: #1976d2; margin: 20px 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #e3f2fd; font-size: 1.1rem; }
-                    .section-title:first-child { margin-top: 0; }
-                    .detail-row { display: flex; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
-                    .detail-label { font-weight: 600; color: #555; min-width: 180px; }
-                    .detail-value { color: #222; flex: 1; }
-                    .role-badge { padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 500; text-transform: capitalize; }
-                    .role-badge.student { background-color: #e8f5e9; color: #2e7d32; }
-                    .role-badge.teacher { background-color: #fff3e0; color: #e65100; }
-                    .role-badge.admin { background-color: #e3f2fd; color: #1565c0; }
-                    h1 { text-align: center; color: #333; margin-bottom: 30px; }
-                    .header-info { text-align: center; color: #666; margin-bottom: 30px; }
-                    @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
-                </style>
-            </head>
-            <body>
-                <h1>St. Mary's School</h1>
-                <div class="header-info">User Details: ${title}</div>
+            <!DOCTYPE html><html><head><title>${title} - Print</title>
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; max-width: 800px; margin: auto; }
+                .section-title { font-weight: 700; color: #1976d2; margin: 20px 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #e3f2fd; font-size: 1.1rem; }
+                .section-title:first-child { margin-top: 0; }
+                .detail-row { display: flex; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+                .detail-label { font-weight: 600; color: #555; min-width: 180px; }
+                .detail-value { color: #222; flex: 1; }
+                .role-badge { padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 500; text-transform: capitalize; }
+                .role-badge.student { background-color: #e8f5e9; color: #2e7d32; }
+                .role-badge.teacher { background-color: #fff3e0; color: #e65100; }
+                .role-badge.admin { background-color: #e3f2fd; color: #1565c0; }
+                h1 { text-align: center; color: #333; margin-bottom: 30px; }
+                .header-info { text-align: center; color: #666; margin-bottom: 30px; }
+                @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+            </style></head><body>
+                <h1>St. Mary's School</h1><div class="header-info">User Details: ${title}</div>
                 ${content}
                 <script>window.onload = function() { window.print(); window.close(); }</script>
-            </body>
-            </html>
+            </body></html>
         `);
         printWindow.document.close();
     }
@@ -563,7 +690,6 @@ window.onload = () => {
     // Generate Study Certificate
     function generateCertificate(user) {
         if (!user || user.role !== 'student') return;
-
         const info = user.studentInfo || {};
         const dob = info.dateOfBirth ? new Date(info.dateOfBirth).toLocaleDateString('en-GB') : '__________';
         const admissionNo = info.admissionNumber || '__________';
@@ -577,7 +703,7 @@ window.onload = () => {
             <html>
             <head>
                 <title>Study Certificate - ${user.name}</title>
-                <style>
+            <style>
                     body { 
                         margin: 0; 
                         padding: 20px; 
@@ -726,9 +852,7 @@ window.onload = () => {
         // CSV format template
         const studentHeaders = 'name,email,phone,password,role,gender,joinDate,class,section,admissionNumber,rollNumber,totalFee,guardianName,fatherGuardianPhone,motherName,motherPhone,address,dateOfBirth,religion,caste,subCaste,identificationMark1,identificationMark2';
         const teacherHeaders = 'name,email,phone,password,role,gender,joinDate,subjects,salary,classTeacherClass,classTeacherSection';
-
         const templateContent = `STUDENT TEMPLATE\n${studentHeaders}\nJohn Doe,john@example.com,9876543210,password123,student,Male,2024-01-01,X,A,ADM001,STU001,50000,Father Name,9876543210,Mother Name,9876543211,123 Main Street,2010-05-15,Hindu,General,,Mole on left arm,\n\nTEACHER TEMPLATE\n${teacherHeaders}\nJane Teacher,jane@example.com,9876543212,password123,teacher,Female,2024-01-01,"Math,Science",50000,X,A`;
-
         const blob = new Blob([templateContent], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -785,15 +909,9 @@ window.onload = () => {
                 return date.toISOString();
             }
         }
-
-        // Case 3: JS Date object
-        if (value instanceof Date) {
-            return value.toISOString();
-        }
-
+        if (value instanceof Date) return value.toISOString();
         return null;
     }
-
 
     async function processExcelFile(file) {
         try {
@@ -801,38 +919,20 @@ window.onload = () => {
             const workbook = XLSX.read(data, { type: 'array' });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
-            if (jsonData.length === 0) {
-                alert('No data found in the Excel file');
-                return;
-            }
-
-            // Confirm import
-            if (!confirm(`Found ${jsonData.length} rows. Proceed with import?`)) return;
-
-            // Send to backend
-            const transformedUsers = jsonData.map(row => ({
-                ...row,
-                dateOfBirth: excelDateToISO(row.dateOfBirth),
-                joinDate: excelDateToISO(row.joinDate)
-            }));
-
+            if (jsonData.length === 0) { alert('No data found'); return; }
+            if (!confirm(`Found ${jsonData.length} rows. Proceed?`)) return;
+            const transformedUsers = jsonData.map(row => ({ ...row, dateOfBirth: excelDateToISO(row.dateOfBirth), joinDate: excelDateToISO(row.joinDate) }));
             const response = await fetch('/api/admin/users/bulk', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ users: transformedUsers })
             });
-
             const result = await response.json();
-
             if (result.success) {
                 let msg = `Import Complete!\n✅ ${result.results.success} users added\n❌ ${result.results.failed} failed`;
                 if (result.results.errors.length > 0) {
                     msg += '\n\nErrors:\n' + result.results.errors.slice(0, 5).map(e => `Row ${e.row}: ${e.error}`).join('\n');
-                    if (result.results.errors.length > 5) msg += `\n... and ${result.results.errors.length - 5} more`;
+                    if (result.results.errors.length > 5) msg += '\n... and ' + (result.results.errors.length - 5) + ' more';
                 }
                 alert(msg);
                 fetchAllUsers();
@@ -840,11 +940,15 @@ window.onload = () => {
                 alert('Import failed: ' + result.message);
             }
         } catch (error) {
-            alert('Error processing file: ' + error.message);
+            alert('Error: ' + error.message);
         }
 
         // Reset file input
         document.getElementById('excel-file-input').value = '';
         document.getElementById('excel-format-note').style.display = 'none';
     }
+
+    // Also load fee defaulters when fees tab is shown (in addition to the handler above)
+    // The tab switching above already handles this, but we add a delayed defaulter load
+    // after fee analytics data arrives, triggered in fetchFeeAnalytics
 };

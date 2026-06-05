@@ -543,7 +543,7 @@ export const addUser = asyncHandler(async (req, res) => {
 // @access  Private (Admin only)
 export const updateUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { name, email, password, studentInfo, teacherInfo, phone, totalFee, joinDate } = req.body;
+    const { name, email, password, studentInfo, teacherInfo, phone, totalFee, joinDate, gender } = req.body;
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
@@ -551,6 +551,7 @@ export const updateUser = asyncHandler(async (req, res) => {
     if (email) user.email = email;
     if (password) user.password = await bcrypt.hash(password, 10);
     if (joinDate) user.joinDate = joinDate;
+    if (gender) user.gender = gender;
 
     // Handle studentInfo updates
     if (user.role === 'student' && studentInfo) {
@@ -983,4 +984,109 @@ export const getFeeAnalytics = asyncHandler(async (req, res) => {
         console.error('Error fetching fee analytics:', error);
         res.status(500).json({ success: false, message: error.message });
     }
-}); 
+});
+
+// @desc    Get fee defaulters (student-level fee details with pending amounts)
+// @route   GET /api/admin/fees/defaulters?class=X&section=Y
+// @access  Private (Admin only)
+export const getFeeDefaulters = asyncHandler(async (req, res) => {
+    const { class: className, section } = req.query;
+
+    try {
+        // Build query for students
+        const studentQuery = { role: 'student' };
+        if (className) studentQuery['studentInfo.class'] = className;
+        if (section) studentQuery['studentInfo.section'] = section;
+
+        const students = await User.find(studentQuery).select('name studentInfo discount isActive');
+
+        // Get all fee payments for these students in current year
+        const currentYear = new Date().getFullYear().toString();
+        const feeStructures = await FeeStructure.find({});
+
+        // Create fee structure map
+        const feeStructureMap = {};
+        feeStructures.forEach(fs => {
+            if (!feeStructureMap[fs.class] || fs.totalFee > feeStructureMap[fs.class].totalFee) {
+                feeStructureMap[fs.class] = fs;
+            }
+        });
+
+        // Get all fee payment records for these students
+        const studentIds = students.map(s => s._id);
+        const payments = await FeePayment.find({
+            student: { $in: studentIds },
+            academicYear: currentYear
+        }).sort('-createdAt');
+
+        // Build per-student fee map
+        const paymentMap = {};
+        payments.forEach(p => {
+            if (!paymentMap[p.student.toString()]) {
+                paymentMap[p.student.toString()] = { totalPaid: 0 };
+            }
+            paymentMap[p.student.toString()].totalPaid += p.totalPaid || 0;
+        });
+
+        // Calculate defaulter data
+        const defaulters = [];
+        let paidCount = 0;
+        let unpaidCount = 0;
+        let partialCount = 0;
+
+        students.forEach(student => {
+            const cls = student.studentInfo?.class;
+            if (!cls) return;
+
+            const feeStructure = feeStructureMap[cls];
+            if (!feeStructure) return;
+
+            const totalFee = feeStructure.totalFee || 0;
+            const discount = student.discount || 0;
+            const netFee = totalFee - discount;
+            const amountPaid = paymentMap[student._id.toString()]?.totalPaid || 0;
+            const pending = netFee - amountPaid;
+
+            if (pending <= 0) {
+                paidCount++;
+            } else if (amountPaid === 0) {
+                unpaidCount++;
+            } else {
+                partialCount++;
+            }
+
+            if (pending > 0) {
+                defaulters.push({
+                    student: {
+                        _id: student._id,
+                        name: student.name,
+                        studentInfo: student.studentInfo
+                    },
+                    totalFee: netFee,
+                    paid: amountPaid,
+                    pending,
+                    discount
+                });
+            }
+        });
+
+        // Sort by pending descending
+        defaulters.sort((a, b) => b.pending - a.pending);
+
+        // Get unique classes and sections
+        const availableClasses = [...new Set(students.map(s => s.studentInfo?.class).filter(Boolean))].sort();
+        const availableSections = [...new Set(students.map(s => s.studentInfo?.section).filter(Boolean))].sort();
+
+        res.json({
+            success: true,
+            summary: { paidCount, unpaidCount, partialCount, totalDefaulters: defaulters.length },
+            defaulters,
+            topPending: defaulters.slice(0, 10),
+            availableClasses,
+            availableSections
+        });
+    } catch (error) {
+        console.error('Error fetching fee defaulters:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});

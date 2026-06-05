@@ -18,7 +18,8 @@ import {
     bulkImportUsers,
     updateUserStatus,
     // Fee analytics
-    getFeeAnalytics
+    getFeeAnalytics,
+    getFeeDefaulters
 } from '../controllers/adminController.js';
 
 const router = express.Router();
@@ -39,8 +40,9 @@ router.post('/fees/pay/:studentId', makePayment);
 router.put('/fees/discount/:studentId', updateDiscount);
 router.get('/fees/search', searchPayments);
 
-// Fee analytics route
+// Fee analytics routes
 router.get('/fee-analytics', getFeeAnalytics);
+router.get('/fees/defaulters', getFeeDefaulters);
 
 // User management routes
 router.get('/users', getUsers);

@@ -1,11 +1,10 @@
 // manage-users.js
 
 console.log("manage-users.js loaded");
-let currentRole = 'student'; // <-- Move this here, at the top
+let currentRole = 'student';
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOMContentLoaded");
-    // Tab switching
     const tabs = document.querySelectorAll('.user-tab');
 
     tabs.forEach(tab => {
@@ -26,26 +25,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Add User button
     document.getElementById('addUserBtn').addEventListener('click', () => {
         showAddUserModal();
     });
 
-    // Filter event listeners
     setupFilterListeners();
 
     // Initial load
-    showStudentFilters(); // Show filters for students by default
-    // Don't auto-load all users - wait for filters to be applied
+    showStudentFilters();
+    // Trigger initial data load
+    setTimeout(() => fetchAndRenderUsers(), 100);
 });
 
-console.log("Calling fetchAndRenderUsers")
 async function fetchAndRenderUsers() {
-    console.log("Calling fetchAndRenderUsers");
     const tbody = document.getElementById('user-table-body');
-    tbody.innerHTML = `<tr><td colspan="8">Loading...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="20">Loading...</td></tr>`;
     try {
-        console.log("Fetching:", `/api/admin/users?role=${currentRole}`);
         const token = localStorage.getItem('auth_token');
         const response = await fetch(`/api/admin/users?role=${currentRole}`, {
             headers: {
@@ -55,68 +50,85 @@ async function fetchAndRenderUsers() {
         });
         const data = await response.json();
         if (!data.success || !Array.isArray(data.users) || data.users.length === 0) {
-            tbody.innerHTML = `<tr class="no-users"><td colspan="8">No users to display.</td></tr>`;
-            renderBulkDeleteButton();
+            tbody.innerHTML = `<tr class="no-users"><td colspan="20">No users to display.</td></tr>`;
+            renderBulkButton();
             return;
         }
         tbody.innerHTML = '';
         data.users.forEach(user => {
             tbody.appendChild(renderUserRow(user));
         });
-        renderBulkDeleteButton();
+        renderBulkButton();
     } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="8">Failed to load users.</td></tr>`;
-        renderBulkDeleteButton();
+        console.error('Failed to fetch users:', error);
+        tbody.innerHTML = `<tr><td colspan="20">Failed to load users.</td></tr>`;
+        renderBulkButton();
     }
 }
 
 function renderUserRow(user) {
     const tr = document.createElement('tr');
-    let classSection = '';
-    let subjects = '';
-    if (user.role === 'student' && user.studentInfo) {
-        classSection = `${user.studentInfo.class || ''} ${user.studentInfo.section || ''}`.trim();
-    }
-    if (user.role === 'teacher' && user.teacherInfo) {
-        subjects = Array.isArray(user.teacherInfo.subjects) ? user.teacherInfo.subjects.join(', ') : user.teacherInfo.subjects || '';
-    }
     const isActive = user.isActive !== false;
     const statusText = isActive ? 'Active' : 'Left';
     const statusColor = isActive ? '#2e7d32' : '#c62828';
-    const dateOfLeaving = user.studentInfo?.dateOfLeaving ? new Date(user.studentInfo.dateOfLeaving).toLocaleDateString('en-GB') : '';
+    const info = user.studentInfo || {};
+    const dateOfLeaving = info.dateOfLeaving ? new Date(info.dateOfLeaving).toLocaleDateString('en-GB') : '';
 
-    // Students get Mark as Left / Restore instead of Delete
-    let actionButtons = '';
-    if (user.role === 'student') {
-        if (isActive) {
-            actionButtons = `
+    if (currentRole === 'student') {
+        // Student row: Name, Roll Number, Admission Number, Class, Section, Gender, Status, Actions
+        tr.innerHTML = `
+            <td><input type="checkbox" class="user-select-checkbox" data-id="${user._id}"></td>
+            <td>${user.name || ''}</td>
+            <td>${info.rollNumber || '-'}</td>
+            <td>${info.admissionNumber || '-'}</td>
+            <td>${info.class || '-'}</td>
+            <td>${info.section || '-'}</td>
+            <td>${user.gender || '-'}</td>
+            <td style="color:${statusColor}; font-weight:500;">
+                <span class="status-badge" style="background:${isActive ? '#e8f5e9' : '#fce4ec'}; color:${statusColor}; padding:2px 8px; border-radius:10px; font-size:0.85rem;">
+                    ${statusText}${dateOfLeaving ? ' (' + dateOfLeaving + ')' : ''}
+                </span>
+            </td>
+            <td class="user-actions">
                 <button class="user-action-btn edit" title="Edit"><i class="fas fa-edit"></i></button>
-                <button class="user-action-btn mark-left" title="Mark as Left" style="background:#ff9800;"><i class="fas fa-user-times"></i></button>
-            `;
-        } else {
-            actionButtons = `
+                ${isActive 
+                    ? `<button class="user-action-btn mark-left" title="Mark as Left" style="background:#ff9800;"><i class="fas fa-user-times"></i></button>`
+                    : `<button class="user-action-btn restore" title="Restore" style="background:#4caf50;"><i class="fas fa-user-check"></i></button>`
+                }
+            </td>
+        `;
+    } else if (currentRole === 'teacher') {
+        let subjects = user.teacherInfo?.subjects ? user.teacherInfo.subjects.join(', ') : '';
+        let classTeacher = user.teacherInfo?.classTeacher?.class || '';
+        let sectionTeacher = user.teacherInfo?.classTeacher?.section || '';
+        tr.innerHTML = `
+            <td><input type="checkbox" class="user-select-checkbox" data-id="${user._id}"></td>
+            <td>${user.name || ''}</td>
+            <td>${user.email || ''}</td>
+            <td>${user.phone || '-'}</td>
+            <td>${subjects}</td>
+            <td>${classTeacher} ${sectionTeacher}</td>
+            <td>${user.gender || '-'}</td>
+            <td class="user-actions">
                 <button class="user-action-btn edit" title="Edit"><i class="fas fa-edit"></i></button>
-                <button class="user-action-btn restore" title="Restore" style="background:#4caf50;"><i class="fas fa-user-check"></i></button>
-            `;
-        }
+                <button class="user-action-btn delete" title="Delete"><i class="fas fa-trash"></i></button>
+            </td>
+        `;
     } else {
-        // Teachers/Admins still have Edit + Delete
-        actionButtons = `
-            <button class="user-action-btn edit" title="Edit"><i class="fas fa-edit"></i></button>
-            <button class="user-action-btn delete" title="Delete"><i class="fas fa-trash"></i></button>
+        // Admin row
+        tr.innerHTML = `
+            <td><input type="checkbox" class="user-select-checkbox" data-id="${user._id}"></td>
+            <td>${user.name || ''}</td>
+            <td>${user.email || ''}</td>
+            <td>${user.phone || '-'}</td>
+            <td>${user.adminInfo?.designation || '-'}</td>
+            <td>${user.gender || '-'}</td>
+            <td class="user-actions">
+                <button class="user-action-btn edit" title="Edit"><i class="fas fa-edit"></i></button>
+                <button class="user-action-btn delete" title="Delete"><i class="fas fa-trash"></i></button>
+            </td>
         `;
     }
-
-    tr.innerHTML = `
-        <td><input type="checkbox" class="user-select-checkbox" data-id="${user._id}"></td>
-        <td>${user.name || ''}</td>
-        <td>${user.email || ''}</td>
-        <td>${capitalize(user.role)}</td>
-        <td>${classSection}</td>
-        <td style="color:${statusColor}; font-weight:500;">${statusText}${dateOfLeaving ? ' (' + dateOfLeaving + ')' : ''}</td>
-        <td>${subjects}</td>
-        <td class="user-actions">${actionButtons}</td>
-    `;
 
     // Edit event
     tr.querySelector('.edit').addEventListener('click', () => {
@@ -127,9 +139,9 @@ function renderUserRow(user) {
     const markLeftBtn = tr.querySelector('.mark-left');
     if (markLeftBtn) {
         markLeftBtn.addEventListener('click', async () => {
-            if (confirm(`Are you sure you want to mark ${user.name} as LEFT? They will no longer be able to log in or appear in operational screens.`)) {
+            if (confirm(`Are you sure you want to mark ${user.name} as LEFT?`)) {
                 await updateUserStatus(user._id, false);
-                showAlert(`${user.name} marked as left successfully!`, 'success');
+                showAlert(`${user.name} marked as left`, 'success');
                 fetchAndRenderUsers();
             }
         });
@@ -139,27 +151,84 @@ function renderUserRow(user) {
     const restoreBtn = tr.querySelector('.restore');
     if (restoreBtn) {
         restoreBtn.addEventListener('click', async () => {
-            if (confirm(`Restore ${user.name}? They will immediately become visible in all operational screens.`)) {
+            if (confirm(`Restore ${user.name}?`)) {
                 await updateUserStatus(user._id, true);
-                showAlert(`${user.name} restored successfully!`, 'success');
+                showAlert(`${user.name} restored`, 'success');
                 fetchAndRenderUsers();
             }
         });
     }
 
-    // Delete (teachers/admins only - NOT students)
+    // Delete (teachers/admins only)
     const deleteBtn = tr.querySelector('.delete');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', async () => {
-            if (confirm(`Are you sure you want to delete ${user.name}?`)) {
+            if (confirm(`Delete ${user.name}?`)) {
                 await deleteUser(user._id);
-                showAlert('User deleted successfully!', 'success');
+                showAlert('User deleted', 'success');
                 fetchAndRenderUsers();
             }
         });
     }
 
     return tr;
+}
+
+// ========== BULK ACTION BUTTON ==========
+
+function renderBulkButton() {
+    let bulkBtn = document.getElementById('bulkActionBtn');
+    if (!bulkBtn) {
+        const container = document.querySelector('.user-header-row');
+        if (!container) return;
+        bulkBtn = document.createElement('button');
+        bulkBtn.id = 'bulkActionBtn';
+        bulkBtn.style.border = 'none';
+        bulkBtn.style.borderRadius = '4px';
+        bulkBtn.style.padding = '0.5rem 1.5rem';
+        bulkBtn.style.fontSize = '1rem';
+        bulkBtn.style.fontWeight = '500';
+        bulkBtn.style.cursor = 'pointer';
+        bulkBtn.style.marginLeft = '1rem';
+        bulkBtn.style.display = 'inline-block';
+        container.appendChild(bulkBtn);
+    }
+
+    if (currentRole === 'student') {
+        bulkBtn.textContent = 'Mark Selected as Left';
+        bulkBtn.style.background = '#ff9800';
+        bulkBtn.style.color = '#fff';
+        bulkBtn.onclick = async function () {
+            const checked = Array.from(document.querySelectorAll('.user-select-checkbox:checked'));
+            if (checked.length === 0) {
+                showAlert('No students selected.', 'error');
+                return;
+            }
+            if (!confirm(`Mark ${checked.length} student(s) as LEFT?`)) return;
+            for (const cb of checked) {
+                await updateUserStatus(cb.getAttribute('data-id'), false);
+            }
+            showAlert('Selected students marked as left!', 'success');
+            fetchAndRenderUsers();
+        };
+    } else {
+        bulkBtn.textContent = 'Delete Selected';
+        bulkBtn.style.background = '#dc3545';
+        bulkBtn.style.color = '#fff';
+        bulkBtn.onclick = async function () {
+            const checked = Array.from(document.querySelectorAll('.user-select-checkbox:checked'));
+            if (checked.length === 0) {
+                showAlert('No users selected.', 'error');
+                return;
+            }
+            if (!confirm(`Delete ${checked.length} user(s)?`)) return;
+            for (const cb of checked) {
+                await deleteUser(cb.getAttribute('data-id'));
+            }
+            showAlert('Selected users deleted!', 'success');
+            fetchAndRenderUsers();
+        };
+    }
 }
 
 async function updateUserStatus(userId, isActive) {
@@ -174,49 +243,12 @@ async function updateUserStatus(userId, isActive) {
             body: JSON.stringify({ isActive })
         });
         const data = await res.json();
-        if (!data.success) throw new Error(data.message || 'Failed to update status');
+        if (!data.success) throw new Error(data.message || 'Failed');
         return data;
     } catch (e) {
-        alert('Failed to update student status: ' + e.message);
+        alert('Failed: ' + e.message);
         throw e;
     }
-}
-
-// Render or update the bulk delete button
-function renderBulkDeleteButton() {
-    let bulkBtn = document.getElementById('bulkDeleteBtn');
-    if (!bulkBtn) {
-        const container = document.querySelector('.user-header-row');
-        bulkBtn = document.createElement('button');
-        bulkBtn.id = 'bulkDeleteBtn';
-        bulkBtn.textContent = 'Delete Selected';
-        bulkBtn.style.background = '#dc3545';
-        bulkBtn.style.color = '#fff';
-        bulkBtn.style.border = 'none';
-        bulkBtn.style.borderRadius = '4px';
-        bulkBtn.style.padding = '0.5rem 1.5rem';
-        bulkBtn.style.fontSize = '1rem';
-        bulkBtn.style.fontWeight = '500';
-        bulkBtn.style.cursor = 'pointer';
-        bulkBtn.style.marginLeft = '1rem';
-        bulkBtn.style.display = 'inline-block';
-        container.appendChild(bulkBtn);
-    }
-    bulkBtn.onclick = async function () {
-        const checked = Array.from(document.querySelectorAll('.user-select-checkbox:checked'));
-        if (checked.length === 0) {
-            showAlert('No users selected.', 'error');
-            return;
-        }
-        if (!confirm(`Are you sure you want to delete ${checked.length} user(s)?`)) return;
-        for (const cb of checked) {
-            // Only delete non-student users via bulk delete
-            const userId = cb.getAttribute('data-id');
-            await deleteUser(userId);
-        }
-        showAlert('Selected users deleted successfully!', 'success');
-        fetchAndRenderUsers();
-    };
 }
 
 async function deleteUser(userId) {
@@ -224,7 +256,7 @@ async function deleteUser(userId) {
         const token = localStorage.getItem('auth_token');
         const res = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         const data = await res.json();
-        if (!data.success) alert(data.message || 'Failed to delete user');
+        if (!data.success) alert(data.message || 'Failed to delete');
     } catch (e) {
         alert('Failed to delete user');
     }
@@ -234,117 +266,149 @@ function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+// ========== ADD USER MODAL ==========
+
 function showAddUserModal() {
     const modal = document.getElementById('addUserModal');
     modal.style.display = 'block';
     modal.innerHTML = `
-        <div style="background: #fff; padding: 2rem; border-radius: 12px; max-width: 400px; margin: 2rem auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-            <h2>Add User</h2>
-            <form id="addUserForm">
-                <div style="margin-bottom:1rem;">
-                    <label>Name:</label><br>
-                    <input type="text" name="name" required style="width:100%;padding:0.5rem;">
+        <div class="modal-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;">
+            <div class="modal-content" style="background:#fff;border-radius:12px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 5px 25px rgba(0,0,0,0.2);">
+                <div style="padding:20px 24px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
+                    <h2 style="margin:0;font-size:1.3rem;">Add User</h2>
+                    <button class="modal-close-btn" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#999;">&times;</button>
                 </div>
-                <div style="margin-bottom:1rem;">
-                    <label>Email:</label><br>
-                    <input type="email" name="email" required style="width:100%;padding:0.5rem;">
+                <div style="padding:20px 24px;">
+                    <form id="addUserForm">
+                        <div style="margin-bottom:1rem;">
+                            <label>Name:</label><br>
+                            <input type="text" name="name" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <label>Email:</label><br>
+                            <input type="email" name="email" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <label>Password:</label><br>
+                            <input type="password" name="password" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <label>Phone:</label><br>
+                            <input type="text" name="phone" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <label>Gender:</label><br>
+                            <select name="gender" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <label>Role:</label><br>
+                            <select name="role" id="roleSelect" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                                <option value="student">Student</option>
+                                <option value="teacher">Teacher</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div id="studentFields" style="display:none;">
+                            <div style="margin-bottom:1rem;">
+                                <label>Class:</label><br>
+                                <input type="text" name="class" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                            </div>
+                            <div style="margin-bottom:1rem;">
+                                <label>Section:</label><br>
+                                <input type="text" name="section" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                            </div>
+                            <div style="margin-bottom:1rem;">
+                                <label>Roll Number:</label><br>
+                                <input type="text" name="rollNumber" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                            </div>
+                            <div style="margin-bottom:1rem;">
+                                <label>Admission Number:</label><br>
+                                <input type="text" name="admissionNumber" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                            </div>
+                        </div>
+                        <div id="teacherFields" style="display:none;">
+                            <div style="margin-bottom:1rem;">
+                                <label>Subjects (comma separated):</label><br>
+                                <input type="text" name="subjects" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <label>Date of Joining:</label><br>
+                            <input type="date" name="joinDate" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                        </div>
+                        <div style="text-align:right;margin-top:20px;">
+                            <button type="button" class="modal-close-btn" style="padding:8px 20px;border:1px solid #ddd;background:white;cursor:pointer;margin-right:10px;border-radius:4px;">Cancel</button>
+                            <button type="submit" style="background:#28a745;color:#fff;padding:8px 20px;border:none;border-radius:4px;cursor:pointer;">Add User</button>
+                        </div>
+                    </form>
                 </div>
-                <div style="margin-bottom:1rem;">
-                    <label>Password:</label><br>
-                    <input type="password" name="password" required style="width:100%;padding:0.5rem;">
-                </div>
-                <div style="margin-bottom:1rem;">
-                    <label>Role:</label><br>
-                    <select name="role" id="roleSelect" required style="width:100%;padding:0.5rem;">
-                        <option value="student">Student</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-                <div id="studentFields" style="display:none;">
-                    <div style="margin-bottom:1rem;">
-                        <label>Class:</label><br>
-                        <input type="text" name="class" style="width:100%;padding:0.5rem;">
-                    </div>
-                    <div style="margin-bottom:1rem;">
-                        <label>Section:</label><br>
-                        <input type="text" name="section" style="width:100%;padding:0.5rem;">
-                    </div>
-                </div>
-                <div id="teacherFields" style="display:none;">
-                    <div style="margin-bottom:1rem;">
-                        <label>Subjects (comma separated):</label><br>
-                        <input type="text" name="subjects" style="width:100%;padding:0.5rem;">
-                    </div>
-                </div>
-                <div id="phoneField" style="display:none;margin-bottom:1rem;">
-                    <label>Phone:</label><br>
-                    <input type="text" name="phone" style="width:100%;padding:0.5rem;">
-                </div>
-                <div style="margin-bottom:1rem;">
-                    <label>Date of Joining:</label><br>
-                    <input type="date" name="joinDate" style="width:100%;padding:0.5rem;">
-                </div>
-                <button type="submit" style="background:#28a745;color:#fff;padding:0.5rem 1.5rem;border:none;border-radius:4px;">Add</button>
-                <button type="button" onclick="document.getElementById('addUserModal').style.display='none'" style="margin-left:1rem;">Cancel</button>
-            </form>
+            </div>
         </div>
     `;
-    // Show/hide fields based on role
-    const roleSelect = document.getElementById('roleSelect');
-    const studentFields = document.getElementById('studentFields');
-    const teacherFields = document.getElementById('teacherFields');
-    const phoneField = document.getElementById('phoneField');
+
+    // Close handlers
+    modal.querySelectorAll('.modal-close-btn').forEach(btn => {
+        btn.addEventListener('click', () => { modal.style.display = 'none'; modal.innerHTML = ''; });
+    });
+    modal.querySelector('.modal-overlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) { modal.style.display = 'none'; modal.innerHTML = ''; }
+    });
+    document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape') { modal.style.display = 'none'; modal.innerHTML = ''; document.removeEventListener('keydown', escHandler); }
+    });
+
+    // Role toggle
+    const roleSelect = modal.querySelector('#roleSelect');
+    const studentFields = modal.querySelector('#studentFields');
+    const teacherFields = modal.querySelector('#teacherFields');
     function updateFields() {
-        if (roleSelect.value === 'student') {
-            studentFields.style.display = '';
-            teacherFields.style.display = 'none';
-            phoneField.style.display = '';
-        } else if (roleSelect.value === 'teacher') {
-            studentFields.style.display = 'none';
-            teacherFields.style.display = '';
-            phoneField.style.display = '';
-        } else {
-            studentFields.style.display = 'none';
-            teacherFields.style.display = 'none';
-            phoneField.style.display = 'none';
-        }
+        const val = roleSelect.value;
+        studentFields.style.display = val === 'student' ? '' : 'none';
+        teacherFields.style.display = val === 'teacher' ? '' : 'none';
     }
     roleSelect.addEventListener('change', updateFields);
-    updateFields(); // Initial call
+    updateFields();
 
-    document.getElementById('addUserForm').onsubmit = async function (e) {
+    // Form submit
+    modal.querySelector('#addUserForm').onsubmit = async function (e) {
         e.preventDefault();
         const form = e.target;
-        const user = {
+        const userData = {
             name: form.name.value,
             email: form.email.value,
             password: form.password.value,
-            role: form.role.value
+            role: form.role.value,
+            phone: form.phone.value,
+            gender: form.gender.value,
+            joinDate: form.joinDate.value || undefined
         };
         if (form.role.value === 'student') {
-            user.studentInfo = {
+            userData.studentInfo = {
                 class: form.class.value,
-                section: form.section.value
+                section: form.section.value,
+                rollNumber: form.rollNumber.value,
+                admissionNumber: form.admissionNumber.value
             };
-            user.phone = form.phone.value;
         } else if (form.role.value === 'teacher') {
-            user.teacherInfo = {
+            userData.teacherInfo = {
                 subjects: form.subjects.value.split(',').map(s => s.trim()).filter(Boolean)
             };
-            user.phone = form.phone.value;
         }
-        if (form.joinDate.value) user.joinDate = form.joinDate.value;
-        // For admin, no extra fields
         const token = localStorage.getItem('auth_token');
         const res = await fetch('/api/admin/users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-            body: JSON.stringify(user)
+            body: JSON.stringify(userData)
         });
         const data = await res.json();
         if (data.success) {
             modal.style.display = 'none';
+            modal.innerHTML = '';
             fetchAndRenderUsers();
         } else {
             alert(data.message || 'Failed to add user');
@@ -352,87 +416,108 @@ function showAddUserModal() {
     };
 }
 
+// ========== EDIT USER MODAL ==========
+
 function showEditUserModal(user) {
-    const modal = document.getElementById('addUserModal');
-    modal.style.display = 'block';
+    // Remove existing edit modal if any
+    const existing = document.getElementById('editUserModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'editUserModal';
+    document.body.appendChild(modal);
 
     const isStudent = user.role === 'student';
     const isTeacher = user.role === 'teacher';
-    const isAdmin = user.role === 'admin';
     const info = user.studentInfo || {};
 
-    // Helper to format date for input (YYYY-MM-DD)
     const formatDate = (d) => {
         if (!d) return '';
         try { return new Date(d).toISOString().split('T')[0]; } catch (e) { return ''; }
     };
-
     const dobVal = formatDate(info.dateOfBirth);
     const dolVal = formatDate(info.dateOfLeaving);
 
+    // Case-insensitive gender selection
+    const genderVal = user.gender || '';
+    const genderLower = genderVal.toLowerCase();
+
+    let formContent = `
+        <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Basic Info</div>
+        <div><label>Name</label><input type="text" name="name" value="${(user.name || '').replace(/"/g, '"')}" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+        <div><label>Email</label><input type="email" name="email" value="${(user.email || '').replace(/"/g, '"')}" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+        <div><label>Phone</label><input type="text" name="phone" value="${(user.phone || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+        <div><label>Role</label><input type="text" value="${user.role}" disabled style="width:100%;padding:8px;background:#f9f9f9;border:1px solid #ddd;border-radius:4px;"></div>
+        <div><label>Gender</label>
+            <select name="gender" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                <option value="">Select</option>
+                <option value="Male" ${genderLower === 'male' ? 'selected' : ''}>Male</option>
+                <option value="Female" ${genderLower === 'female' ? 'selected' : ''}>Female</option>
+                <option value="Other" ${genderLower === 'other' ? 'selected' : ''}>Other</option>
+            </select>
+        </div>
+        <div><label>Date of Joining</label><input type="date" name="joinDate" value="${formatDate(user.joinDate)}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+    `;
+
+    if (isStudent) {
+        formContent += `
+            <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Academic Info</div>
+            <div><label>Class</label><input type="text" name="class" value="${info.class || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label>Section</label><input type="text" name="section" value="${info.section || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label>Roll Number</label><input type="text" name="rollNumber" value="${info.rollNumber || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label>Admission Number</label><input type="text" name="admissionNumber" value="${info.admissionNumber || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Dates</div>
+            <div><label>Date of Birth</label><input type="date" name="dateOfBirth" value="${dobVal}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label style="color:#c62828;">Date of Leaving</label><input type="date" name="dateOfLeaving" value="${dolVal}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Parent/Guardian</div>
+            <div><label>Father/Guardian Name</label><input type="text" name="guardianName" value="${(info.guardianName || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label>Father/Guardian Phone</label><input type="text" name="fatherGuardianPhone" value="${(info.fatherGuardianPhone || info.guardianPhone || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label>Mother Name</label><input type="text" name="motherName" value="${(info.motherName || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label>Mother Phone</label><input type="text" name="motherPhone" value="${(info.motherPhone || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div style="grid-column: span 2;"><label>Address</label><input type="text" name="address" value="${(info.address || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+        `;
+    }
+
+    if (isTeacher) {
+        const subjects = user.teacherInfo?.subjects?.join(', ') || '';
+        formContent += `
+            <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Teacher Info</div>
+            <div style="grid-column: span 2;"><label>Subjects (comma separated)</label><input type="text" name="subjects" value="${subjects.replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label>Salary</label><input type="number" name="salary" value="${user.teacherInfo?.salary || 0}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+        `;
+    }
+
     modal.innerHTML = `
-        <div style="background: #fff; padding: 2rem; border-radius: 12px; max-width: 800px; margin: 2rem auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08); max-height:90vh; overflow-y:auto;">
-            <h2 style="border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:20px;">Edit User: ${user.name}</h2>
-            <form id="editUserForm" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Basic Info</div>
-                
-                <div><label>Name</label><input type="text" name="name" value="${user.name || ''}" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Email</label><input type="email" name="email" value="${user.email || ''}" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Phone</label><input type="text" name="phone" value="${user.phone || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Role</label><input type="text" value="${user.role}" disabled style="width:100%;padding:8px;background:#f9f9f9;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Gender</label>
-                    <select name="gender" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
-                        <option value="">Select</option>
-                        <option value="Male" ${user.gender === 'Male' ? 'selected' : ''}>Male</option>
-                        <option value="Female" ${user.gender === 'Female' ? 'selected' : ''}>Female</option>
-                        <option value="Other" ${user.gender === 'Other' ? 'selected' : ''}>Other</option>
-                    </select>
+        <div class="modal-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;">
+            <div class="modal-content" style="background:#fff;border-radius:12px;max-width:800px;width:92%;max-height:90vh;overflow-y:auto;box-shadow:0 5px 25px rgba(0,0,0,0.2);padding:0;">
+                <div style="padding:20px 24px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:1;">
+                    <h2 style="margin:0;font-size:1.3rem;">Edit: ${user.name}</h2>
+                    <button class="modal-close-btn" style="background:none;border:none;font-size:1.8rem;cursor:pointer;color:#999;line-height:1;">&times;</button>
                 </div>
-                <div><label>Date of Joining</label><input type="date" name="joinDate" value="${formatDate(user.joinDate)}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-
-                ${isStudent ? `
-                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Academic Info</div>
-                <div><label>Class</label><input type="text" name="class" value="${info.class || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Section</label><input type="text" name="section" value="${info.section || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Roll Number</label><input type="text" name="rollNumber" value="${info.rollNumber || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Admission Number</label><input type="text" name="admissionNumber" value="${info.admissionNumber || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                
-                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Dates</div>
-                <div><label>Date of Birth</label><input type="date" name="dateOfBirth" value="${dobVal}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label style="color:#c62828;">Date of Leaving</label><input type="date" name="dateOfLeaving" value="${dolVal}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-
-                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Parent/Guardian</div>
-                <div><label>Father/Guardian Name</label><input type="text" name="guardianName" value="${info.guardianName || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Father/Guardian Phone</label><input type="text" name="fatherGuardianPhone" value="${info.fatherGuardianPhone || info.guardianPhone || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Mother Name</label><input type="text" name="motherName" value="${info.motherName || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Mother Phone</label><input type="text" name="motherPhone" value="${info.motherPhone || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div style="grid-column: span 2;"><label>Address</label><input type="text" name="address" value="${info.address || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-
-                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Personal Details</div>
-                <div><label>Religion</label><input type="text" name="religion" value="${info.religion || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Caste</label><input type="text" name="caste" value="${info.caste || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Sub-Caste</label><input type="text" name="subCaste" value="${info.subCaste || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>ID Mark 1</label><input type="text" name="identificationMark1" value="${info.identificationMark1 || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>ID Mark 2</label><input type="text" name="identificationMark2" value="${info.identificationMark2 || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                
-                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Fee Info</div>
-                <div><label>Update Total Fee (Optional)</label><input type="number" name="totalFee" placeholder="Enter new fee amount to update discount" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                ` : ''}
-
-                ${isTeacher ? `
-                <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Teacher Info</div>
-                <div style="grid-column: span 2;"><label>Subjects (comma separated)</label><input type="text" name="subjects" value="${user.teacherInfo?.subjects?.join(', ') || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                <div><label>Salary</label><input type="number" name="salary" value="${user.teacherInfo?.salary || 0}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
-                ` : ''}
-
-                <div style="grid-column: span 2; margin-top:20px; text-align:right;">
-                    <button type="button" onclick="document.getElementById('addUserModal').style.display='none'" style="padding:10px 20px; border:1px solid #ddd; background:white; cursor:pointer; margin-right:10px;">Cancel</button>
-                    <button type="submit" style="background:#007bff;color:#fff;padding:10px 20px;border:none;border-radius:4px;cursor:pointer;">Save Changes</button>
+                <div style="padding:20px 24px;">
+                    <form id="editUserForm" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                        ${formContent}
+                        <div style="grid-column: span 2; margin-top:15px; padding-top:15px; border-top:1px solid #eee; text-align:right;">
+                            <button type="button" class="modal-close-btn" style="padding:10px 24px; border:1px solid #ddd; background:white; cursor:pointer; margin-right:10px; border-radius:4px;">Cancel</button>
+                            <button type="submit" style="background:#007bff;color:#fff;padding:10px 24px;border:none;border-radius:4px;cursor:pointer;">Save Changes</button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     `;
 
+    // Close handlers
+    modal.querySelectorAll('.modal-close-btn').forEach(btn => {
+        btn.addEventListener('click', () => modal.remove());
+    });
+    modal.querySelector('.modal-overlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) modal.remove();
+    });
+    const escHandler = (e) => { if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', escHandler); } };
+    document.addEventListener('keydown', escHandler);
+
+    // Save handler
     document.getElementById('editUserForm').onsubmit = async function (e) {
         e.preventDefault();
         const form = e.target;
@@ -441,9 +526,7 @@ function showEditUserModal(user) {
             email: form.email.value,
             phone: form.phone.value,
             gender: form.gender.value,
-            joinDate: form.joinDate.value,
-            studentInfo: isStudent ? {} : undefined,
-            teacherInfo: isTeacher ? {} : undefined
+            joinDate: form.joinDate.value
         };
 
         if (isStudent) {
@@ -458,14 +541,8 @@ function showEditUserModal(user) {
                 fatherGuardianPhone: form.fatherGuardianPhone.value,
                 motherName: form.motherName.value,
                 motherPhone: form.motherPhone.value,
-                address: form.address.value,
-                religion: form.religion.value,
-                caste: form.caste.value,
-                subCaste: form.subCaste.value,
-                identificationMark1: form.identificationMark1.value,
-                identificationMark2: form.identificationMark2.value
+                address: form.address.value
             };
-            if (form.totalFee.value) updatedUser.totalFee = form.totalFee.value;
         } else if (isTeacher) {
             updatedUser.teacherInfo = {
                 subjects: form.subjects.value.split(',').map(s => s.trim()).filter(Boolean),
@@ -482,11 +559,11 @@ function showEditUserModal(user) {
             });
             const data = await res.json();
             if (data.success) {
-                modal.style.display = 'none';
-                showAlert('User updated successfully!', 'success');
+                modal.remove();
+                showAlert('User updated!', 'success');
                 fetchAndRenderUsers();
             } else {
-                alert(data.message || 'Failed to update user');
+                alert(data.message || 'Failed to update');
             }
         } catch (err) {
             alert('Error updating user');
@@ -494,7 +571,8 @@ function showEditUserModal(user) {
     };
 }
 
-// Helper to show alerts
+// ========== ALERT ==========
+
 function showAlert(message, type = 'success') {
     const alertContainer = document.querySelector('.alert-container');
     if (!alertContainer) return;
@@ -502,16 +580,17 @@ function showAlert(message, type = 'success') {
     setTimeout(() => { alertContainer.innerHTML = ''; }, 3000);
 }
 
-// Filter functions
+// ========== FILTERS ==========
+
 function showStudentFilters() {
     const filterControls = document.querySelector('.filter-controls');
-    filterControls.style.display = 'block';
+    if (filterControls) filterControls.style.display = 'block';
     loadClassOptions();
 }
 
 function hideFilters() {
     const filterControls = document.querySelector('.filter-controls');
-    filterControls.style.display = 'none';
+    if (filterControls) filterControls.style.display = 'none';
 }
 
 function setupFilterListeners() {
@@ -519,7 +598,6 @@ function setupFilterListeners() {
         loadSectionOptions();
         applyFilters();
     });
-
     document.getElementById('sectionFilter').addEventListener('change', applyFilters);
     document.getElementById('searchFilter').addEventListener('input', debounce(applyFilters, 300));
     document.getElementById('clearFilters').addEventListener('click', clearFilters);
@@ -532,10 +610,8 @@ async function loadClassOptions() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
-
         const classFilter = document.getElementById('classFilter');
         classFilter.innerHTML = '<option value="">All Classes</option>';
-
         if (data.classes && Array.isArray(data.classes)) {
             data.classes.forEach(cls => {
                 const option = document.createElement('option');
@@ -552,18 +628,14 @@ async function loadClassOptions() {
 async function loadSectionOptions() {
     const selectedClass = document.getElementById('classFilter').value;
     const sectionFilter = document.getElementById('sectionFilter');
-
     sectionFilter.innerHTML = '<option value="">All Sections</option>';
-
     if (!selectedClass) return;
-
     try {
         const token = localStorage.getItem('auth_token');
         const response = await fetch(`/api/teacher/sections/${selectedClass}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const sections = await response.json();
-
         if (Array.isArray(sections)) {
             sections.forEach(section => {
                 const option = document.createElement('option');
@@ -578,42 +650,34 @@ async function loadSectionOptions() {
 }
 
 async function applyFilters() {
-    const className = document.getElementById('classFilter').value;
-    const section = document.getElementById('sectionFilter').value;
-    const search = document.getElementById('searchFilter').value;
+    const className = document.getElementById('classFilter')?.value || '';
+    const section = document.getElementById('sectionFilter')?.value || '';
+    const search = document.getElementById('searchFilter')?.value || '';
 
     const tbody = document.getElementById('user-table-body');
-    tbody.innerHTML = `<tr><td colspan="8">Loading...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="20">Loading...</td></tr>`;
 
     try {
         const token = localStorage.getItem('auth_token');
         const params = new URLSearchParams({ role: currentRole });
-
         if (className) params.append('class', className);
         if (section) params.append('section', section);
         if (search) params.append('search', search);
 
         const response = await fetch(`/api/admin/users?${params.toString()}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            }
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
         });
-
         const data = await response.json();
 
         if (!data.success || !Array.isArray(data.users) || data.users.length === 0) {
-            tbody.innerHTML = `<tr class="no-users"><td colspan="8">No users found matching the criteria.</td></tr>`;
+            tbody.innerHTML = `<tr class="no-users"><td colspan="20">No users found.</td></tr>`;
             return;
         }
-
         tbody.innerHTML = '';
-        data.users.forEach(user => {
-            tbody.appendChild(renderUserRow(user));
-        });
-
+        data.users.forEach(user => tbody.appendChild(renderUserRow(user)));
     } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="8">Failed to load users.</td></tr>`;
+        console.error('Filter error:', error);
+        tbody.innerHTML = `<tr><td colspan="20">Failed to load users.</td></tr>`;
     }
 }
 
@@ -621,18 +685,14 @@ function clearFilters() {
     document.getElementById('classFilter').value = '';
     document.getElementById('sectionFilter').value = '';
     document.getElementById('searchFilter').value = '';
-    loadSectionOptions(); // Reset sections
+    loadSectionOptions();
     applyFilters();
 }
 
-// Debounce function for search input
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
+        const later = () => { clearTimeout(timeout); func(...args); };
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
