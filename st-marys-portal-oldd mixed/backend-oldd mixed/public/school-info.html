@@ -145,6 +145,16 @@
             box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
         }
 
+        .stat-card.former {
+            background: linear-gradient(135deg, #e53935 0%, #ff7043 100%);
+            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3);
+        }
+
+        .stat-card.current {
+            background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+            box-shadow: 0 4px 15px rgba(67, 160, 71, 0.3);
+        }
+
         .stat-number {
             font-size: 1.6rem;
             font-weight: 700;
@@ -195,6 +205,16 @@
             color: white !important;
         }
 
+        .filter-btn.active-green {
+            background-color: #2e7d32 !important;
+            color: white !important;
+        }
+
+        .filter-btn.active-red {
+            background-color: #c62828 !important;
+            color: white !important;
+        }
+
         .filter-select {
             padding: 8px 12px;
             border: 1px solid #ccc;
@@ -235,6 +255,7 @@
             border-radius: 12px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             overflow: hidden;
+            margin-bottom: 24px;
         }
 
         .data-table {
@@ -451,6 +472,25 @@
             cursor: not-allowed;
         }
 
+        /* Defaulter section specific styles */
+        .defaulter-section {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .defaulter-section h2 {
+            color: #333;
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+        }
+
+        .defaulter-section h3 {
+            color: #555;
+            font-size: 1.1rem;
+            margin: 20px 0 12px 0;
+        }
+
         @media (max-width: 768px) {
             .table-container {
                 overflow-x: auto;
@@ -494,6 +534,13 @@
         .dashboard-nav-link:hover i {
             transform: translateX(-4px);
         }
+
+        /* Styling for active/former filter buttons group */
+        .student-status-filters {
+            display: flex;
+            gap: 8px;
+            margin-right: 16px;
+        }
     </style>
 </head>
 
@@ -519,18 +566,39 @@
 
         <!-- Users Tab -->
         <div class="tab-content active" id="users-tab">
+            <!-- Stats Cards: Row 1 - Overview -->
             <div class="stats-container">
                 <div class="stat-card">
                     <div class="stat-number" id="total-count">-</div>
                     <div class="stat-label">Total Users</div>
                 </div>
                 <div class="stat-card students">
-                    <div class="stat-number" id="students-count">-</div>
-                    <div class="stat-label">Students</div>
+                    <div class="stat-number" id="total-students-count">-</div>
+                    <div class="stat-label">Total Students</div>
                 </div>
+                <div class="stat-card current">
+                    <div class="stat-number" id="students-count">-</div>
+                    <div class="stat-label">Current Students</div>
+                </div>
+                <div class="stat-card former">
+                    <div class="stat-number" id="former-students-count">-</div>
+                    <div class="stat-label">Former Students</div>
+                </div>
+            </div>
+
+            <!-- Stats Cards: Row 2 - Teachers & Admins -->
+            <div class="stats-container">
                 <div class="stat-card teachers">
+                    <div class="stat-number" id="total-teachers-count">-</div>
+                    <div class="stat-label">Total Teachers</div>
+                </div>
+                <div class="stat-card current">
                     <div class="stat-number" id="teachers-count">-</div>
-                    <div class="stat-label">Teachers</div>
+                    <div class="stat-label">Current Teachers</div>
+                </div>
+                <div class="stat-card former">
+                    <div class="stat-number" id="former-teachers-count">-</div>
+                    <div class="stat-label">Former Teachers</div>
                 </div>
                 <div class="stat-card admins">
                     <div class="stat-number" id="admins-count">-</div>
@@ -578,11 +646,20 @@
                     Download Template</button>
             </div>
 
+            <!-- Role filters -->
             <div class="filters-container">
                 <button class="filter-btn active" data-role="all">All</button>
                 <button class="filter-btn" data-role="student">Students</button>
                 <button class="filter-btn" data-role="teacher">Teachers</button>
                 <button class="filter-btn" data-role="admin">Admins</button>
+            </div>
+
+            <!-- Student Status Filters (hidden by default, shown when Students filter is active) -->
+            <div class="filters-container" id="student-status-filters" style="display:none;">
+                <span style="font-weight:500; margin-right:8px;">Status:</span>
+                <button class="filter-btn active-green active" data-student-status="all">All Students</button>
+                <button class="filter-btn active-green" data-student-status="active">Current Students</button>
+                <button class="filter-btn active-red" data-student-status="former">Former Students</button>
             </div>
 
             <div class="search-container">
@@ -600,12 +677,13 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Role</th>
+                            <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="users-table-body">
                         <tr>
-                            <td colspan="6" class="no-data">Loading users...</td>
+                            <td colspan="7" class="no-data">Loading users...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -670,6 +748,86 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Fee Defaulters Section -->
+            <div class="defaulter-section" id="defaulters-section">
+                <h2>💳 Fee Defaulters</h2>
+
+                <!-- Defaulter Filters -->
+                <div class="filters-container" id="defaulter-filters">
+                    <span style="font-weight:500; margin-right:8px;">Class:</span>
+                    <select class="filter-select" id="defaulter-class-filter">
+                        <option value="">All Classes</option>
+                    </select>
+                    <span style="font-weight:500; margin-left:10px; margin-right:8px;">Section:</span>
+                    <select class="filter-select" id="defaulter-section-filter">
+                        <option value="">All Sections</option>
+                    </select>
+                </div>
+
+                <!-- Fee Summary Cards -->
+                <h3>Fee Summary</h3>
+                <div class="stats-container">
+                    <div class="stat-card current" style="min-width:120px;">
+                        <div class="stat-number" id="paid-students-count">-</div>
+                        <div class="stat-label">Paid Students</div>
+                    </div>
+                    <div class="stat-card" style="background:linear-gradient(135deg, #ff9800 0%, #ffb74d 100%); min-width:120px;">
+                        <div class="stat-number" id="partial-paid-count">-</div>
+                        <div class="stat-label">Partially Paid</div>
+                    </div>
+                    <div class="stat-card former" style="min-width:120px;">
+                        <div class="stat-number" id="unpaid-students-count">-</div>
+                        <div class="stat-label">Unpaid Students</div>
+                    </div>
+                </div>
+
+                <!-- Defaulters Table -->
+                <h3>Defaulters List</h3>
+                <div class="table-container">
+                    <table class="data-table" id="defaulters-table">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Admission No</th>
+                                <th>Name</th>
+                                <th>Class</th>
+                                <th>Section</th>
+                                <th>Total Fee</th>
+                                <th>Paid</th>
+                                <th>Pending</th>
+                                <th>Discount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="defaulters-table-body">
+                            <tr>
+                                <td colspan="9" class="no-data">Loading defaulters...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Top 10 Outstanding -->
+                <h3>🏆 Top 10 Outstanding Dues</h3>
+                <div class="table-container">
+                    <table class="data-table" id="top-pending-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Class - Section</th>
+                                <th>Roll No</th>
+                                <th>Pending Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-pending-body">
+                            <tr>
+                                <td colspan="5" class="no-data">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

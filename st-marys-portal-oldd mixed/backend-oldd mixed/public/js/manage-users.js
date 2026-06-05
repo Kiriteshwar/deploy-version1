@@ -466,6 +466,13 @@ function showEditUserModal(user) {
             <div><label>Section</label><input type="text" name="section" value="${info.section || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
             <div><label>Roll Number</label><input type="text" name="rollNumber" value="${info.rollNumber || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
             <div><label>Admission Number</label><input type="text" name="admissionNumber" value="${info.admissionNumber || ''}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Demographics</div>
+            <div><label>Religion</label><input type="text" name="religion" value="${(info.religion || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label>Caste</label><input type="text" name="caste" value="${(info.caste || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label>Sub-Caste</label><input type="text" name="subCaste" value="${(info.subCaste || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Identification Marks</div>
+            <div><label>ID Mark 1</label><input type="text" name="identificationMark1" value="${(info.identificationMark1 || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label>ID Mark 2</label><input type="text" name="identificationMark2" value="${(info.identificationMark2 || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
             <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Dates</div>
             <div><label>Date of Birth</label><input type="date" name="dateOfBirth" value="${dobVal}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
             <div><label style="color:#c62828;">Date of Leaving</label><input type="date" name="dateOfLeaving" value="${dolVal}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
@@ -541,7 +548,12 @@ function showEditUserModal(user) {
                 fatherGuardianPhone: form.fatherGuardianPhone.value,
                 motherName: form.motherName.value,
                 motherPhone: form.motherPhone.value,
-                address: form.address.value
+                address: form.address.value,
+                religion: form.religion.value,
+                caste: form.caste.value,
+                subCaste: form.subCaste.value,
+                identificationMark1: form.identificationMark1.value,
+                identificationMark2: form.identificationMark2.value
             };
         } else if (isTeacher) {
             updatedUser.teacherInfo = {

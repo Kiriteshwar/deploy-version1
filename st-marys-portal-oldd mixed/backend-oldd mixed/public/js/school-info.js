@@ -21,6 +21,10 @@ window.onload = () => {
     // Store data
     let allUsers = [];
     let currentFeeFilters = { period: 'all', class: '', section: '' };
+    let studentStatusFilter = 'all'; // 'all', 'active', 'former'
+    let feeDefaultersClass = '';
+    let feeDefaultersSection = '';
+    let defaulterFiltersInitialized = false; // prevent duplicate event bindings
 
     // Initialize fetchAllUsers after a short delay to ensure DOM is ready
     // Removed duplicate inline fetchAllUsers() call — only this setTimeout triggers it
@@ -37,17 +41,45 @@ window.onload = () => {
 
             if (tabId === 'fees') {
                 fetchFeeAnalytics();
+                // Load defaulters when fees tab opens
+                setTimeout(() => loadFeeDefaulters(), 300);
             }
         });
     });
 
     // ========== USERS TAB ==========
 
-    // Filter buttons
+    // Filter buttons (role filters)
     document.querySelectorAll('.filters-container .filter-btn[data-role]').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.filters-container .filter-btn[data-role]').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            
+            // Show/hide student status filters based on role selection
+            const studentStatusContainer = document.getElementById('student-status-filters');
+            if (studentStatusContainer) {
+                if (btn.dataset.role === 'student') {
+                    studentStatusContainer.style.display = 'flex';
+                } else {
+                    studentStatusContainer.style.display = 'none';
+                    // Reset student status filter to 'all' when not on student role
+                    studentStatusFilter = 'all';
+                    document.querySelectorAll('#student-status-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                    const allStatusBtn = document.querySelector('#student-status-filters .filter-btn[data-student-status="all"]');
+                    if (allStatusBtn) allStatusBtn.classList.add('active');
+                }
+            }
+            
+            filterAndDisplayUsers();
+        });
+    });
+
+    // Student status filter buttons (active/former/all)
+    document.querySelectorAll('#student-status-filters .filter-btn[data-student-status]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#student-status-filters .filter-btn[data-student-status]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            studentStatusFilter = btn.dataset.studentStatus;
             filterAndDisplayUsers();
         });
     });
@@ -218,6 +250,18 @@ window.onload = () => {
 
         let filtered = allUsers;
         if (roleFilter !== 'all') filtered = filtered.filter(u => u.role === roleFilter);
+        
+        // Apply student status filter when role is 'student' or 'all'
+        if (studentStatusFilter !== 'all') {
+            if (roleFilter === 'student' || roleFilter === 'all') {
+                if (studentStatusFilter === 'active') {
+                    filtered = filtered.filter(u => u.role === 'student' && u.isActive !== false);
+                } else if (studentStatusFilter === 'former') {
+                    filtered = filtered.filter(u => u.role === 'student' && u.isActive === false);
+                }
+            }
+        }
+        
         if (search) {
             filtered = filtered.filter(u =>
                 u.name?.toLowerCase().includes(search) ||
@@ -327,16 +371,15 @@ window.onload = () => {
             (sections || []).map(s => `<option value="${s}" ${s === currentValue ? 'selected' : ''}>${s}</option>`).join('');
     }
 
-    // Fee defaulter filters
-    let feeDefaultersClass = '';
-    let feeDefaultersSection = '';
-
     function populateFeeDefaultersClassFilter(classes) {
         const select = document.getElementById('defaulter-class-filter');
         if (!select) return;
-        select.innerHTML = '<option value="">All Classes</option>' +
+        // Remove old event listener by cloning and replacing to prevent duplicates
+        const newSelect = select.cloneNode(true);
+        select.parentNode.replaceChild(newSelect, select);
+        newSelect.innerHTML = '<option value="">All Classes</option>' +
             (classes || []).map(c => `<option value="${c}">${c}</option>`).join('');
-        select.addEventListener('change', (e) => {
+        newSelect.addEventListener('change', (e) => {
             feeDefaultersClass = e.target.value;
             loadFeeDefaulters();
         });
@@ -345,9 +388,12 @@ window.onload = () => {
     function populateFeeDefaultersSectionFilter(sections) {
         const select = document.getElementById('defaulter-section-filter');
         if (!select) return;
-        select.innerHTML = '<option value="">All Sections</option>' +
+        // Remove old event listener by cloning and replacing to prevent duplicates
+        const newSelect = select.cloneNode(true);
+        select.parentNode.replaceChild(newSelect, select);
+        newSelect.innerHTML = '<option value="">All Sections</option>' +
             (sections || []).map(s => `<option value="${s}">${s}</option>`).join('');
-        select.addEventListener('change', (e) => {
+        newSelect.addEventListener('change', (e) => {
             feeDefaultersSection = e.target.value;
             loadFeeDefaulters();
         });
@@ -691,10 +737,10 @@ window.onload = () => {
     function generateCertificate(user) {
         if (!user || user.role !== 'student') return;
         const info = user.studentInfo || {};
-        const dob = info.dateOfBirth ? new Date(info.dateOfBirth).toLocaleDateString('en-GB') : '__________';
-        const admissionNo = info.admissionNumber || '__________';
-        const fatherName = info.guardianName || '__________';
-        const className = info.class || '__________';
+        const dob = info.dateOfBirth ? new Date(info.dateOfBirth).toLocaleDateString('en-GB') : '';
+        const admissionNo = info.admissionNumber || '';
+        const fatherName = info.guardianName || '';
+        const className = info.class || '';
         const logoUrl = window.location.origin + '/images/logo.jpg';
 
         const printWindow = window.open('', '_blank');
