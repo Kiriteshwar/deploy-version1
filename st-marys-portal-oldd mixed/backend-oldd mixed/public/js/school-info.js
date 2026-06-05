@@ -626,6 +626,7 @@ window.onload = () => {
                 <div class="detail-row"><span class="detail-label">Father/Guardian Phone:</span><span class="detail-value">${i.fatherGuardianPhone || i.guardianPhone || 'N/A'}</span></div>
                 <div class="detail-row"><span class="detail-label">Mother's Name:</span><span class="detail-value">${escapeHtml(i.motherName) || 'N/A'}</span></div>
                 <div class="detail-row"><span class="detail-label">Mother's Phone:</span><span class="detail-value">${i.motherPhone || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">Parent Email:</span><span class="detail-value">${i.parentEmail || 'N/A'}</span></div>
                 <div class="detail-row"><span class="detail-label">Address:</span><span class="detail-value">${escapeHtml(i.address) || 'N/A'}</span></div>
                 <div class="section-title">Identification</div>
                 <div class="detail-row"><span class="detail-label">ID Mark 1:</span><span class="detail-value">${escapeHtml(i.identificationMark1) || 'N/A'}</span></div>
