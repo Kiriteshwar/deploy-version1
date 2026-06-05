@@ -25,6 +25,7 @@ import examRoutes from './routes/examRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import inquiryRoutes from './routes/inquiryRoutes.js';
 import communicationsRoutes from './routes/communicationsRoutes.js';
+import diagnosticRoutes from './routes/diagnosticRoutes.js';
 
 // Try to import error middleware from server.js if it exists
 let notFound, errorHandler;
@@ -108,6 +109,9 @@ app.use('/api/exams', examRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/communications', communicationsRoutes);
+
+// Diagnostic routes (admin only) — SMTP/Brevo connectivity testing
+app.use('/api/diag', diagnosticRoutes);
 
 // Test route to verify server is running correct codebase
 app.get('/api/test', (req, res) => {
