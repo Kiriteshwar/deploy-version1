@@ -361,6 +361,7 @@
       <div class="dashboard-card teacher-only" id="manage-complaints-card">💬 Manage Complaints</div>
 
       <!-- Admin-specific cards -->
+      <div class="dashboard-card admin-only" id="communications-card">📢 Communications Center</div>
       <div class="dashboard-card admin-only" id="admin-complaints-card">💬 Manage All Complaints</div>
       <div class="dashboard-card admin-only" id="manage-users-card">👥 Manage Users</div>
       <div class="dashboard-card admin-only" id="manage-classes-card">🏫 Manage Classes</div>
@@ -565,6 +566,10 @@
 
     document.getElementById('manage-fees-card').onclick = function () {
       window.location.href = 'admin-fees.html';
+    };
+
+    document.getElementById('communications-card').onclick = function () {
+      window.location.href = 'admin-communications.html';
     };
 
     document.getElementById('manage-inquiries-card').onclick = function () {

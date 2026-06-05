@@ -8,6 +8,7 @@ import {
     getDashboardStats,
     getCommunicationLogs,
     sendBirthdayWishes,
+    sendEmergencyBroadcast,
     getRecipients
 } from '../controllers/communicationsController.js';
 
@@ -35,5 +36,8 @@ router.post('/send-absence-emails', sendAbsenceEmails);
 
 // Birthday automation
 router.post('/send-birthday-wishes', sendBirthdayWishes);
+
+// Emergency broadcast
+router.post('/emergency-broadcast', sendEmergencyBroadcast);
 
 export default router;

@@ -7,7 +7,11 @@ import {
     getAttendance,
     testWhatsAppPeriod2,
     getAutoSendStatus,
-    toggleAutoSend
+    toggleAutoSend,
+    getAttendanceStatus,
+    getAutoSendSettings,
+    setAutoSendSettings,
+    sendManualAbsenceEmails
 } from "../controllers/attendanceController.js";
 import { protect, teacherOnly } from "../middleware/authMiddleware.js";
 
@@ -21,6 +25,14 @@ router.post("/mark", protect, teacherOnly, markAttendance);
 router.get("/check", protect, teacherOnly, checkExistingAttendance);
 router.get("/class/:class/:section", protect, teacherOnly, getClassAttendance);
 router.get('/:studentId', protect, getAttendance);
+
+// Admin attendance status & auto-send settings
+router.get("/status", protect, teacherOnly, getAttendanceStatus);
+router.get("/auto-send-settings", protect, teacherOnly, getAutoSendSettings);
+router.post("/auto-send-settings", protect, teacherOnly, setAutoSendSettings);
+
+// Manual absence email sending by period
+router.post("/send-absence-emails/:period", protect, teacherOnly, sendManualAbsenceEmails);
 
 // Messaging routes (admin only)
 router.post("/test-whatsapp-period2", protect, /*adminOnly*/ teacherOnly, testWhatsAppPeriod2);

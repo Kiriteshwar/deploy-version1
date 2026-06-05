@@ -22,6 +22,11 @@ const communicationLogSchema = new mongoose.Schema({
         enum: ['absence', 'announcement', 'birthday', 'fees', 'custom', 'homework', 'circular', 'event', 'emergency', 'reminder'],
         default: 'custom'
     },
+    triggerSource: {
+        type: String,
+        enum: ['period2', 'period6', 'manual', 'birthday', 'announcement', 'emergency', 'custom'],
+        default: 'custom'
+    },
 
     // Message details
     subject: {
@@ -64,7 +69,8 @@ const communicationLogSchema = new mongoose.Schema({
     sentBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false,
+        default: null
     },
 
     sentAt: {
@@ -80,6 +86,8 @@ communicationLogSchema.index({ sentAt: -1 });
 communicationLogSchema.index({ notificationType: 1, sentAt: -1 });
 communicationLogSchema.index({ recipientEmail: 1 });
 communicationLogSchema.index({ status: 1 });
+// Compound index for fast duplicate-prevention checks (studentRef + type + date)
+communicationLogSchema.index({ studentRef: 1, notificationType: 1, sentAt: -1 });
 
 const CommunicationLog = mongoose.model('CommunicationLog', communicationLogSchema);
 

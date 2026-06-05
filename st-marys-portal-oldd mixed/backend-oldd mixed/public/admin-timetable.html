@@ -783,6 +783,89 @@
       color: #dc3545;
       background-color: #f8d7da;
     }
+
+    /* New enhanced status cards styles */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .status-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .status-card .card-header {
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: white;
+    }
+    .status-card .card-body { padding: 16px; }
+    .status-card .value { font-size: 1.8rem; font-weight: bold; margin: 0.3rem 0; }
+    .status-card .label { color: #666; font-size: 0.85rem; }
+    .header-blue { background: linear-gradient(135deg, #1976d2, #1565c0); }
+    .header-green { background: linear-gradient(135deg, #43a047, #388e3c); }
+    .header-orange { background: linear-gradient(135deg, #ff9800, #f57c00); }
+    .header-red { background: linear-gradient(135deg, #e53935, #c62828); }
+
+    .status-badge-sm {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge-success { background: #e8f5e9; color: #2e7d32; }
+    .badge-warning { background: #fff3e0; color: #e65100; }
+
+    .progress-bar {
+      width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; margin: 8px 0;
+    }
+    .progress-fill {
+      height: 100%; background: #43a047; border-radius: 4px; transition: width 0.5s ease;
+    }
+    .progress-fill.partial { background: #ff9800; }
+
+    .summary-row {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+    }
+    .summary-item { text-align: center; min-width: 80px; }
+    .summary-item .num { font-size: 1.5rem; font-weight: bold; }
+    .summary-item .lbl { font-size: 0.8rem; color: #666; }
+
+    .alert-msg { padding: 12px; border-radius: 6px; margin: 10px 0; display: none; }
+    .alert-msg.success { display: block; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .alert-msg.error { display: block; background: #fce4ec; color: #c62828; border: 1px solid #f8bbd0; }
+    .alert-msg.info { display: block; background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+
+    .settings-panel {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 16px;
+      margin-bottom: 1.5rem;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .toggle-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .toggle-item label { font-weight: 500; color: #333; cursor: pointer; }
+    .action-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
   </style>
 </head>
 <script src="js/timetable-data.js"></script>
@@ -802,8 +885,117 @@
   </header>
 
   <div class="container">
-    <!-- Student Absentees Panel -->
-    <div class="card absentees-card">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         NEW: Attendance Status Overview Cards
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="attendance-status-section">
+      <!-- Alert message area -->
+      <div id="status-alert" class="alert-msg"></div>
+
+      <!-- Status Cards Grid -->
+      <div class="status-grid">
+        <!-- Period 2 Card -->
+        <div class="status-card">
+          <div class="card-header header-blue">
+            <i class="fas fa-clock"></i> Period 2 Attendance
+          </div>
+          <div class="card-body">
+            <div class="value" id="p2-completed">–/–</div>
+            <div class="label">Classes Completed</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="p2-progress" style="width:0%"></div>
+            </div>
+            <span class="status-badge-sm" id="p2-badge">Loading…</span>
+          </div>
+        </div>
+
+        <!-- Period 6 Card -->
+        <div class="status-card">
+          <div class="card-header header-green">
+            <i class="fas fa-clock"></i> Period 6 Attendance
+          </div>
+          <div class="card-body">
+            <div class="value" id="p6-completed">–/–</div>
+            <div class="label">Classes Completed</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="p6-progress" style="width:0%"></div>
+            </div>
+            <span class="status-badge-sm" id="p6-badge">Loading…</span>
+          </div>
+        </div>
+
+        <!-- Absentees Card -->
+        <div class="status-card">
+          <div class="card-header header-orange">
+            <i class="fas fa-user-times"></i> Absentees Today
+          </div>
+          <div class="card-body">
+            <div class="value" id="status-absentees">–</div>
+            <div class="label">Unique Students Absent</div>
+            <div style="margin-top:8px;">
+              <span class="status-badge-sm badge-warning" id="pending-badge">– pending notification</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emails Card -->
+        <div class="status-card">
+          <div class="card-header header-red">
+            <i class="fas fa-envelope"></i> Emails Sent Today
+          </div>
+          <div class="card-body">
+            <div class="value" id="status-emails">–</div>
+            <div class="label">Absence Notifications</div>
+            <div style="margin-top:8px;">
+              <span class="status-badge-sm badge-success" id="emails-badge">–</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Panel: Auto-Send Toggles + Manual Send Buttons -->
+      <div class="settings-panel">
+        <h3 style="margin:0 0 12px 0; font-size:1rem; color:#333;">
+          <i class="fas fa-cog"></i> Absence Email Settings
+        </h3>
+        <div class="settings-row">
+          <!-- Period 2 Toggle -->
+          <div class="toggle-item">
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-period2" checked>
+              <span class="slider"></span>
+            </label>
+            <label for="toggle-period2">Auto-send after Period 2</label>
+            <span class="toggle-status enabled" id="status-period2">ON</span>
+          </div>
+          <!-- Period 6 Toggle -->
+          <div class="toggle-item">
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-period6">
+              <span class="slider"></span>
+            </label>
+            <label for="toggle-period6">Auto-send after Period 6</label>
+            <span class="toggle-status disabled" id="status-period6">OFF</span>
+          </div>
+        </div>
+        <div class="action-row">
+          <button class="send-messages-btn" id="manual-send-p2" disabled>
+            <i class="fas fa-paper-plane"></i> Send Now (Period 2)
+          </button>
+          <button class="send-messages-btn" id="manual-send-p6" disabled style="background:linear-gradient(135deg,#43a047,#388e3c);">
+            <i class="fas fa-paper-plane"></i> Send Now (Period 6)
+          </button>
+          <button class="refresh-btn" id="refresh-status-btn" style="margin-left:auto;">
+            <i class="fas fa-sync-alt"></i> Refresh Status
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- END: Attendance Status Overview -->
+
+    <!-- Legacy Student Absentees Panel (kept for compatibility) -->
+    <div class="card absentees-card" style="display:none;" id="legacy-absentees-card">
       <div class="card-header">
         <h2 class="card-title"><i class="fas fa-user-times"></i> Student Absentees Today</h2>
       </div>
@@ -814,7 +1006,7 @@
             <p class="count-label">Students Absent</p>
           </div>
           <div class="absentee-controls">
-            <!-- Auto-send toggle -->
+            <!-- Auto-send toggle (legacy) -->
             <div class="auto-send-toggle">
               <label class="toggle-label" for="auto-send-checkbox">Auto-Send:</label>
               <label class="toggle-switch">
@@ -823,8 +1015,7 @@
               </label>
               <span class="toggle-status" id="auto-send-status">Enabled</span>
             </div>
-            
-            <!-- Send messages button -->
+            <!-- Send messages button (legacy) -->
             <button id="send-absent-messages" class="send-messages-btn" disabled>
               <i class="fas fa-paper-plane"></i>
               Send Absent Messages
@@ -1028,67 +1219,319 @@
 
       tabButtons.forEach(button => {
         button.addEventListener('click', function() {
-          // Remove active class from all buttons
           tabButtons.forEach(btn => btn.classList.remove('active'));
-          // Add active class to current button
           this.classList.add('active');
-          
-          // Hide all tab panes
           document.querySelectorAll('.tab-pane').forEach(pane => {
             pane.classList.remove('active');
           });
-          
-          // Show the current tab pane
           const tabId = this.getAttribute('data-tab');
           document.getElementById(`${tabId}-tab`).classList.add('active');
-          
-          // Additionally, refresh the data when switching tabs
           fetchTeacherAttendance();
         });
       });
       
       // Fetch classes and sections from the database
       fetchClasses();
-      
-      // Fetch teachers as soon as the page loads
       fetchTeachers();
-      
-      // Fetch teacher attendance
       fetchTeacherAttendance();
       
-      // Fetch absentees count
-      fetchAbsenteesCount();
+      // Fetch attendance status (new endpoint) instead of legacy count
+      fetchAttendanceStatus();
       
       // Refresh teacher attendance when button is clicked
       refreshTeachersAttendanceBtn.addEventListener('click', function() {
         fetchTeacherAttendance();
-        fetchAbsenteesCount(); // Also refresh absentees count
+        fetchAttendanceStatus();
       });
       
-      // Send absent messages button
+      // Legacy send absent messages button (still works)
       document.getElementById('send-absent-messages').addEventListener('click', function() {
         sendAbsentMessages();
       });
       
-      // Auto-send toggle functionality
+      // Legacy auto-send toggle 
       const autoSendCheckbox = document.getElementById('auto-send-checkbox');
       const autoSendStatus = document.getElementById('auto-send-status');
       
       // Load initial auto-send status
       fetchAutoSendStatus();
       
-      // Handle auto-send toggle changes
       autoSendCheckbox.addEventListener('change', function() {
         const enabled = this.checked;
         toggleAutoSend(enabled);
       });
       
+      // ═══════════════════════════════════════════════════════════════
+      // NEW: Enhanced Status Cards - Toggle & Button Handlers
+      // ═══════════════════════════════════════════════════════════════
+      
+      const togglePeriod2 = document.getElementById('toggle-period2');
+      const togglePeriod6 = document.getElementById('toggle-period6');
+      const manualSendP2 = document.getElementById('manual-send-p2');
+      const manualSendP6 = document.getElementById('manual-send-p6');
+      const refreshStatusBtn = document.getElementById('refresh-status-btn');
+      const statusAlert = document.getElementById('status-alert');
+      
+      // Load auto-send settings
+      fetchAutoSendSettings();
+      
+      // Period 2 toggle change
+      togglePeriod2.addEventListener('change', function() {
+        saveAutoSendSettings();
+      });
+      
+      // Period 6 toggle change
+      togglePeriod6.addEventListener('change', function() {
+        saveAutoSendSettings();
+      });
+      
+      // Manual send for Period 2
+      manualSendP2.addEventListener('click', function() {
+        sendManualAbsenceEmails(2);
+      });
+      
+      // Manual send for Period 6
+      manualSendP6.addEventListener('click', function() {
+        sendManualAbsenceEmails(6);
+      });
+      
+      // Refresh status button
+      refreshStatusBtn.addEventListener('click', function() {
+        fetchAttendanceStatus();
+      });
+      
+      // Set auto-refresh every 60 seconds
+      setInterval(() => {
+        fetchAttendanceStatus();
+      }, 60000);
+      
+      // ═══════════════════════════════════════════════════════════════
+      // NEW: Fetch attendance status from /api/attendance/status
+      // ═══════════════════════════════════════════════════════════════
+      async function fetchAttendanceStatus() {
+        try {
+          const res = await fetch('/api/attendance/status', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (!res.ok) throw new Error('Failed to fetch status');
+          const data = await res.json();
+          
+          // Update Period 2 card
+          const p2Completed = document.getElementById('p2-completed');
+          const p2Progress = document.getElementById('p2-progress');
+          const p2Badge = document.getElementById('p2-badge');
+          if (data.period2) {
+            p2Completed.textContent = `${data.period2.completed}/${data.period2.total}`;
+            const p2Pct = data.period2.total > 0 ? (data.period2.completed / data.period2.total * 100) : 0;
+            p2Progress.style.width = `${p2Pct}%`;
+            p2Progress.className = 'progress-fill' + (p2Pct === 100 ? '' : ' partial');
+            p2Badge.textContent = data.period2.complete ? '✅ All Complete' : `⏳ ${data.period2.completed}/${data.period2.total} marked`;
+            p2Badge.className = 'status-badge-sm ' + (data.period2.complete ? 'badge-success' : 'badge-warning');
+          }
+          
+          // Update Period 6 card
+          const p6Completed = document.getElementById('p6-completed');
+          const p6Progress = document.getElementById('p6-progress');
+          const p6Badge = document.getElementById('p6-badge');
+          if (data.period6) {
+            p6Completed.textContent = `${data.period6.completed}/${data.period6.total}`;
+            const p6Pct = data.period6.total > 0 ? (data.period6.completed / data.period6.total * 100) : 0;
+            p6Progress.style.width = `${p6Pct}%`;
+            p6Progress.className = 'progress-fill' + (p6Pct === 100 ? '' : ' partial');
+            p6Badge.textContent = data.period6.complete ? '✅ All Complete' : `⏳ ${data.period6.completed}/${data.period6.total} marked`;
+            p6Badge.className = 'status-badge-sm ' + (data.period6.complete ? 'badge-success' : 'badge-warning');
+          }
+          
+          // Update Absentees card
+          document.getElementById('status-absentees').textContent = data.absenteesToday;
+          const pendingBadge = document.getElementById('pending-badge');
+          if (data.eligiblePending > 0) {
+            pendingBadge.textContent = `${data.eligiblePending} pending notification`;
+            pendingBadge.className = 'status-badge-sm badge-warning';
+          } else {
+            pendingBadge.textContent = 'All notified ✓';
+            pendingBadge.className = 'status-badge-sm badge-success';
+          }
+          
+          // Update Emails card
+          document.getElementById('status-emails').textContent = data.emailsSentToday;
+          const emailsBadge = document.getElementById('emails-badge');
+          if (data.emailsSentToday > 0) {
+            emailsBadge.textContent = `${data.emailsSentToday} sent today`;
+            emailsBadge.className = 'status-badge-sm badge-success';
+          } else {
+            emailsBadge.textContent = 'No emails sent yet';
+            emailsBadge.className = 'status-badge-sm badge-warning';
+          }
+          
+          // Update manual send buttons
+          manualSendP2.disabled = data.absenteesToday === 0 || data.eligiblePending === 0;
+          manualSendP6.disabled = data.absenteesToday === 0 || data.eligiblePending === 0;
+          
+          // Also update legacy count display
+          updateAbsenteesCount(data.absenteesToday);
+          
+          return data;
+        } catch (error) {
+          console.error('Error fetching attendance status:', error);
+          showStatusAlert('Failed to load attendance status. Please refresh.', 'error');
+          return null;
+        }
+      }
+      
+      // ═══════════════════════════════════════════════════════════════
+      // NEW: Fetch auto-send settings
+      // ═══════════════════════════════════════════════════════════════
+      async function fetchAutoSendSettings() {
+        try {
+          const res = await fetch('/api/attendance/auto-send-settings', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (!res.ok) throw new Error('Failed to fetch settings');
+          const data = await res.json();
+          
+          // Update Period 2 toggle
+          togglePeriod2.checked = data.autoSendAfterPeriod2;
+          const statusP2 = document.getElementById('status-period2');
+          if (data.autoSendAfterPeriod2) {
+            statusP2.textContent = 'ON';
+            statusP2.className = 'toggle-status enabled';
+          } else {
+            statusP2.textContent = 'OFF';
+            statusP2.className = 'toggle-status disabled';
+          }
+          
+          // Update Period 6 toggle
+          togglePeriod6.checked = data.autoSendAfterPeriod6;
+          const statusP6 = document.getElementById('status-period6');
+          if (data.autoSendAfterPeriod6) {
+            statusP6.textContent = 'ON';
+            statusP6.className = 'toggle-status enabled';
+          } else {
+            statusP6.textContent = 'OFF';
+            statusP6.className = 'toggle-status disabled';
+          }
+        } catch (error) {
+          console.error('Error fetching auto-send settings:', error);
+        }
+      }
+      
+      // ═══════════════════════════════════════════════════════════════
+      // NEW: Save auto-send settings (dual toggle)
+      // ═══════════════════════════════════════════════════════════════
+      async function saveAutoSendSettings() {
+        const autoSendAfterPeriod2 = togglePeriod2.checked;
+        const autoSendAfterPeriod6 = togglePeriod6.checked;
+        
+        try {
+          const res = await fetch('/api/attendance/auto-send-settings', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ autoSendAfterPeriod2, autoSendAfterPeriod6 })
+          });
+          if (!res.ok) throw new Error('Failed to save settings');
+          const data = await res.json();
+          
+          // Update status labels
+          const statusP2 = document.getElementById('status-period2');
+          const statusP6 = document.getElementById('status-period6');
+          
+          if (data.autoSendAfterPeriod2) {
+            statusP2.textContent = 'ON';
+            statusP2.className = 'toggle-status enabled';
+          } else {
+            statusP2.textContent = 'OFF';
+            statusP2.className = 'toggle-status disabled';
+          }
+          
+          if (data.autoSendAfterPeriod6) {
+            statusP6.textContent = 'ON';
+            statusP6.className = 'toggle-status enabled';
+          } else {
+            statusP6.textContent = 'OFF';
+            statusP6.className = 'toggle-status disabled';
+          }
+          
+          showStatusAlert(data.message, 'success');
+        } catch (error) {
+          console.error('Error saving auto-send settings:', error);
+          showStatusAlert('Failed to save settings. Please try again.', 'error');
+          // Revert toggles
+          fetchAutoSendSettings();
+        }
+      }
+      
+      // ═══════════════════════════════════════════════════════════════
+      // NEW: Send manual absence emails for a specific period
+      // ═══════════════════════════════════════════════════════════════
+      async function sendManualAbsenceEmails(period) {
+        const btn = period === 2 ? manualSendP2 : manualSendP6;
+        const originalText = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending Period ${period}...`;
+        
+        try {
+          const res = await fetch(`/api/attendance/send-absence-emails/${period}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (!res.ok) throw new Error('Failed to send emails');
+          const data = await res.json();
+          
+          showStatusAlert(
+            `Period ${period}: ${data.sent} sent, ${data.skipped} skipped, ${data.duplicates} duplicates prevented, ${data.failed} failed`,
+            data.sent > 0 || data.duplicates > 0 ? 'success' : 'info'
+          );
+          
+          // Refresh the status
+          fetchAttendanceStatus();
+        } catch (error) {
+          console.error('Error sending absence emails:', error);
+          showStatusAlert(`Failed to send Period ${period} emails: ${error.message}`, 'error');
+        } finally {
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+          }, 2000);
+        }
+      }
+      
+      // ═══════════════════════════════════════════════════════════════
+      // NEW: Show status alert
+      // ═══════════════════════════════════════════════════════════════
+      function showStatusAlert(message, type) {
+        statusAlert.textContent = message;
+        statusAlert.className = 'alert-msg ' + type;
+        statusAlert.style.display = 'block';
+        setTimeout(() => {
+          statusAlert.style.display = 'none';
+        }, 5000);
+      }
+      
+      // ═══════════════════════════════════════════════════════════════
+      
       // Set a global refresh interval (every 5 minutes)
       setInterval(() => {
         fetchTeacherAttendance();
-        fetchAbsenteesCount();
-        fetchAutoSendStatus(); // Also refresh auto-send status
-      }, 300000); // 300000 ms = 5 minutes
+        fetchAttendanceStatus();
+        fetchAutoSendStatus();
+        fetchAutoSendSettings();
+      }, 300000);
       
       function fetchClasses() {
         fetch('/api/teacher/classes', {
@@ -1105,20 +1548,13 @@
           return response.json();
         })
         .then(data => {
-          // Clear current options
           classSelect.innerHTML = '<option value="">Select Class</option>';
-          
-          // Sort classes numerically
           const sortedClasses = data.classes.sort((a, b) => {
-            // If both are numbers, sort numerically
             if (!isNaN(a) && !isNaN(b)) {
               return parseInt(a) - parseInt(b);
             }
-            // Otherwise, sort alphabetically
             return a.localeCompare(b);
           });
-          
-          // Add classes to dropdown
           sortedClasses.forEach(className => {
             const option = document.createElement('option');
             option.value = className;
@@ -1128,35 +1564,24 @@
         })
         .catch(error => {
           console.error('Error fetching classes:', error);
-          // If API fails, fallback to predefined classes with class 10 pre-selected
           const classOptions = ['10'];
-          
           classOptions.forEach(className => {
             const option = document.createElement('option');
             option.value = className;
             option.textContent = className;
             classSelect.appendChild(option);
           });
-          
-          // Auto-select class 10 since our sample data is for class 10
           classSelect.value = '10';
-          
-          // Trigger the change event to populate sections
           const changeEvent = new Event('change');
           classSelect.dispatchEvent(changeEvent);
         });
       }
       
-      // Handle class selection change
       classSelect.addEventListener('change', function() {
         const selectedClass = this.value;
-        
-        // Clear current options
         sectionSelect.innerHTML = '<option value="">Select Section</option>';
-        
         if (!selectedClass) return;
         
-        // Fetch sections for the selected class
         fetch(`/api/teacher/sections/${selectedClass}`, {
           method: 'GET',
           headers: {
@@ -1171,7 +1596,6 @@
           return response.json();
         })
         .then(sections => {
-          // Add sections to dropdown
           sections.forEach(section => {
             const option = document.createElement('option');
             option.value = section;
@@ -1181,7 +1605,6 @@
         })
         .catch(error => {
           console.error('Error fetching sections:', error);
-          // If API fails, fallback to predefined sections for class 10 (A and B)
           if (selectedClass === '10') {
             const sections = ['A', 'B'];
             sections.forEach(section => {
@@ -1190,8 +1613,6 @@
               option.textContent = section;
               sectionSelect.appendChild(option);
             });
-            
-            // Auto-select section A since our sample data is mainly for 10-A
             sectionSelect.value = 'A';
           } else {
           const sectionsByClass = {
@@ -1221,7 +1642,6 @@
         });
       });
       
-      // Fetch teachers for the dropdown
       function fetchTeachers() {
         teacherLoadingSpinner.style.display = 'flex';
         teacherMessageArea.innerHTML = '';
@@ -1241,17 +1661,11 @@
         })
         .then(data => {
           teacherLoadingSpinner.style.display = 'none';
-          
-          // Clear current options except the first one
           while (teacherSelect.options.length > 1) {
             teacherSelect.remove(1);
           }
-          
           if (data.users && Array.isArray(data.users)) {
-            // Sort teachers alphabetically by name
             data.users.sort((a, b) => a.name.localeCompare(b.name));
-            
-            // Populate teacher dropdown
             data.users.forEach(teacher => {
               const option = document.createElement('option');
               option.value = teacher._id;
@@ -1268,25 +1682,20 @@
             </div>
           `;
           console.error('Error fetching teachers:', error);
-          
-          // Fallback to sample data if API fails
           const sampleTeachers = [
             { id: '1', name: 'Teacher User' },
             { id: '2', name: 'Teacher User-2' },
             { id: '3', name: 'Teacher User-3' }
           ];
-          
-          // Populate teacher dropdown with sample data
           sampleTeachers.forEach(teacher => {
             const option = document.createElement('option');
-            option.value = teacher.name; // Use name as value for simple matching
+            option.value = teacher.name;
             option.textContent = teacher.name;
             teacherSelect.appendChild(option);
           });
         });
       }
       
-      // Event listeners for main view buttons
       viewTeacherTimetablesBtn.addEventListener('click', function() {
         teacherTimetableSection.style.display = 'block';
         classTimetableSection.style.display = 'none';
@@ -1297,24 +1706,18 @@
         teacherTimetableSection.style.display = 'none';
       });
       
-      // Fetch and display teacher timetable
       fetchTeacherTimetableBtn.addEventListener('click', function() {
         const teacherId = teacherSelect.value;
         const dayOfWeek = document.getElementById('teacher-day-select').value;
-        
-        // Clear previous data
         teacherTimetableData.innerHTML = '';
         teacherMessageArea.innerHTML = '';
         teacherLoadingSpinner.style.display = 'flex';
-        
-        // Display sample timetable data directly
         setTimeout(() => {
           teacherLoadingSpinner.style.display = 'none';
           displayTeacherTimetables([], []);
         }, 500);
       });
       
-      // Fetch and display class timetable
       fetchClassTimetableBtn.addEventListener('click', function() {
         const className = classSelect.value;
         const section = sectionSelect.value;
@@ -1329,56 +1732,39 @@
           return;
         }
         
-        // Clear previous data
         classTimetableData.innerHTML = '';
         classMessageArea.innerHTML = '';
         classLoadingSpinner.style.display = 'flex';
         
-        // Use the selected class and section
         console.log(`Fetching timetable for class ${className}-${section}, day: ${dayOfWeek}`);
         
-        // Display sample timetable data directly
         setTimeout(() => {
           classLoadingSpinner.style.display = 'none';
-          
-          // Use the actual selected class and section values
           displayClassTimetable({}, className, section, dayOfWeek);
         }, 500);
       });
       
-      // Trigger the class and section selection with defaults on page load
       window.addEventListener('DOMContentLoaded', function() {
-        // Auto-show the class timetable section
         setTimeout(() => {
           viewClassTimetablesBtn.click();
-          
-          // After classes are fetched, auto-select class 10 and set to Section A
           setTimeout(() => {
             if (classSelect.options.length > 1) {
-              // Find and select Class 10
               for (let i = 0; i < classSelect.options.length; i++) {
                 if (classSelect.options[i].value === '10') {
                   classSelect.selectedIndex = i;
                   break;
                 }
               }
-              
-              // Trigger the change event to populate sections
               const changeEvent = new Event('change');
               classSelect.dispatchEvent(changeEvent);
-              
-              // After sections are populated, select Section A and trigger fetch
               setTimeout(() => {
                 if (sectionSelect.options.length > 1) {
                   for (let i = 0; i < sectionSelect.options.length; i++) {
                     if (sectionSelect.options[i].value === 'A') {
                       sectionSelect.selectedIndex = i;
-                      
-                      // Finally, trigger the fetch button to load the timetable
                       setTimeout(() => {
                         fetchClassTimetableBtn.click();
                       }, 200);
-                      
                       break;
                     }
                   }
@@ -1389,7 +1775,6 @@
         }, 300);
       });
       
-      // Function to display teacher timetables
       function displayTeacherTimetables(_, __) {
         const teacherSelect = document.getElementById('teacher-select');
         const selectedTeacherName = teacherSelect.options[teacherSelect.selectedIndex].text;
@@ -1438,9 +1823,7 @@
         document.getElementById('teacher-timetable-data').innerHTML = html;
       }
       
-      // Function to display class timetable
       function displayClassTimetable(_, className, section, dayFilter) {
-        // Filter timetable data for this class/section
         const timetableData = window.timetableData;
         const filtered = timetableData.classes.filter(c => c.class === className && c.section === section);
         const dayIndices = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
@@ -1485,7 +1868,6 @@
         document.getElementById('class-timetable-data').innerHTML = html;
       }
       
-      // Function to fetch teacher attendance status
       function fetchTeacherAttendance() {
         const loadingElements = [
           document.getElementById('absent-teachers-loading'),
@@ -1505,12 +1887,9 @@
           document.getElementById('not-marked-teachers-list')
         ];
         
-        // Show loading indicators
         loadingElements.forEach(el => {
           if (el) el.style.display = 'flex';
         });
-        
-        // Clear previous content
         messageElements.forEach(el => {
           if (el) el.innerHTML = '';
         });
@@ -1518,10 +1897,8 @@
           if (el) el.innerHTML = '';
         });
         
-        // Add timestamp to prevent caching
         const timestamp = new Date().getTime();
         
-        // First fetch all teachers
         fetch(`/api/teacher/all?t=${timestamp}`, {
           method: 'GET',
           headers: {
@@ -1539,7 +1916,6 @@
           return response.json();
         })
         .then(teachersData => {
-          // Now fetch attendance data
           return fetch(`/api/teacher/admin/attendance?t=${timestamp}`, {
             method: 'GET',
             headers: {
@@ -1563,20 +1939,16 @@
           });
         })
         .then(({ allTeachers, attendanceData }) => {
-          // Hide loading indicators
           loadingElements.forEach(el => {
             if (el) el.style.display = 'none';
           });
           
-          // Sort teachers alphabetically by name
           allTeachers.sort((a, b) => a.name.localeCompare(b.name));
           
-          // Group teachers by attendance status
           const absentTeachers = [];
           const presentTeachers = [];
           const notMarkedTeachers = [];
           
-          // Process all teachers to categorize them
           if (attendanceData.teachers && Array.isArray(attendanceData.teachers)) {
             attendanceData.teachers.forEach(teacher => {
               if (teacher.attendance) {
@@ -1591,7 +1963,6 @@
             });
           }
           
-          // Update absent teachers list
           if (absentTeachers.length === 0) {
             document.getElementById('absent-teachers-message').innerHTML = 
               '<p>No teachers have marked themselves as absent today.</p>';
@@ -1609,18 +1980,13 @@
             });
           }
           
-          // Update present teachers list
           if (presentTeachers.length === 0) {
             document.getElementById('present-teachers-message').innerHTML = 
               '<p>No teachers have marked themselves as present today.</p>';
           } else {
             presentTeachers.forEach(teacher => {
-              // Default message in case we can't determine the actual time
               let timestampStr = 'Time not recorded';
-              
-              // Try to use createdAt/updatedAt from the attendance data
               if (teacher.attendance) {
-                // Try createdAt timestamp first (when they initially marked attendance)
                 if (teacher.attendance.createdAt) {
                   try {
                     const timestamp = new Date(teacher.attendance.createdAt);
@@ -1636,7 +2002,6 @@
                     console.error('Error parsing createdAt timestamp:', e);
                   }
                 }
-                // If createdAt failed, try updatedAt (when they last updated attendance)
                 else if (teacher.attendance.updatedAt) {
                   try {
                     const timestamp = new Date(teacher.attendance.updatedAt);
@@ -1666,7 +2031,6 @@
             });
           }
           
-          // Update not marked teachers list
           if (notMarkedTeachers.length === 0) {
             document.getElementById('not-marked-teachers-message').innerHTML = 
               '<p>All teachers have marked their attendance today.</p>';
@@ -1684,7 +2048,6 @@
             });
           }
           
-          // Update counts in tab buttons
           document.querySelector('.tab-btn[data-tab="absent"]').textContent = 
             `Absent Teachers (${absentTeachers.length})`;
           document.querySelector('.tab-btn[data-tab="present"]').textContent = 
@@ -1693,25 +2056,20 @@
             `Not Marked (${notMarkedTeachers.length})`;
         })
         .catch(error => {
-          // Hide loading indicators
           loadingElements.forEach(el => {
             if (el) el.style.display = 'none';
           });
-          
-          // Show error messages
           messageElements.forEach(el => {
             if (el) el.innerHTML = `<p>Error loading teacher attendance: ${error.message}</p>`;
           });
-          
           console.error('Error fetching teacher attendance:', error);
         });
       }
 
-      // Function to fetch student absentees count
+      // Function to fetch student absentees count (legacy, updated to use /status)
       function fetchAbsenteesCount() {
-        // Use the test WhatsApp API to get period 2 absentees count
-        fetch('/api/attendance/test-whatsapp-period2', {
-          method: 'POST',
+        fetch('/api/attendance/status', {
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -1724,10 +2082,9 @@
           return response.json();
         })
         .then(data => {
-          // Update count display based on total absentees found
-          const count = data.total || 0;
+          const count = data.absenteesToday || 0;
           updateAbsenteesCount(count);
-          console.log(`Found ${count} absentees for period 2`);
+          console.log(`Found ${count} absentees for today`);
         })
         .catch(error => {
           console.error('Error fetching absentees count:', error);
@@ -1735,14 +2092,12 @@
         });
       }
       
-      // Function to update the absentees count display
       function updateAbsenteesCount(count) {
         const countElement = document.getElementById('absentees-count');
         const sendBtn = document.getElementById('send-absent-messages');
         
         countElement.textContent = count;
         
-        // Enable/disable send button based on count
         if (count > 0) {
           sendBtn.disabled = false;
           sendBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Send Messages (${count} students)`;
@@ -1752,16 +2107,13 @@
         }
       }
       
-      // Function to send absent messages
       function sendAbsentMessages() {
         const sendBtn = document.getElementById('send-absent-messages');
         const originalText = sendBtn.innerHTML;
         
-        // Show loading state
         sendBtn.disabled = true;
         sendBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending Emails...`;
         
-        // Use the new communications endpoint for sending absence emails
         fetch('/api/communications/send-absence-emails', {
           method: 'POST',
           headers: {
@@ -1776,7 +2128,6 @@
           return response.json();
         })
         .then(data => {
-          // Show success message with detailed info
           const sentCount = data.sent || 0;
           const skippedCount = data.skipped || 0;
           if (sentCount > 0 || skippedCount > 0) {
@@ -1784,17 +2135,15 @@
           } else {
             alert('No absent students found today.');
           }
-          
           console.log('Email sending results:', data);
-          // Update the count after sending
           fetchAbsenteesCount();
+          fetchAttendanceStatus();
         })
         .catch(error => {
           console.error('Error sending emails:', error);
           alert('Failed to send emails. Please check the console for details.');
         })
         .finally(() => {
-          // Restore button
           setTimeout(() => {
             sendBtn.disabled = false;
             sendBtn.innerHTML = originalText;
@@ -1802,9 +2151,7 @@
         });
       }
 
-      // Add this function after fetchTeacherAttendance
       function fetchAbsentTeachersList() {
-        // Return a Promise that resolves to the list of absent teachers
         return new Promise((resolve, reject) => {
           const timestamp = new Date().getTime();
           fetch(`/api/teacher/admin/attendance?t=${timestamp}`, {
@@ -1824,22 +2171,18 @@
             return response.json();
           })
           .then(data => {
-            // Extract names of absent teachers
             const absentTeachers = data.teachers
               .filter(teacher => teacher.attendance && teacher.attendance.status === 'absent')
               .map(teacher => teacher.name);
-            
             resolve(absentTeachers);
           })
           .catch(error => {
             console.error('Error fetching absent teachers:', error);
-            // Resolve with empty array in case of error
             resolve([]);
           });
         });
       }
       
-      // Function to fetch auto-send status
       function fetchAutoSendStatus() {
         fetch('/api/attendance/auto-send-status', {
           method: 'GET',
@@ -1855,7 +2198,6 @@
           return response.json();
         })
         .then(data => {
-          // Update UI based on current status
           const checkbox = document.getElementById('auto-send-checkbox');
           const statusElement = document.getElementById('auto-send-status');
           
@@ -1876,11 +2218,9 @@
         });
       }
       
-      // Function to toggle auto-send setting
       function toggleAutoSend(enabled) {
         const statusElement = document.getElementById('auto-send-status');
         
-        // Show loading state
         statusElement.textContent = 'Updating...';
         statusElement.className = 'toggle-status';
         
@@ -1899,7 +2239,6 @@
           return response.json();
         })
         .then(data => {
-          // Update UI based on new status
           if (data.autoSendEnabled) {
             statusElement.textContent = 'Enabled';
             statusElement.className = 'toggle-status enabled';
@@ -1907,27 +2246,14 @@
             statusElement.textContent = 'Disabled';
             statusElement.className = 'toggle-status disabled';
           }
-          
           console.log('Auto-send toggled:', data.message);
-          
-          // Show brief notification
-          const message = enabled ? 
-            'Auto-send ENABLED - Messages will be sent automatically when all classes mark Period 2 attendance' :
-            'Auto-send DISABLED - Only manual send will work';
-          
-          // You could replace this alert with a nicer notification
-          alert(message);
         })
         .catch(error => {
           console.error('Error toggling auto-send:', error);
-          
-          // Revert checkbox state on error
           const checkbox = document.getElementById('auto-send-checkbox');
           checkbox.checked = !enabled;
-          
           statusElement.textContent = 'Error';
           statusElement.className = 'toggle-status';
-          
           alert('Failed to update auto-send setting. Please try again.');
         });
       }

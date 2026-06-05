@@ -208,6 +208,7 @@
                 <button class="comm-tab active" data-tab="individual"><i class="fas fa-user"></i> Individual</button>
                 <button class="comm-tab" data-tab="bulk"><i class="fas fa-users"></i> Bulk</button>
                 <button class="comm-tab" data-tab="announcement"><i class="fas fa-bullhorn"></i> Announcement</button>
+                <button class="comm-tab" data-tab="emergency"><i class="fas fa-exclamation-triangle"></i> 🚨 Emergency</button>
                 <button class="comm-tab" data-tab="logs"><i class="fas fa-history"></i> Logs</button>
             </div>
 
@@ -327,6 +328,48 @@
                     <button type="submit" class="btn btn-primary"><i class="fas fa-bullhorn"></i> Send Announcement</button>
                 </form>
                 <div id="ann-result" class="message-box"></div>
+            </div>
+
+            <!-- Emergency Broadcast Tab -->
+            <div class="tab-content" id="tab-emergency">
+                <h3><i class="fas fa-exclamation-triangle" style="color:#e53935;"></i> Emergency Broadcast</h3>
+                <div id="emergency-confirmation" class="message-box"></div>
+                <div id="emergency-estimate" style="margin-bottom:1rem; padding:0.8rem; background:#fff3e0; border-radius:6px; border-left:4px solid #ff9800; display:none;">
+                    <strong><i class="fas fa-users"></i> Estimated Recipients:</strong>
+                    <span id="emergency-estimate-text">Loading...</span>
+                </div>
+                <form id="emergency-form">
+                    <div class="form-group">
+                        <label>Subject <span style="color:#e53935;">*</span></label>
+                        <input type="text" class="form-control" id="emergency-subject" placeholder="e.g. School Closure Tomorrow" required>
+                        <small style="color:#999;">A 🚨 prefix will be added automatically.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Message <span style="color:#e53935;">*</span></label>
+                        <textarea class="form-control" id="emergency-message" placeholder="Type your emergency message here..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Send to:</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="emergency-to-parents" checked onchange="updateEmergencyEstimate()"> Parents</label>
+                            <label><input type="checkbox" id="emergency-to-teachers" checked onchange="updateEmergencyEstimate()"> Teachers</label>
+                            <label><input type="checkbox" id="emergency-to-admins" checked onchange="updateEmergencyEstimate()"> Admins</label>
+                        </div>
+                    </div>
+                    <div id="emergency-preview" style="margin-top:0.5rem; padding:0.8rem; background:#ffebee; border-radius:6px; border:1px solid #ffcdd2; display:none;">
+                        <strong style="color:#c62828;">⚠️ Confirmation Required</strong>
+                        <p id="emergency-confirm-text" style="margin:0.5rem 0; color:#555;"></p>
+                    </div>
+                    <div style="display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-danger" id="emergency-send-btn" disabled>
+                            <i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast
+                        </button>
+                        <button type="button" class="btn btn-outline" id="emergency-cancel-btn" style="display:none;">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+                <div id="emergency-result" class="message-box"></div>
             </div>
 
             <!-- Logs Tab -->
@@ -702,6 +745,190 @@
 
             // Initial recipients load
             setTimeout(() => loadRecipients('ind'), 300);
+
+            // ═══════════════════════════════════════════════════════
+            // EMERGENCY BROADCAST HANDLER
+            // ═══════════════════════════════════════════════════════
+            
+            // Elements
+            const emergencyForm = document.getElementById('emergency-form');
+            const emergencySubject = document.getElementById('emergency-subject');
+            const emergencyMessage = document.getElementById('emergency-message');
+            const emergencyToParents = document.getElementById('emergency-to-parents');
+            const emergencyToTeachers = document.getElementById('emergency-to-teachers');
+            const emergencyToAdmins = document.getElementById('emergency-to-admins');
+            const emergencySendBtn = document.getElementById('emergency-send-btn');
+            const emergencyCancelBtn = document.getElementById('emergency-cancel-btn');
+            const emergencyPreview = document.getElementById('emergency-preview');
+            const emergencyConfirmText = document.getElementById('emergency-confirm-text');
+            const emergencyResult = document.getElementById('emergency-result');
+            const emergencyEstimate = document.getElementById('emergency-estimate');
+            const emergencyEstimateText = document.getElementById('emergency-estimate-text');
+
+            // Make updateEmergencyEstimate globally accessible (for onchange= in HTML)
+            window.updateEmergencyEstimate = async function() {
+                if (!emergencyToParents.checked && !emergencyToTeachers.checked && !emergencyToAdmins.checked) {
+                    emergencyEstimate.style.display = 'none';
+                    emergencySendBtn.disabled = true;
+                    return;
+                }
+                emergencyEstimate.style.display = 'block';
+                emergencyEstimateText.textContent = 'Loading...';
+                
+                try {
+                    // Count parents
+                    let parentCount = 0;
+                    if (emergencyToParents.checked) {
+                        const students = await fetch('/api/communications/recipients?role=student', {
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        }).then(r => r.json());
+                        parentCount = students.success ? students.users.length : 0;
+                    }
+                    
+                    // Count teachers
+                    let teacherCount = 0;
+                    if (emergencyToTeachers.checked) {
+                        const teachers = await fetch('/api/communications/recipients?role=teacher', {
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        }).then(r => r.json());
+                        teacherCount = teachers.success ? teachers.users.filter(u => u.email).length : 0;
+                    }
+                    
+                    // Count admins
+                    let adminCount = 0;
+                    if (emergencyToAdmins.checked) {
+                        const admins = await fetch('/api/communications/recipients?role=admin', {
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        }).then(r => r.json());
+                        adminCount = admins.success ? admins.users.filter(u => u.email).length : 0;
+                    }
+                    
+                    const total = parentCount + teacherCount + adminCount;
+                    emergencyEstimateText.innerHTML = `
+                        <strong>${total.toLocaleString()}</strong> total
+                        ${parentCount > 0 ? `(${parentCount.toLocaleString()} parents` : ''}
+                        ${teacherCount > 0 ? `, ${teacherCount.toLocaleString()} teachers` : ''}
+                        ${adminCount > 0 ? `, ${adminCount.toLocaleString()} admins` : ''}
+                        ${parentCount > 0 ? ')' : ''}
+                    `;
+                    
+                    if (total > 0) {
+                        emergencySendBtn.disabled = !(emergencySubject.value.trim() && emergencyMessage.value.trim());
+                    } else {
+                        emergencySendBtn.disabled = true;
+                    }
+                } catch (err) {
+                    emergencyEstimateText.textContent = 'Could not load estimates';
+                    console.error('Estimate error:', err);
+                }
+            };
+
+            // Update estimate when inputs change
+            emergencySubject.addEventListener('input', updateEstimateButton);
+            emergencyMessage.addEventListener('input', updateEstimateButton);
+            
+            function updateEstimateButton() {
+                const hasContent = emergencySubject.value.trim() && emergencyMessage.value.trim();
+                const hasRecipients = emergencyToParents.checked || emergencyToTeachers.checked || emergencyToAdmins.checked;
+                emergencySendBtn.disabled = !(hasContent && hasRecipients);
+            }
+
+            // Send button - show confirmation first
+            emergencySendBtn.addEventListener('click', async function() {
+                const subject = emergencySubject.value.trim();
+                const message = emergencyMessage.value.trim();
+                
+                if (!subject || !message) return;
+                
+                const hasParents = emergencyToParents.checked;
+                const hasTeachers = emergencyToTeachers.checked;
+                const hasAdmins = emergencyToAdmins.checked;
+                
+                if (!hasParents && !hasTeachers && !hasAdmins) {
+                    emergencyResult.className = 'message-box error';
+                    emergencyResult.textContent = 'Please select at least one recipient group.';
+                    emergencyResult.style.display = 'block';
+                    return;
+                }
+                
+                // Show confirmation dialog
+                let confirmParts = [];
+                if (hasParents) confirmParts.push('Parents');
+                if (hasTeachers) confirmParts.push('Teachers');
+                if (hasAdmins) confirmParts.push('Admins');
+                
+                emergencyConfirmText.innerHTML = `⚠️ This will send an emergency email to: <strong>${confirmParts.join(', ')}</strong>.<br><br>Subject will be: <strong>🚨 ${subject}</strong><br><br>Are you sure you want to continue?`;
+                emergencyPreview.style.display = 'block';
+                emergencySendBtn.disabled = true;
+                emergencyCancelBtn.style.display = 'inline-flex';
+                emergencySendBtn.textContent = '✅ Confirm & Send';
+                emergencySendBtn.className = 'btn btn-success';
+                
+                // Remove old listeners and add confirm handler
+                const confirmHandler = async function() {
+                    emergencySendBtn.disabled = true;
+                    emergencySendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                    emergencyCancelBtn.style.display = 'none';
+                    
+                    try {
+                        const res = await fetch('/api/communications/emergency-broadcast', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({
+                                subject,
+                                message,
+                                sendToParents: hasParents,
+                                sendToTeachers: hasTeachers,
+                                sendToAdmins: hasAdmins
+                            })
+                        });
+                        const data = await res.json();
+                        
+                        emergencyResult.className = 'message-box ' + (data.success ? 'success' : 'error');
+                        emergencyResult.innerHTML = data.success 
+                            ? `<strong>✅ Emergency Broadcast Sent</strong><br>${data.message}`
+                            : `<strong>❌ Failed</strong><br>${data.message}`;
+                        emergencyResult.style.display = 'block';
+                        
+                        if (data.success) {
+                            emergencyPreview.style.display = 'none';
+                            emergencySubject.value = '';
+                            emergencyMessage.value = '';
+                            emergencySendBtn.textContent = '<i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast';
+                            emergencySendBtn.className = 'btn btn-danger';
+                            emergencySendBtn.disabled = true;
+                            loadDashboardStats();
+                        } else {
+                            // Re-enable on failure
+                            emergencySendBtn.textContent = '✅ Confirm & Send';
+                            emergencySendBtn.className = 'btn btn-success';
+                            emergencySendBtn.disabled = false;
+                            emergencyCancelBtn.style.display = 'inline-flex';
+                        }
+                    } catch (err) {
+                        emergencyResult.className = 'message-box error';
+                        emergencyResult.textContent = 'Error: ' + err.message;
+                        emergencyResult.style.display = 'block';
+                        emergencySendBtn.textContent = '✅ Confirm & Send';
+                        emergencySendBtn.className = 'btn btn-success';
+                        emergencySendBtn.disabled = false;
+                        emergencyCancelBtn.style.display = 'inline-flex';
+                    }
+                };
+                
+                // Remove any previous confirm listeners and attach new one
+                emergencySendBtn.removeEventListener('click', confirmHandler);
+                emergencySendBtn.addEventListener('click', confirmHandler);
+            });
+            
+            // Cancel button
+            emergencyCancelBtn.addEventListener('click', function() {
+                emergencyPreview.style.display = 'none';
+                emergencyCancelBtn.style.display = 'none';
+                emergencySendBtn.textContent = '<i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast';
+                emergencySendBtn.className = 'btn btn-danger';
+                emergencySendBtn.disabled = false;
+            });
         });
     </script>
 </body>

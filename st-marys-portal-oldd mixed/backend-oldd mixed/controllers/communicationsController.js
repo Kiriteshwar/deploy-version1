@@ -229,7 +229,10 @@ export const sendAbsenceEmails = asyncHandler(async (req, res) => {
     const absenteeRecords = await Attendance.find({
         date: { $gte: start, $lt: end },
         status: 'Absent'
-    }).populate('student');
+    }).populate({
+        path: 'student',
+        match: { role: 'student', isActive: true }
+    });
 
     // Deduplicate by student
     const sentStudents = new Set();
@@ -510,6 +513,85 @@ export const sendBirthdayWishes = asyncHandler(async (req, res) => {
         sent: results.filter(r => r.status === 'sent').length,
         failed: results.filter(r => r.status === 'failed').length,
         details: results
+    });
+});
+
+// @desc    Send emergency broadcast to all parents, teachers, admins
+// @route   POST /api/communications/emergency-broadcast
+// @access  Private (Admin)
+export const sendEmergencyBroadcast = asyncHandler(async (req, res) => {
+    const { subject, message, sendToParents, sendToTeachers, sendToAdmins } = req.body;
+
+    if (!subject || !message) {
+        return res.status(400).json({ success: false, message: 'subject and message are required' });
+    }
+
+    const recipients = [];
+
+    if (sendToParents) {
+        const students = await User.find({ role: 'student', isActive: true }).select('name studentInfo');
+        students.forEach(student => {
+            if (student.studentInfo?.parentEmail) {
+                recipients.push({
+                    email: student.studentInfo.parentEmail,
+                    name: student.studentInfo.guardianName || `Parent of ${student.name}`,
+                    subject: `🚨 ${subject}`,
+                    message: `EMERGENCY: ${message}`,
+                    studentRef: student._id
+                });
+            }
+        });
+    }
+
+    if (sendToTeachers) {
+        const teachers = await User.find({ role: 'teacher', isActive: true }).select('name teacherInfo email');
+        teachers.forEach(teacher => {
+            const email = teacher.teacherInfo?.personalEmail || teacher.email;
+            if (email) {
+                recipients.push({
+                    email,
+                    name: teacher.name,
+                    subject: `🚨 ${subject}`,
+                    message: `EMERGENCY: ${message}`,
+                    teacherRef: teacher._id
+                });
+            }
+        });
+    }
+
+    if (sendToAdmins) {
+        const admins = await User.find({ role: 'admin', isActive: true }).select('name adminInfo email');
+        admins.forEach(admin => {
+            const email = admin.adminInfo?.personalEmail || admin.email;
+            if (email) {
+                recipients.push({
+                    email,
+                    name: admin.name,
+                    subject: `🚨 ${subject}`,
+                    message: `EMERGENCY: ${message}`,
+                    adminRef: admin._id
+                });
+            }
+        });
+    }
+
+    if (recipients.length === 0) {
+        return res.json({ success: false, message: 'No recipients found with email addresses' });
+    }
+
+    const results = await sendBulkEmailNotification({
+        type: 'emergency',
+        recipients,
+        sentBy: req.user._id
+    });
+
+    const sentCount = results.filter(r => r.success).length;
+
+    res.json({
+        success: true,
+        message: `Emergency broadcast sent to ${sentCount} recipients`,
+        total: recipients.length,
+        sent: sentCount
     });
 });
 
