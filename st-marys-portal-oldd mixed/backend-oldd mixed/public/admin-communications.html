@@ -450,6 +450,21 @@
                     const tabId = 'tab-' + tab.dataset.tab;
                     logDiag('Tab switched', { from: document.querySelector('.tab-content.active')?.id, to: tabId });
                     document.getElementById(tabId).classList.add('active');
+
+                    // Hide all result messages on tab switch
+                    document.querySelectorAll('.message-box').forEach(msg => {
+                        msg.style.display = 'none';
+                    });
+
+                    // Sync Bulk tab visibility based on current role selection
+                    if (tab.dataset.tab === 'bulk') {
+                        const roleSelect = $('#bulk-role');
+                        if (roleSelect) {
+                            // Manually trigger the change to sync UI state
+                            const event = new Event('change');
+                            roleSelect.dispatchEvent(event);
+                        }
+                    }
                 });
             });
 
@@ -532,10 +547,13 @@
                     resultBox.textContent = data.message || 'Sent successfully';
                     resultBox.style.display = 'block';
                     if (data.success) { this.reset(); loadDashboardStats(); }
+                    // Auto-dismiss after 5 seconds
+                    setTimeout(() => { resultBox.style.display = 'none'; }, 5000);
                 } catch (err) {
                     resultBox.className = 'message-box error';
                     resultBox.textContent = 'Error: ' + err.message;
                     resultBox.style.display = 'block';
+                    setTimeout(() => { resultBox.style.display = 'none'; }, 5000);
                 }
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
@@ -582,10 +600,13 @@
                         resultBox.innerHTML += `<div class="result-details"><strong>Total:</strong> ${data.total} | <strong>Sent:</strong> ${data.sent} | <strong>Failed:</strong> ${data.failed}</div>`;
                         loadDashboardStats();
                     }
+                    // Auto-dismiss after 5 seconds
+                    setTimeout(() => { resultBox.style.display = 'none'; }, 5000);
                 } catch (err) {
                     resultBox.className = 'message-box error';
                     resultBox.textContent = 'Error: ' + err.message;
                     resultBox.style.display = 'block';
+                    setTimeout(() => { resultBox.style.display = 'none'; }, 5000);
                 }
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send to All';
@@ -623,10 +644,13 @@
                     resultBox.textContent = data.message || 'Sent';
                     resultBox.style.display = 'block';
                     if (data.success) { this.reset(); loadDashboardStats(); }
+                    // Auto-dismiss after 5 seconds
+                    setTimeout(() => { resultBox.style.display = 'none'; }, 5000);
                 } catch (err) {
                     resultBox.className = 'message-box error';
                     resultBox.textContent = 'Error: ' + err.message;
                     resultBox.style.display = 'block';
+                    setTimeout(() => { resultBox.style.display = 'none'; }, 5000);
                 }
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-bullhorn"></i> Send Announcement';
@@ -933,8 +957,8 @@
                 }
             }
 
-            // Send button: show confirmation first
-            emergencySendBtn.addEventListener('click', function firstClick() {
+            // Define firstClick in the outer scope so it can be referenced by confirmHandler and cancel
+            function firstClick() {
                 const subject = emergencySubject.value.trim();
                 const message = emergencyMessage.value.trim();
                 
@@ -1008,19 +1032,27 @@
                             emergencySendBtn.className = 'btn btn-danger';
                             setEmergencyBtnDisabled(true);
                             loadDashboardStats();
+                            // Auto-dismiss emergency result after 5 seconds
+                            setTimeout(() => { emergencyResult.style.display = 'none'; }, 5000);
                             // Re-attach the first-click handler for next use
                             emergencySendBtn.addEventListener('click', firstClick);
+                            if (emergencyConfirmHandler) {
+                                emergencySendBtn.removeEventListener('click', emergencyConfirmHandler);
+                                emergencyConfirmHandler = null;
+                            }
                         } else {
                             emergencySendBtn.textContent = '✅ Confirm & Send';
                             emergencySendBtn.className = 'btn btn-success';
                             setEmergencyBtnDisabled(false);
                             emergencyCancelBtn.style.display = 'inline-flex';
+                            setTimeout(() => { emergencyResult.style.display = 'none'; }, 5000);
                         }
                     } catch (err) {
                         logDiag('Emergency error', err.message);
                         emergencyResult.className = 'message-box error';
                         emergencyResult.textContent = 'Error: ' + err.message;
                         emergencyResult.style.display = 'block';
+                        setTimeout(() => { emergencyResult.style.display = 'none'; }, 5000);
                         emergencySendBtn.textContent = '✅ Confirm & Send';
                         emergencySendBtn.className = 'btn btn-success';
                         setEmergencyBtnDisabled(false);
@@ -1029,7 +1061,10 @@
                 };
 
                 emergencySendBtn.addEventListener('click', emergencyConfirmHandler);
-            });
+            }
+            
+            // Register the first click handler
+            emergencySendBtn.addEventListener('click', firstClick);
             
             // Cancel button
             emergencyCancelBtn.addEventListener('click', function() {

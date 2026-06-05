@@ -1176,6 +1176,10 @@
   </div>
 
   <script>
+    // Helper: safe getElementById — returns element or null, never throws
+    function $id(id) { return document.getElementById(id); }
+    function $sel(sel) { return document.querySelector(sel); }
+
     document.addEventListener('DOMContentLoaded', function() {
       // Check for admin privileges
       const token = localStorage.getItem('auth_token');
@@ -1192,23 +1196,23 @@
         return;
       }
       
-      // DOM elements
-      const viewTeacherTimetablesBtn = document.getElementById('view-teacher-timetables');
-      const viewClassTimetablesBtn = document.getElementById('view-class-timetables');
-      const teacherTimetableSection = document.getElementById('teacher-timetable-section');
-      const classTimetableSection = document.getElementById('class-timetable-section');
-      const teacherSelect = document.getElementById('teacher-select');
-      const classSelect = document.getElementById('class-select');
-      const sectionSelect = document.getElementById('section-select');
-      const fetchTeacherTimetableBtn = document.getElementById('fetch-teacher-timetable');
-      const fetchClassTimetableBtn = document.getElementById('fetch-class-timetable');
-      const teacherLoadingSpinner = document.getElementById('teacher-loading-spinner');
-      const classLoadingSpinner = document.getElementById('class-loading-spinner');
-      const teacherMessageArea = document.getElementById('teacher-message-area');
-      const classMessageArea = document.getElementById('class-message-area');
-      const teacherTimetableData = document.getElementById('teacher-timetable-data');
-      const classTimetableData = document.getElementById('class-timetable-data');
-      const refreshTeachersAttendanceBtn = document.getElementById('refresh-teachers-attendance');
+      // DOM elements (all null-safe through $id)
+      const viewTeacherTimetablesBtn = $id('view-teacher-timetables');
+      const viewClassTimetablesBtn = $id('view-class-timetables');
+      const teacherTimetableSection = $id('teacher-timetable-section');
+      const classTimetableSection = $id('class-timetable-section');
+      const teacherSelect = $id('teacher-select');
+      const classSelect = $id('class-select');
+      const sectionSelect = $id('section-select');
+      const fetchTeacherTimetableBtn = $id('fetch-teacher-timetable');
+      const fetchClassTimetableBtn = $id('fetch-class-timetable');
+      const teacherLoadingSpinner = $id('teacher-loading-spinner');
+      const classLoadingSpinner = $id('class-loading-spinner');
+      const teacherMessageArea = $id('teacher-message-area');
+      const classMessageArea = $id('class-message-area');
+      const teacherTimetableData = $id('teacher-timetable-data');
+      const classTimetableData = $id('class-timetable-data');
+      const refreshTeachersAttendanceBtn = $id('refresh-teachers-attendance');
       
       // Tab functionality
       const tabButtons = document.querySelectorAll('.tab-btn');
