@@ -947,7 +947,7 @@
                 if (emergencyPreview.style.display === 'block') {
                     emergencyPreview.style.display = 'none';
                     emergencyCancelBtn.style.display = 'none';
-                    emergencySendBtn.textContent = '<i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast';
+                    emergencySendBtn.innerHTML ='<i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast';
                     emergencySendBtn.className = 'btn btn-danger';
                     // Remove the confirm handler if it exists
                     if (emergencyConfirmHandler) {
@@ -1028,7 +1028,7 @@
                             emergencyPreview.style.display = 'none';
                             emergencySubject.value = '';
                             emergencyMessage.value = '';
-                            emergencySendBtn.textContent = '<i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast';
+                            emergencySendBtn.innerHTML ='<i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast';
                             emergencySendBtn.className = 'btn btn-danger';
                             setEmergencyBtnDisabled(true);
                             loadDashboardStats();
@@ -1071,7 +1071,7 @@
                 logDiag('Emergency cancelled');
                 emergencyPreview.style.display = 'none';
                 emergencyCancelBtn.style.display = 'none';
-                emergencySendBtn.textContent = '<i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast';
+                emergencySendBtn.innerHTML ='<i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast';
                 emergencySendBtn.className = 'btn btn-danger';
                 setEmergencyBtnDisabled(false);
                 

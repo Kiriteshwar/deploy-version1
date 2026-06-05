@@ -229,7 +229,7 @@ export const sendFeeReminder = async ({ parentEmail, parentName, studentName, cl
  * Send birthday wish
  */
 export const sendBirthdayWish = async ({ email, name, role }) => {
-    const subject = `Happy Birthday from St. Mary's School!`;
+    const subject = `Happy Birthday from St. Mary's High School!`;
     const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
             <div style="background: linear-gradient(135deg, #ff6f00, #ff8f00); color: white; padding: 25px; border-radius: 8px 8px 0 0; text-align: center;">
@@ -284,7 +284,7 @@ export const sendCustomMessage = async ({ email, name, subject, message }) => {
     const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
             <div style="background: #1976d2; color: white; padding: 15px; border-radius: 8px 8px 0 0; text-align: center;">
-                <h2 style="margin: 0;">Message from St. Mary's School</h2>
+                <h2 style="margin: 0;">Message from St. Mary's High School</h2>
             </div>
             <div style="padding: 20px;">
                 <p>Dear ${name || 'Recipient'},</p>
