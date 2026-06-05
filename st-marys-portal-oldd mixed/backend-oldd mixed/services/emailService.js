@@ -20,7 +20,12 @@ const createTransporter = () => {
         auth: {
             user,
             pass
-        }
+        },
+        logger: true,
+        debug: true,
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000
     });
 };
 
@@ -35,6 +40,8 @@ const fromAddress = process.env.EMAIL_FROM || 'noreply@stmarysschool.edu';
  * @returns {Promise<Object>} - { success, messageId, error }
  */
 export const sendEmail = async ({ to, subject, html }) => {
+    const host = process.env.EMAIL_HOST;
+    const port = process.env.EMAIL_PORT;
     const transporter = createTransporter();
 
     if (!transporter) {
@@ -48,6 +55,14 @@ export const sendEmail = async ({ to, subject, html }) => {
         // await transporter.verify();
 
         console.log('[EmailService] SMTP verified');
+
+        console.log('[EmailService] About to send');
+        console.log({
+            host,
+            port,
+            to,
+            from: fromAddress
+        });
 
         const info = await transporter.sendMail({
             from: `"St. Mary's High School" <${fromAddress}>`,
