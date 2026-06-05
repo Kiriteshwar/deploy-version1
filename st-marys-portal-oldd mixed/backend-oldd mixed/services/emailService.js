@@ -14,9 +14,8 @@ const createTransporter = () => {
 
     return nodemailer.createTransport({
         host,
-        port,
-        secure: false,
-        family: 4,
+        port: 465,
+        secure: true,
         auth: {
             user,
             pass
