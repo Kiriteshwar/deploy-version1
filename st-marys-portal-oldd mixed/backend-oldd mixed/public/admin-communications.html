@@ -432,20 +432,33 @@
                 return;
             }
 
+            // ============================================================
+            // DIAGNOSTIC LOGGING HELPER
+            // ============================================================
+            const DEBUG = true;
+            function logDiag(label, data) {
+                if (!DEBUG) return;
+                console.log(`[COMMS-DIAG] ${label}:`, data);
+            }
+
             // Tab switching
             document.querySelectorAll('.comm-tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     document.querySelectorAll('.comm-tab').forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
-                    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+                    const tabId = 'tab-' + tab.dataset.tab;
+                    logDiag('Tab switched', { from: document.querySelector('.tab-content.active')?.id, to: tabId });
+                    document.getElementById(tabId).classList.add('active');
                 });
             });
 
             // Load dashboard stats
             loadDashboardStats();
 
-            // Load recipient dropdown based on type
+            // ════════════════════════════════════════════════════════════
+            // INDIVIDUAL TAB
+            // ════════════════════════════════════════════════════════════
             $('#ind-recipient-type').addEventListener('change', function() {
                 const role = this.value;
                 const classGroup = document.getElementById('ind-class-group');
@@ -458,20 +471,25 @@
                     classGroup.style.display = 'none';
                     sectionGroup.style.display = 'none';
                 }
+                logDiag('Individual recipient type changed', { role });
                 loadRecipients('ind');
             });
 
-            // Bulk role change
+            // ════════════════════════════════════════════════════════════
+            // BULK TAB — Role change handler
+            // ════════════════════════════════════════════════════════════
             $('#bulk-role').addEventListener('change', function() {
                 const role = this.value;
                 const classGroup = document.getElementById('bulk-class-group');
                 const sectionGroup = document.getElementById('bulk-section-group');
                 const statusGroup = document.getElementById('bulk-status-group');
                 
-                if (role === 'student' || role === 'all') {
-                    classGroup.style.display = role === 'student' ? 'block' : 'none';
-                    sectionGroup.style.display = role === 'student' ? 'block' : 'none';
-                    statusGroup.style.display = role === 'student' ? 'block' : 'none';
+                logDiag('Bulk role changed', { role });
+                
+                if (role === 'student') {
+                    classGroup.style.display = 'block';
+                    sectionGroup.style.display = 'block';
+                    statusGroup.style.display = 'block';
                 } else {
                     classGroup.style.display = 'none';
                     sectionGroup.style.display = 'none';
@@ -479,8 +497,12 @@
                 }
             });
 
-            // Load classes
+            // Load classes for both tabs
             loadClasses();
+
+            // ============================================================
+            // FORM SUBMIT HANDLERS
+            // ============================================================
 
             // Individual form submit
             $('#individual-form').addEventListener('submit', async function(e) {
@@ -494,6 +516,7 @@
                 resultBox.style.display = 'none';
 
                 try {
+                    logDiag('Sending individual', { recipientId: $('#ind-recipient').value, subject: $('#ind-subject').value });
                     const res = await fetch('/api/communications/send-individual', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
@@ -504,6 +527,7 @@
                         })
                     });
                     const data = await res.json();
+                    logDiag('Individual result', data);
                     resultBox.className = 'message-box ' + (data.success ? 'success' : 'error');
                     resultBox.textContent = data.message || 'Sent successfully';
                     resultBox.style.display = 'block';
@@ -537,6 +561,8 @@
                     filters.studentStatus = $('#bulk-status-filter').value;
                 }
 
+                logDiag('Sending bulk', { role, filters, subject: $('#bulk-subject').value });
+
                 try {
                     const res = await fetch('/api/communications/send-bulk', {
                         method: 'POST',
@@ -548,6 +574,7 @@
                         })
                     });
                     const data = await res.json();
+                    logDiag('Bulk result', data);
                     resultBox.className = 'message-box ' + (data.success ? 'success' : 'error');
                     resultBox.textContent = data.message || 'Sent';
                     resultBox.style.display = 'block';
@@ -575,19 +602,23 @@
                 resultBox.className = 'message-box';
                 resultBox.style.display = 'none';
 
+                const payload = {
+                    subject: $('#ann-subject').value,
+                    message: $('#ann-message').value,
+                    sendToParents: $('#ann-to-parents').checked,
+                    sendToTeachers: $('#ann-to-teachers').checked,
+                    sendToAdmins: $('#ann-to-admins').checked
+                };
+                logDiag('Sending announcement', payload);
+
                 try {
                     const res = await fetch('/api/communications/send-announcement', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify({
-                            subject: $('#ann-subject').value,
-                            message: $('#ann-message').value,
-                            sendToParents: $('#ann-to-parents').checked,
-                            sendToTeachers: $('#ann-to-teachers').checked,
-                            sendToAdmins: $('#ann-to-admins').checked
-                        })
+                        body: JSON.stringify(payload)
                     });
                     const data = await res.json();
+                    logDiag('Announcement result', data);
                     resultBox.className = 'message-box ' + (data.success ? 'success' : 'error');
                     resultBox.textContent = data.message || 'Sent';
                     resultBox.style.display = 'block';
@@ -601,12 +632,13 @@
                 btn.innerHTML = '<i class="fas fa-bullhorn"></i> Send Announcement';
             });
 
-            // Refresh logs
+            // ============================================================
+            // LOGS
+            // ============================================================
             $('#refresh-logs').addEventListener('click', loadLogs);
             $('#log-type').addEventListener('change', loadLogs);
             $('#log-status').addEventListener('change', loadLogs);
 
-            // Initial logs load
             setTimeout(loadLogs, 500);
 
             // Helper: $() for querySelector
@@ -628,13 +660,16 @@
                 } catch (err) { console.error('Stats error:', err); }
             }
 
-            // Load classes
+            // ============================================================
+            // LOAD CLASSES — Populate class dropdowns for ind + bulk
+            // ============================================================
             async function loadClasses() {
                 try {
                     const res = await fetch('/api/teacher/classes', {
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     const data = await res.json();
+                    logDiag('Classes loaded', data);
                     if (data.classes) {
                         ['ind', 'bulk'].forEach(prefix => {
                             const select = $(`#${prefix}-class-filter`);
@@ -647,12 +682,28 @@
                 } catch (err) { console.error('Classes error:', err); }
             }
 
-            // Load recipients for individual
+            // ============================================================
+            // LOAD RECIPIENTS (Individual tab only — bulk sends to all)
+            // ============================================================
             async function loadRecipients(prefix) {
-                const role = $(`#${prefix}-recipient-type`).value;
-                const classVal = $(`#${prefix}-class-filter`).value || '';
-                const sectionVal = $(`#${prefix}-section-filter`).value || '';
+                // ONLY load recipients for 'ind' prefix — bulk doesn't have recipient-type selector
+                // Defensive: if element doesn't exist, skip silently
+                const roleSelect = $(`#${prefix}-recipient-type`);
+                if (!roleSelect) {
+                    logDiag('Skipping loadRecipients', { prefix, reason: `#${prefix}-recipient-type not found` });
+                    return;
+                }
+
+                const role = roleSelect.value || '';
+                const classVal = $(`#${prefix}-class-filter`) ? $(`#${prefix}-class-filter`).value || '' : '';
+                const sectionVal = $(`#${prefix}-section-filter`) ? $(`#${prefix}-section-filter`).value || '' : '';
                 const select = $(`#${prefix}-recipient`);
+                if (!select) {
+                    logDiag('Skipping loadRecipients', { prefix, reason: `#${prefix}-recipient not found` });
+                    return;
+                }
+                
+                logDiag('Loading recipients', { prefix, role, classVal, sectionVal });
                 select.innerHTML = '<option value="">Loading...</option>';
 
                 try {
@@ -664,6 +715,7 @@
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
                     const data = await res.json();
+                    logDiag('Recipients loaded', { prefix, count: data.users?.length || 0 });
                     if (data.success) {
                         select.innerHTML = '<option value="">Select a recipient...</option>';
                         data.users.forEach(u => {
@@ -678,13 +730,57 @@
                 }
             }
 
-            // Reload recipients on class/section filter change
-            ['ind', 'bulk'].forEach(prefix => {
-                const classFilter = $(`#${prefix}-class-filter`);
-                const sectionFilter = $(`#${prefix}-section-filter`);
-                if (classFilter) classFilter.addEventListener('change', () => loadRecipients(prefix));
-                if (sectionFilter) sectionFilter.addEventListener('change', () => loadRecipients(prefix));
+            // ============================================================
+            // CLASS → SECTION CHANGE LISTENERS (BOTH ind AND bulk)
+            // ============================================================
+            // Individual tab: class → section + reload recipients
+            $('#ind-class-filter').addEventListener('change', async function() {
+                const classVal = this.value;
+                logDiag('Individual class selected', { classVal });
+                const sectionSelect = $('#ind-section-filter');
+                if (sectionSelect) sectionSelect.innerHTML = '<option value="">All Sections</option>';
+                if (!classVal) { loadRecipients('ind'); return; }
+                try {
+                    const res = await fetch(`/api/teacher/sections/${classVal}`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const sections = await res.json();
+                    logDiag('Individual sections loaded', { classVal, sections });
+                    if (Array.isArray(sections) && sectionSelect) {
+                        sections.forEach(s => sectionSelect.innerHTML += `<option value="${s}">${s}</option>`);
+                    }
+                    loadRecipients('ind');
+                } catch (err) { console.error(err); }
             });
+
+            // Bulk tab: class → section
+            $('#bulk-class-filter').addEventListener('change', async function() {
+                const classVal = this.value;
+                logDiag('Bulk class selected', { classVal });
+                const sectionSelect = $('#bulk-section-filter');
+                if (sectionSelect) sectionSelect.innerHTML = '<option value="">All Sections</option>';
+                if (!classVal || !sectionSelect) return;
+                try {
+                    const res = await fetch(`/api/teacher/sections/${classVal}`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const sections = await res.json();
+                    logDiag('Bulk sections loaded', { classVal, sections });
+                    if (Array.isArray(sections)) {
+                        sections.forEach(s => sectionSelect.innerHTML += `<option value="${s}">${s}</option>`);
+                    }
+                } catch (err) { console.error(err); }
+            });
+
+            // Individual: reload recipients on class/section filter change
+            // NOTE: Only 'ind' prefix, NOT 'bulk' — bulk doesn't have recipient-type selector
+            const indClassFilter = $('#ind-class-filter');
+            const indSectionFilter = $('#ind-section-filter');
+            if (indClassFilter) indClassFilter.addEventListener('change', () => loadRecipients('ind'));
+            if (indSectionFilter) indSectionFilter.addEventListener('change', () => loadRecipients('ind'));
+
+            // Initial recipients load
+            setTimeout(() => loadRecipients('ind'), 300);
 
             // Load logs
             async function loadLogs() {
@@ -725,32 +821,10 @@
                 spinner.classList.remove('active');
             }
 
-            // Handle class -> section loading for individual
-            $('#ind-class-filter').addEventListener('change', async function() {
-                const classVal = this.value;
-                const sectionSelect = $('#ind-section-filter');
-                sectionSelect.innerHTML = '<option value="">All Sections</option>';
-                if (!classVal) { loadRecipients('ind'); return; }
-                try {
-                    const res = await fetch(`/api/teacher/sections/${classVal}`, {
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    });
-                    const sections = await res.json();
-                    if (Array.isArray(sections)) {
-                        sections.forEach(s => sectionSelect.innerHTML += `<option value="${s}">${s}</option>`);
-                    }
-                    loadRecipients('ind');
-                } catch (err) { console.error(err); }
-            });
-
-            // Initial recipients load
-            setTimeout(() => loadRecipients('ind'), 300);
-
-            // ═══════════════════════════════════════════════════════
+            // ════════════════════════════════════════════════════════════
             // EMERGENCY BROADCAST HANDLER
-            // ═══════════════════════════════════════════════════════
+            // ════════════════════════════════════════════════════════════
             
-            // Elements
             const emergencyForm = document.getElementById('emergency-form');
             const emergencySubject = document.getElementById('emergency-subject');
             const emergencyMessage = document.getElementById('emergency-message');
@@ -765,42 +839,43 @@
             const emergencyEstimate = document.getElementById('emergency-estimate');
             const emergencyEstimateText = document.getElementById('emergency-estimate-text');
 
-            // Make updateEmergencyEstimate globally accessible (for onchange= in HTML)
+            let emergencyConfirmHandler = null; // Track for removal
+
             window.updateEmergencyEstimate = async function() {
                 if (!emergencyToParents.checked && !emergencyToTeachers.checked && !emergencyToAdmins.checked) {
                     emergencyEstimate.style.display = 'none';
-                    emergencySendBtn.disabled = true;
+                    setEmergencyBtnDisabled(true);
                     return;
                 }
                 emergencyEstimate.style.display = 'block';
                 emergencyEstimateText.textContent = 'Loading...';
                 
                 try {
-                    // Count parents
                     let parentCount = 0;
                     if (emergencyToParents.checked) {
-                        const students = await fetch('/api/communications/recipients?role=student', {
+                        const res = await fetch('/api/communications/recipients?role=student', {
                             headers: { 'Authorization': 'Bearer ' + token }
-                        }).then(r => r.json());
-                        parentCount = students.success ? students.users.length : 0;
+                        });
+                        const data = await res.json();
+                        parentCount = data.success ? data.users.length : 0;
                     }
                     
-                    // Count teachers
                     let teacherCount = 0;
                     if (emergencyToTeachers.checked) {
-                        const teachers = await fetch('/api/communications/recipients?role=teacher', {
+                        const res = await fetch('/api/communications/recipients?role=teacher', {
                             headers: { 'Authorization': 'Bearer ' + token }
-                        }).then(r => r.json());
-                        teacherCount = teachers.success ? teachers.users.filter(u => u.email).length : 0;
+                        });
+                        const data = await res.json();
+                        teacherCount = data.success ? data.users.filter(u => u.email).length : 0;
                     }
                     
-                    // Count admins
                     let adminCount = 0;
                     if (emergencyToAdmins.checked) {
-                        const admins = await fetch('/api/communications/recipients?role=admin', {
+                        const res = await fetch('/api/communications/recipients?role=admin', {
                             headers: { 'Authorization': 'Bearer ' + token }
-                        }).then(r => r.json());
-                        adminCount = admins.success ? admins.users.filter(u => u.email).length : 0;
+                        });
+                        const data = await res.json();
+                        adminCount = data.success ? data.users.filter(u => u.email).length : 0;
                     }
                     
                     const total = parentCount + teacherCount + adminCount;
@@ -812,10 +887,12 @@
                         ${parentCount > 0 ? ')' : ''}
                     `;
                     
+                    logDiag('Emergency estimate', { parentCount, teacherCount, adminCount, total });
+                    
                     if (total > 0) {
-                        emergencySendBtn.disabled = !(emergencySubject.value.trim() && emergencyMessage.value.trim());
+                        setEmergencyBtnDisabled(!(emergencySubject.value.trim() && emergencyMessage.value.trim()));
                     } else {
-                        emergencySendBtn.disabled = true;
+                        setEmergencyBtnDisabled(true);
                     }
                 } catch (err) {
                     emergencyEstimateText.textContent = 'Could not load estimates';
@@ -823,20 +900,45 @@
                 }
             };
 
-            // Update estimate when inputs change
+            function setEmergencyBtnDisabled(disabled) {
+                emergencySendBtn.disabled = disabled;
+                // When disabled, add class for visual dimming
+                if (disabled) {
+                    emergencySendBtn.style.opacity = '0.5';
+                } else {
+                    emergencySendBtn.style.opacity = '1';
+                }
+            }
+
+            // Enable/disable button based on content
             emergencySubject.addEventListener('input', updateEstimateButton);
             emergencyMessage.addEventListener('input', updateEstimateButton);
             
             function updateEstimateButton() {
                 const hasContent = emergencySubject.value.trim() && emergencyMessage.value.trim();
                 const hasRecipients = emergencyToParents.checked || emergencyToTeachers.checked || emergencyToAdmins.checked;
-                emergencySendBtn.disabled = !(hasContent && hasRecipients);
+                setEmergencyBtnDisabled(!(hasContent && hasRecipients));
+                
+                // Reset confirmation state if user edits fields
+                if (emergencyPreview.style.display === 'block') {
+                    emergencyPreview.style.display = 'none';
+                    emergencyCancelBtn.style.display = 'none';
+                    emergencySendBtn.textContent = '<i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast';
+                    emergencySendBtn.className = 'btn btn-danger';
+                    // Remove the confirm handler if it exists
+                    if (emergencyConfirmHandler) {
+                        emergencySendBtn.removeEventListener('click', emergencyConfirmHandler);
+                        emergencyConfirmHandler = null;
+                    }
+                }
             }
 
-            // Send button - show confirmation first
-            emergencySendBtn.addEventListener('click', async function() {
+            // Send button: show confirmation first
+            emergencySendBtn.addEventListener('click', function firstClick() {
                 const subject = emergencySubject.value.trim();
                 const message = emergencyMessage.value.trim();
+                
+                logDiag('Emergency send clicked (first click)', { subjectLength: subject.length, messageLength: message.length });
                 
                 if (!subject || !message) return;
                 
@@ -859,14 +961,21 @@
                 
                 emergencyConfirmText.innerHTML = `⚠️ This will send an emergency email to: <strong>${confirmParts.join(', ')}</strong>.<br><br>Subject will be: <strong>🚨 ${subject}</strong><br><br>Are you sure you want to continue?`;
                 emergencyPreview.style.display = 'block';
-                emergencySendBtn.disabled = true;
                 emergencyCancelBtn.style.display = 'inline-flex';
+                
+                // Change button to "Confirm & Send" — keep it ENABLED so it can be clicked
                 emergencySendBtn.textContent = '✅ Confirm & Send';
                 emergencySendBtn.className = 'btn btn-success';
-                
-                // Remove old listeners and add confirm handler
-                const confirmHandler = async function() {
-                    emergencySendBtn.disabled = true;
+                setEmergencyBtnDisabled(false); // CRITICAL: button must stay enabled!
+
+                // Remove this first-click listener so it doesn't re-fire
+                emergencySendBtn.removeEventListener('click', firstClick);
+
+                // Attach the confirm handler
+                emergencyConfirmHandler = async function confirmHandler() {
+                    logDiag('Emergency confirmed — sending', { subject, message, hasParents, hasTeachers, hasAdmins });
+                    
+                    setEmergencyBtnDisabled(true);
                     emergencySendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
                     emergencyCancelBtn.style.display = 'none';
                     
@@ -883,6 +992,7 @@
                             })
                         });
                         const data = await res.json();
+                        logDiag('Emergency result', data);
                         
                         emergencyResult.className = 'message-box ' + (data.success ? 'success' : 'error');
                         emergencyResult.innerHTML = data.success 
@@ -896,38 +1006,47 @@
                             emergencyMessage.value = '';
                             emergencySendBtn.textContent = '<i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast';
                             emergencySendBtn.className = 'btn btn-danger';
-                            emergencySendBtn.disabled = true;
+                            setEmergencyBtnDisabled(true);
                             loadDashboardStats();
+                            // Re-attach the first-click handler for next use
+                            emergencySendBtn.addEventListener('click', firstClick);
                         } else {
-                            // Re-enable on failure
                             emergencySendBtn.textContent = '✅ Confirm & Send';
                             emergencySendBtn.className = 'btn btn-success';
-                            emergencySendBtn.disabled = false;
+                            setEmergencyBtnDisabled(false);
                             emergencyCancelBtn.style.display = 'inline-flex';
                         }
                     } catch (err) {
+                        logDiag('Emergency error', err.message);
                         emergencyResult.className = 'message-box error';
                         emergencyResult.textContent = 'Error: ' + err.message;
                         emergencyResult.style.display = 'block';
                         emergencySendBtn.textContent = '✅ Confirm & Send';
                         emergencySendBtn.className = 'btn btn-success';
-                        emergencySendBtn.disabled = false;
+                        setEmergencyBtnDisabled(false);
                         emergencyCancelBtn.style.display = 'inline-flex';
                     }
                 };
-                
-                // Remove any previous confirm listeners and attach new one
-                emergencySendBtn.removeEventListener('click', confirmHandler);
-                emergencySendBtn.addEventListener('click', confirmHandler);
+
+                emergencySendBtn.addEventListener('click', emergencyConfirmHandler);
             });
             
             // Cancel button
             emergencyCancelBtn.addEventListener('click', function() {
+                logDiag('Emergency cancelled');
                 emergencyPreview.style.display = 'none';
                 emergencyCancelBtn.style.display = 'none';
                 emergencySendBtn.textContent = '<i class="fas fa-exclamation-triangle"></i> Send Emergency Broadcast';
                 emergencySendBtn.className = 'btn btn-danger';
-                emergencySendBtn.disabled = false;
+                setEmergencyBtnDisabled(false);
+                
+                // Remove confirm handler if exists
+                if (emergencyConfirmHandler) {
+                    emergencySendBtn.removeEventListener('click', emergencyConfirmHandler);
+                    emergencyConfirmHandler = null;
+                }
+                // Re-attach first click handler
+                emergencySendBtn.addEventListener('click', firstClick);
             });
         });
     </script>
