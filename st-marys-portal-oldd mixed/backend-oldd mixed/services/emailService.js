@@ -15,7 +15,8 @@ const createTransporter = () => {
     return nodemailer.createTransport({
         host,
         port,
-        secure: port === 465,
+        secure: false,
+        family: 4,
         auth: {
             user,
             pass
@@ -37,11 +38,17 @@ export const sendEmail = async ({ to, subject, html }) => {
     const transporter = createTransporter();
 
     if (!transporter) {
-        console.log(`[EmailService] LOGGED (no transporter): To: ${to}, Subject: ${subject}`);
+        console.log('[EmailService] No transporter configured');
         return { success: true, messageId: 'logged-only', logged: true };
     }
 
     try {
+        console.log('[EmailService] Verifying SMTP...');
+
+        await transporter.verify();
+
+        console.log('[EmailService] SMTP verified');
+
         const info = await transporter.sendMail({
             from: `"St. Mary's School" <${fromAddress}>`,
             to,
@@ -50,10 +57,18 @@ export const sendEmail = async ({ to, subject, html }) => {
         });
 
         console.log(`[EmailService] Sent to ${to}: ${info.messageId}`);
-        return { success: true, messageId: info.messageId };
+
+        return {
+            success: true,
+            messageId: info.messageId
+        };
     } catch (error) {
-        console.error(`[EmailService] Failed to send to ${to}:`, error.message);
-        return { success: false, error: error.message };
+        console.error('[EmailService] Error:', error);
+
+        return {
+            success: false,
+            error: error.message
+        };
     }
 };
 
