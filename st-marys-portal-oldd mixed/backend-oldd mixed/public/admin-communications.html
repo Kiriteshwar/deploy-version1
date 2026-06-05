@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communications Center - St. Mary's Portal</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        header {
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        .back-button {
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+        }
+        .back-button:hover { background: rgba(255,255,255,0.2); }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-card i { font-size: 2rem; margin-bottom: 0.5rem; }
+        .stat-card .number { font-size: 2rem; font-weight: bold; margin: 0.5rem 0; }
+        .stat-card .label { color: #666; font-size: 0.9rem; }
+        .card-blue { border-top: 4px solid #1976d2; }
+        .card-blue i { color: #1976d2; }
+        .card-orange { border-top: 4px solid #ff9800; }
+        .card-orange i { color: #ff9800; }
+        .card-pink { border-top: 4px solid #e91e63; }
+        .card-pink i { color: #e91e63; }
+        .card-red { border-top: 4px solid #f44336; }
+        .card-red i { color: #f44336; }
+
+        .tab-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .comm-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .comm-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 500;
+            border: none;
+            background: none;
+            transition: all 0.3s;
+            color: #555;
+        }
+        .comm-tab:hover { background: rgba(0,0,0,0.03); }
+        .comm-tab.active {
+            background: white;
+            color: #1976d2;
+            border-bottom: 3px solid #1976d2;
+            font-weight: 600;
+        }
+        .tab-content { padding: 1.5rem; display: none; }
+        .tab-content.active { display: block; }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 0.3rem; color: #333; }
+        .form-control {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .form-control:focus { outline: none; border-color: #1976d2; box-shadow: 0 0 0 2px rgba(25,118,210,0.1); }
+        textarea.form-control { min-height: 120px; resize: vertical; }
+        select.form-control { background: white; }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary { background: #1976d2; color: white; }
+        .btn-primary:hover { background: #1565c0; }
+        .btn-primary:disabled { background: #90caf9; cursor: not-allowed; }
+        .btn-success { background: #43a047; color: white; }
+        .btn-success:hover { background: #388e3c; }
+        .btn-danger { background: #e53935; color: white; }
+        .btn-danger:hover { background: #c62828; }
+        .btn-outline { background: white; color: #333; border: 1px solid #ddd; }
+        .btn-outline:hover { background: #f5f5f5; }
+
+        .checkbox-group { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 0.5rem 0; }
+        .checkbox-group label { display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer; }
+        .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; }
+
+        .message-box { padding: 1rem; border-radius: 6px; margin: 1rem 0; display: none; }
+        .message-box.success { display: block; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .message-box.error { display: block; background: #fce4ec; color: #c62828; border: 1px solid #f8bbd0; }
+        .message-box.info { display: block; background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+
+        .filter-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem; }
+        .filter-row .form-group { flex: 1; min-width: 150px; margin-bottom: 0; }
+
+        .recipient-select { max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 0.5rem; }
+        .recipient-item { padding: 0.5rem; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 0.5rem; }
+        .recipient-item:last-child { border-bottom: none; }
+        .recipient-item label { cursor: pointer; flex: 1; font-weight: normal; }
+        .recipient-item input[type="checkbox"] { width: 16px; height: 16px; }
+
+        .logs-table { width: 100%; border-collapse: collapse; }
+        .logs-table th { background: #f5f5f5; padding: 0.7rem; text-align: left; font-weight: 600; border-bottom: 2px solid #e0e0e0; }
+        .logs-table td { padding: 0.7rem; border-bottom: 1px solid #f0f0f0; }
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .badge-success { background: #e8f5e9; color: #2e7d32; }
+        .badge-danger { background: #fce4ec; color: #c62828; }
+        .badge-warning { background: #fff3e0; color: #e65100; }
+
+        .spinner { display: none; text-align: center; padding: 2rem; }
+        .spinner.active { display: block; }
+        .spinner i { font-size: 2rem; color: #1976d2; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .result-details { margin-top: 1rem; padding: 0.5rem; background: #f9f9f9; border-radius: 4px; max-height: 200px; overflow-y: auto; font-size: 0.85rem; }
+        .result-item { padding: 0.3rem 0; border-bottom: 1px solid #eee; }
+        .result-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Dashboard
+                </a>
+            </div>
+            <div class="header-title">
+                <h1><i class="fas fa-bullhorn"></i> Communications Center</h1>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Dashboard Stats -->
+        <div class="dashboard-cards" id="dashboard-stats">
+            <div class="stat-card card-blue">
+                <i class="fas fa-envelope"></i>
+                <div class="number" id="emails-sent-today">0</div>
+                <div class="label">Emails Sent Today</div>
+            </div>
+            <div class="stat-card card-orange">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="number" id="pending-notifications">0</div>
+                <div class="label">Failed Today</div>
+            </div>
+            <div class="stat-card card-pink">
+                <i class="fas fa-birthday-cake"></i>
+                <div class="number" id="birthdays-today">0</div>
+                <div class="label">Birthdays Today</div>
+            </div>
+            <div class="stat-card card-red">
+                <i class="fas fa-users"></i>
+                <div class="number" id="total-students">0</div>
+                <div class="label">Active Students</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tab-container">
+            <div class="comm-tabs">
+                <button class="comm-tab active" data-tab="individual"><i class="fas fa-user"></i> Individual</button>
+                <button class="comm-tab" data-tab="bulk"><i class="fas fa-users"></i> Bulk</button>
+                <button class="comm-tab" data-tab="announcement"><i class="fas fa-bullhorn"></i> Announcement</button>
+                <button class="comm-tab" data-tab="logs"><i class="fas fa-history"></i> Logs</button>
+            </div>
+
+            <!-- Individual Message Tab -->
+            <div class="tab-content active" id="tab-individual">
+                <h3><i class="fas fa-paper-plane"></i> Send Individual Message</h3>
+                <form id="individual-form">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Recipient Type</label>
+                            <select class="form-control" id="ind-recipient-type">
+                                <option value="student">Student Parent</option>
+                                <option value="teacher">Teacher</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="ind-class-group" style="display:none;">
+                            <label>Class</label>
+                            <select class="form-control" id="ind-class-filter">
+                                <option value="">All Classes</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="ind-section-group" style="display:none;">
+                            <label>Section</label>
+                            <select class="form-control" id="ind-section-filter">
+                                <option value="">All Sections</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Recipient</label>
+                        <select class="form-control" id="ind-recipient" required>
+                            <option value="">Select a recipient...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" class="form-control" id="ind-subject" placeholder="Enter subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea class="form-control" id="ind-message" placeholder="Enter your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send Message</button>
+                </form>
+                <div id="ind-result" class="message-box"></div>
+            </div>
+
+            <!-- Bulk Message Tab -->
+            <div class="tab-content" id="tab-bulk">
+                <h3><i class="fas fa-users"></i> Send Bulk Message</h3>
+                <form id="bulk-form">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Target Role</label>
+                            <select class="form-control" id="bulk-role">
+                                <option value="all">All Users</option>
+                                <option value="student">All Parents (Students)</option>
+                                <option value="teacher">All Teachers</option>
+                                <option value="admin">All Admins</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="bulk-class-group" style="display:none;">
+                            <label>Class</label>
+                            <select class="form-control" id="bulk-class-filter">
+                                <option value="">All Classes</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="bulk-section-group" style="display:none;">
+                            <label>Section</label>
+                            <select class="form-control" id="bulk-section-filter">
+                                <option value="">All Sections</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="bulk-status-group" style="display:none;">
+                            <label>Student Status</label>
+                            <select class="form-control" id="bulk-status-filter">
+                                <option value="active">Current Students</option>
+                                <option value="former">Former Students</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" class="form-control" id="bulk-subject" placeholder="Enter subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea class="form-control" id="bulk-message" placeholder="Enter your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send to All</button>
+                </form>
+                <div id="bulk-result" class="message-box"></div>
+            </div>
+
+            <!-- Announcement Tab -->
+            <div class="tab-content" id="tab-announcement">
+                <h3><i class="fas fa-bullhorn"></i> Create Announcement</h3>
+                <form id="announcement-form">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" class="form-control" id="ann-subject" placeholder="Announcement title" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea class="form-control" id="ann-message" placeholder="Write your announcement..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Send to:</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="ann-to-parents" checked> Parents</label>
+                            <label><input type="checkbox" id="ann-to-teachers" checked> Teachers</label>
+                            <label><input type="checkbox" id="ann-to-admins" checked> Admins</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-bullhorn"></i> Send Announcement</button>
+                </form>
+                <div id="ann-result" class="message-box"></div>
+            </div>
+
+            <!-- Logs Tab -->
+            <div class="tab-content" id="tab-logs">
+                <h3><i class="fas fa-history"></i> Communication Logs</h3>
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select class="form-control" id="log-type">
+                            <option value="">All Types</option>
+                            <option value="absence">Absence</option>
+                            <option value="announcement">Announcement</option>
+                            <option value="birthday">Birthday</option>
+                            <option value="fees">Fees</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" id="log-status">
+                            <option value="">All Status</option>
+                            <option value="sent">Sent</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-outline" id="refresh-logs" style="margin-top:22px;">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="spinner" id="logs-spinner"><i class="fas fa-spinner"></i></div>
+                <div style="overflow-x:auto;">
+                    <table class="logs-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Recipient</th>
+                                <th>Type</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-body">
+                            <tr><td colspan="5" style="text-align:center;color:#999;">No logs yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('auth_token');
+            const userRole = localStorage.getItem('user_role');
+            
+            if (!token || userRole !== 'admin') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Tab switching
+            document.querySelectorAll('.comm-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.comm-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+                });
+            });
+
+            // Load dashboard stats
+            loadDashboardStats();
+
+            // Load recipient dropdown based on type
+            $('#ind-recipient-type').addEventListener('change', function() {
+                const role = this.value;
+                const classGroup = document.getElementById('ind-class-group');
+                const sectionGroup = document.getElementById('ind-section-group');
+                
+                if (role === 'student') {
+                    classGroup.style.display = 'block';
+                    sectionGroup.style.display = 'block';
+                } else {
+                    classGroup.style.display = 'none';
+                    sectionGroup.style.display = 'none';
+                }
+                loadRecipients('ind');
+            });
+
+            // Bulk role change
+            $('#bulk-role').addEventListener('change', function() {
+                const role = this.value;
+                const classGroup = document.getElementById('bulk-class-group');
+                const sectionGroup = document.getElementById('bulk-section-group');
+                const statusGroup = document.getElementById('bulk-status-group');
+                
+                if (role === 'student' || role === 'all') {
+                    classGroup.style.display = role === 'student' ? 'block' : 'none';
+                    sectionGroup.style.display = role === 'student' ? 'block' : 'none';
+                    statusGroup.style.display = role === 'student' ? 'block' : 'none';
+                } else {
+                    classGroup.style.display = 'none';
+                    sectionGroup.style.display = 'none';
+                    statusGroup.style.display = 'none';
+                }
+            });
+
+            // Load classes
+            loadClasses();
+
+            // Individual form submit
+            $('#individual-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                
+                const resultBox = document.getElementById('ind-result');
+                resultBox.className = 'message-box';
+                resultBox.style.display = 'none';
+
+                try {
+                    const res = await fetch('/api/communications/send-individual', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({
+                            recipientId: $('#ind-recipient').value,
+                            subject: $('#ind-subject').value,
+                            message: $('#ind-message').value
+                        })
+                    });
+                    const data = await res.json();
+                    resultBox.className = 'message-box ' + (data.success ? 'success' : 'error');
+                    resultBox.textContent = data.message || 'Sent successfully';
+                    resultBox.style.display = 'block';
+                    if (data.success) { this.reset(); loadDashboardStats(); }
+                } catch (err) {
+                    resultBox.className = 'message-box error';
+                    resultBox.textContent = 'Error: ' + err.message;
+                    resultBox.style.display = 'block';
+                }
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+            });
+
+            // Bulk form submit
+            $('#bulk-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+                const resultBox = document.getElementById('bulk-result');
+                resultBox.className = 'message-box';
+                resultBox.style.display = 'none';
+
+                const role = $('#bulk-role').value;
+                const filters = {};
+                if (role !== 'all') filters.role = role;
+                if (role === 'student' || role === 'all') {
+                    filters.class = $('#bulk-class-filter').value;
+                    filters.section = $('#bulk-section-filter').value;
+                    filters.studentStatus = $('#bulk-status-filter').value;
+                }
+
+                try {
+                    const res = await fetch('/api/communications/send-bulk', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({
+                            subject: $('#bulk-subject').value,
+                            message: $('#bulk-message').value,
+                            filters
+                        })
+                    });
+                    const data = await res.json();
+                    resultBox.className = 'message-box ' + (data.success ? 'success' : 'error');
+                    resultBox.textContent = data.message || 'Sent';
+                    resultBox.style.display = 'block';
+                    if (data.success && data.total) {
+                        resultBox.innerHTML += `<div class="result-details"><strong>Total:</strong> ${data.total} | <strong>Sent:</strong> ${data.sent} | <strong>Failed:</strong> ${data.failed}</div>`;
+                        loadDashboardStats();
+                    }
+                } catch (err) {
+                    resultBox.className = 'message-box error';
+                    resultBox.textContent = 'Error: ' + err.message;
+                    resultBox.style.display = 'block';
+                }
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send to All';
+            });
+
+            // Announcement form submit
+            $('#announcement-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+                const resultBox = document.getElementById('ann-result');
+                resultBox.className = 'message-box';
+                resultBox.style.display = 'none';
+
+                try {
+                    const res = await fetch('/api/communications/send-announcement', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({
+                            subject: $('#ann-subject').value,
+                            message: $('#ann-message').value,
+                            sendToParents: $('#ann-to-parents').checked,
+                            sendToTeachers: $('#ann-to-teachers').checked,
+                            sendToAdmins: $('#ann-to-admins').checked
+                        })
+                    });
+                    const data = await res.json();
+                    resultBox.className = 'message-box ' + (data.success ? 'success' : 'error');
+                    resultBox.textContent = data.message || 'Sent';
+                    resultBox.style.display = 'block';
+                    if (data.success) { this.reset(); loadDashboardStats(); }
+                } catch (err) {
+                    resultBox.className = 'message-box error';
+                    resultBox.textContent = 'Error: ' + err.message;
+                    resultBox.style.display = 'block';
+                }
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-bullhorn"></i> Send Announcement';
+            });
+
+            // Refresh logs
+            $('#refresh-logs').addEventListener('click', loadLogs);
+            $('#log-type').addEventListener('change', loadLogs);
+            $('#log-status').addEventListener('change', loadLogs);
+
+            // Initial logs load
+            setTimeout(loadLogs, 500);
+
+            // Helper: $() for querySelector
+            function $(id) { return document.querySelector(id); }
+
+            // Load dashboard stats
+            async function loadDashboardStats() {
+                try {
+                    const res = await fetch('/api/communications/dashboard', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        $('#emails-sent-today').textContent = data.stats.emailsSentToday;
+                        $('#pending-notifications').textContent = data.stats.pendingNotifications;
+                        $('#birthdays-today').textContent = data.stats.birthdaysToday;
+                        $('#total-students').textContent = data.stats.totalStudents;
+                    }
+                } catch (err) { console.error('Stats error:', err); }
+            }
+
+            // Load classes
+            async function loadClasses() {
+                try {
+                    const res = await fetch('/api/teacher/classes', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await res.json();
+                    if (data.classes) {
+                        ['ind', 'bulk'].forEach(prefix => {
+                            const select = $(`#${prefix}-class-filter`);
+                            if (select) {
+                                select.innerHTML = '<option value="">All Classes</option>' +
+                                    data.classes.map(c => `<option value="${c}">${c}</option>`).join('');
+                            }
+                        });
+                    }
+                } catch (err) { console.error('Classes error:', err); }
+            }
+
+            // Load recipients for individual
+            async function loadRecipients(prefix) {
+                const role = $(`#${prefix}-recipient-type`).value;
+                const classVal = $(`#${prefix}-class-filter`).value || '';
+                const sectionVal = $(`#${prefix}-section-filter`).value || '';
+                const select = $(`#${prefix}-recipient`);
+                select.innerHTML = '<option value="">Loading...</option>';
+
+                try {
+                    const params = new URLSearchParams({ role });
+                    if (classVal) params.append('class', classVal);
+                    if (sectionVal) params.append('section', sectionVal);
+                    
+                    const res = await fetch(`/api/communications/recipients?${params}`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        select.innerHTML = '<option value="">Select a recipient...</option>';
+                        data.users.forEach(u => {
+                            const opt = document.createElement('option');
+                            opt.value = u._id;
+                            opt.textContent = u.name + (u.email ? ` (${u.email})` : '');
+                            select.appendChild(opt);
+                        });
+                    }
+                } catch (err) {
+                    select.innerHTML = '<option value="">Error loading recipients</option>';
+                }
+            }
+
+            // Reload recipients on class/section filter change
+            ['ind', 'bulk'].forEach(prefix => {
+                const classFilter = $(`#${prefix}-class-filter`);
+                const sectionFilter = $(`#${prefix}-section-filter`);
+                if (classFilter) classFilter.addEventListener('change', () => loadRecipients(prefix));
+                if (sectionFilter) sectionFilter.addEventListener('change', () => loadRecipients(prefix));
+            });
+
+            // Load logs
+            async function loadLogs() {
+                const spinner = document.getElementById('logs-spinner');
+                spinner.classList.add('active');
+                
+                try {
+                    const params = new URLSearchParams();
+                    const logType = $('#log-type').value;
+                    const logStatus = $('#log-status').value;
+                    if (logType) params.append('type', logType);
+                    if (logStatus) params.append('status', logStatus);
+                    
+                    const res = await fetch(`/api/communications/logs?${params}`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await res.json();
+                    const tbody = document.getElementById('logs-body');
+                    
+                    if (data.success && data.logs.length) {
+                        tbody.innerHTML = data.logs.map(log => {
+                            const date = new Date(log.sentAt).toLocaleString('en-IN');
+                            const statusClass = log.status === 'sent' ? 'badge-success' : log.status === 'failed' ? 'badge-danger' : 'badge-warning';
+                            return `<tr>
+                                <td>${date}</td>
+                                <td>${log.recipientName || 'Unknown'}</td>
+                                <td><span class="badge badge-success">${log.notificationType}</span></td>
+                                <td>${log.subject || '-'}</td>
+                                <td><span class="badge ${statusClass}">${log.status}</span></td>
+                            </tr>`;
+                        }).join('');
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">No logs found</td></tr>';
+                    }
+                } catch (err) {
+                    document.getElementById('logs-body').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#c62828;">Error loading logs</td></tr>';
+                }
+                spinner.classList.remove('active');
+            }
+
+            // Handle class -> section loading for individual
+            $('#ind-class-filter').addEventListener('change', async function() {
+                const classVal = this.value;
+                const sectionSelect = $('#ind-section-filter');
+                sectionSelect.innerHTML = '<option value="">All Sections</option>';
+                if (!classVal) { loadRecipients('ind'); return; }
+                try {
+                    const res = await fetch(`/api/teacher/sections/${classVal}`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const sections = await res.json();
+                    if (Array.isArray(sections)) {
+                        sections.forEach(s => sectionSelect.innerHTML += `<option value="${s}">${s}</option>`);
+                    }
+                    loadRecipients('ind');
+                } catch (err) { console.error(err); }
+            });
+
+            // Initial recipients load
+            setTimeout(() => loadRecipients('ind'), 300);
+        });
+    </script>
+</body>
+</html>

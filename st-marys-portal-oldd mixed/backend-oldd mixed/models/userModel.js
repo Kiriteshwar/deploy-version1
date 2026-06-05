@@ -56,6 +56,11 @@ const userSchema = new mongoose.Schema({
             fatherGuardianPhone: String,
             motherName: String,
             motherPhone: String,
+            parentEmail: {
+                type: String,
+                lowercase: true,
+                trim: true
+            },
             address: String,
             dateOfBirth: Date,
             dateOfLeaving: Date,
@@ -78,6 +83,11 @@ const userSchema = new mongoose.Schema({
     teacherInfo: {
         type: {
             subjects: [String],
+            personalEmail: {
+                type: String,
+                lowercase: true,
+                trim: true
+            },
             qualifications: [{
                 degree: String,
                 institution: String,
@@ -103,6 +113,11 @@ const userSchema = new mongoose.Schema({
     adminInfo: {
         type: {
             designation: String,
+            personalEmail: {
+                type: String,
+                lowercase: true,
+                trim: true
+            },
             permissions: [String]
         },
         required: function () { return this.role === 'admin'; }
@@ -205,4 +220,4 @@ userSchema.methods.resetLoginAttempts = function () {
 
 const User = mongoose.model('User', userSchema);
 
-export default User; 
+export default User;

@@ -544,6 +544,7 @@ window.onload = () => {
                 fatherGuardianPhone: document.getElementById('new-guardian-phone').value.trim() || phone,
                 motherName: document.getElementById('new-mother-name').value.trim(),
                 motherPhone: document.getElementById('new-mother-phone').value.trim(),
+                parentEmail: document.getElementById('new-parent-email').value.trim(),
                 address: document.getElementById('new-address').value.trim(),
                 dateOfBirth: document.getElementById('new-dob').value || null,
                 dateOfLeaving: document.getElementById('new-dol').value || null,

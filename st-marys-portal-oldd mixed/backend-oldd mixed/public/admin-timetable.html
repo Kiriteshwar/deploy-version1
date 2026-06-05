@@ -1759,10 +1759,10 @@
         
         // Show loading state
         sendBtn.disabled = true;
-        sendBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending Messages...`;
+        sendBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending Emails...`;
         
-        // Use the existing test API for period 2 absentees
-        fetch('/api/attendance/test-whatsapp-period2', {
+        // Use the new communications endpoint for sending absence emails
+        fetch('/api/communications/send-absence-emails', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1771,27 +1771,27 @@
         })
         .then(response => {
           if (!response.ok) {
-            throw new Error('Failed to send messages');
+            throw new Error('Failed to send emails');
           }
           return response.json();
         })
         .then(data => {
           // Show success message with detailed info
-          const successCount = data.sent || 0;
-          if (successCount > 0) {
-            const names = data.details?.map(d => d.studentName).join(', ') || 'students';
-            alert(`Messages sent successfully to ${successCount} parent(s)!\n\nStudents: ${names}`);
+          const sentCount = data.sent || 0;
+          const skippedCount = data.skipped || 0;
+          if (sentCount > 0 || skippedCount > 0) {
+            alert(`Absence emails sent successfully!\n\n✅ Sent to ${sentCount} parent(s)\n⚠️ Skipped ${skippedCount} (no email on file)\n\nTotal absentees: ${data.total}`);
           } else {
-            alert('No absent students found for period 2 today.');
+            alert('No absent students found today.');
           }
           
-          console.log('Message sending results:', data);
+          console.log('Email sending results:', data);
           // Update the count after sending
           fetchAbsenteesCount();
         })
         .catch(error => {
-          console.error('Error sending messages:', error);
-          alert('Failed to send messages. Please check the console for details.');
+          console.error('Error sending emails:', error);
+          alert('Failed to send emails. Please check the console for details.');
         })
         .finally(() => {
           // Restore button

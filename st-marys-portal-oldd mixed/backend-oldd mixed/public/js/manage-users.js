@@ -330,11 +330,19 @@ function showAddUserModal() {
                                 <label>Admission Number:</label><br>
                                 <input type="text" name="admissionNumber" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
                             </div>
+                            <div style="margin-bottom:1rem;">
+                                <label>Parent Email:</label><br>
+                                <input type="email" name="parentEmail" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="parent@example.com">
+                            </div>
                         </div>
                         <div id="teacherFields" style="display:none;">
                             <div style="margin-bottom:1rem;">
                                 <label>Subjects (comma separated):</label><br>
                                 <input type="text" name="subjects" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                            </div>
+                            <div style="margin-bottom:1rem;">
+                                <label>Personal Email:</label><br>
+                                <input type="email" name="personalEmail" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="teacher@personal.com">
                             </div>
                         </div>
                         <div style="margin-bottom:1rem;">
@@ -392,11 +400,13 @@ function showAddUserModal() {
                 class: form.class.value,
                 section: form.section.value,
                 rollNumber: form.rollNumber.value,
-                admissionNumber: form.admissionNumber.value
+                admissionNumber: form.admissionNumber.value,
+                parentEmail: form.parentEmail.value
             };
         } else if (form.role.value === 'teacher') {
             userData.teacherInfo = {
-                subjects: form.subjects.value.split(',').map(s => s.trim()).filter(Boolean)
+                subjects: form.subjects.value.split(',').map(s => s.trim()).filter(Boolean),
+                personalEmail: form.personalEmail.value
             };
         }
         const token = localStorage.getItem('auth_token');
@@ -479,6 +489,7 @@ function showEditUserModal(user) {
             <div style="grid-column: span 2; font-weight:bold; margin-top:10px; border-bottom:1px solid #f0f0f0;">Parent/Guardian</div>
             <div><label>Father/Guardian Name</label><input type="text" name="guardianName" value="${(info.guardianName || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
             <div><label>Father/Guardian Phone</label><input type="text" name="fatherGuardianPhone" value="${(info.fatherGuardianPhone || info.guardianPhone || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
+            <div><label>Parent Email</label><input type="email" name="parentEmail" value="${(info.parentEmail || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" placeholder="parent@example.com"></div>
             <div><label>Mother Name</label><input type="text" name="motherName" value="${(info.motherName || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
             <div><label>Mother Phone</label><input type="text" name="motherPhone" value="${(info.motherPhone || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>
             <div style="grid-column: span 2;"><label>Address</label><input type="text" name="address" value="${(info.address || '').replace(/"/g, '"')}" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></div>

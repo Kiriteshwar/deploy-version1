@@ -511,7 +511,12 @@ export const addUser = asyncHandler(async (req, res) => {
     const user = new User({ name, email, phone, password: hashedPassword, role, gender, joinDate: joinDate || undefined });
 
     if (role === 'student' && studentInfo) {
-        user.studentInfo = studentInfo;
+        // Handle parentEmail explicitly
+        const { parentEmail, ...restStudentInfo } = studentInfo;
+        user.studentInfo = {
+            ...restStudentInfo,
+            parentEmail: parentEmail || ''
+        };
 
         // Calculate discount if totalFee is provided
         if (totalFee) {
@@ -532,8 +537,18 @@ export const addUser = asyncHandler(async (req, res) => {
             }
         }
     }
-    if (role === 'teacher' && teacherInfo) user.teacherInfo = teacherInfo;
-    if (role === 'admin' && adminInfo) user.adminInfo = adminInfo;
+    if (role === 'teacher' && teacherInfo) {
+        user.teacherInfo = {
+            ...teacherInfo,
+            personalEmail: teacherInfo.personalEmail || ''
+        };
+    }
+    if (role === 'admin' && adminInfo) {
+        user.adminInfo = {
+            ...adminInfo,
+            personalEmail: adminInfo.personalEmail || ''
+        };
+    }
     await user.save();
     res.json({ success: true, user });
 });
@@ -745,6 +760,7 @@ export const bulkImportUsers = asyncHandler(async (req, res) => {
                     fatherGuardianPhone: row.fatherGuardianPhone || row.phone,
                     motherName: row.motherName || '',
                     motherPhone: row.motherPhone || '',
+                    parentEmail: row.parentEmail || '',
                     address: row.address || '',
                     dateOfBirth: row.dateOfBirth ? new Date(row.dateOfBirth) : null,
                     religion: row.religion || '',

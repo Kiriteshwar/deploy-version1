@@ -3,6 +3,7 @@ import axios from 'axios';
 import Attendance from '../models/attendanceModel.js';
 import User from '../models/userModel.js';
 import Student from '../models/studentModel.js';
+import { sendEmailNotification } from '../services/notificationService.js';
 
 // Global setting to enable/disable auto-send (can be moved to database later)
 let AUTO_SEND_ENABLED = true;
