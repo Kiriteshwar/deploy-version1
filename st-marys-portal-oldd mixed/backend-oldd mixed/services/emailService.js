@@ -45,12 +45,12 @@ export const sendEmail = async ({ to, subject, html }) => {
     try {
         console.log('[EmailService] Verifying SMTP...');
 
-        await transporter.verify();
+        // await transporter.verify();
 
         console.log('[EmailService] SMTP verified');
 
         const info = await transporter.sendMail({
-            from: `"St. Mary's School" <${fromAddress}>`,
+            from: `"St. Mary's High School" <${fromAddress}>`,
             to,
             subject,
             html
