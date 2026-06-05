@@ -125,6 +125,7 @@ async function sendViaSmtp({ to, subject, html }) {
  * Send a single email — tries Brevo API first, then SMTP, then logs
  */
 export const sendEmail = async ({ to, subject, html }) => {
+    console.log('BREVO KEY EXISTS:', !!process.env.BREVO_API_KEY);
     // Strategy 1: Try Brevo HTTP API (port 443, never blocked)
     if (brevoApiKey) {
         const brevoResult = await sendViaBrevoApi({ to, subject, html });
