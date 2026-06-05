@@ -14,17 +14,12 @@ const createTransporter = () => {
 
     return nodemailer.createTransport({
         host,
-        port: 465,
-        secure: true,
+        port,
+        secure: port === 465,
         auth: {
             user,
             pass
         },
-        logger: true,
-        debug: true,
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 10000
     });
 };
 
@@ -49,11 +44,8 @@ export const sendEmail = async ({ to, subject, html }) => {
     }
 
     try {
-        console.log('[EmailService] Verifying SMTP...');
-
-        // await transporter.verify();
-
-        console.log('[EmailService] SMTP verified');
+       
+        console.log('[EmailService] Sending email...');
 
         console.log('[EmailService] About to send');
         console.log({
