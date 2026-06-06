@@ -1214,6 +1214,26 @@
       const classTimetableData = $id('class-timetable-data');
       const refreshTeachersAttendanceBtn = $id('refresh-teachers-attendance');
       
+      // Class name conversion helper: convert Arabic numerals (e.g. '10') to Roman (e.g. 'X')
+      // to match the static timetable-data.js format
+      const arabicToRoman = {
+        '1': 'I', '2': 'II', '3': 'III', '4': 'IV', '5': 'V',
+        '6': 'VI', '7': 'VII', '8': 'VIII', '9': 'IX', '10': 'X',
+        '11': 'XI', '12': 'XII'
+      };
+      // Reverse mapping: convert Roman to Arabic (in case data is stored either way)
+      const romanToArabic = Object.fromEntries(
+        Object.entries(arabicToRoman).map(([k, v]) => [v, k])
+      );
+      // Normalize class name — tries to find a match regardless of format
+      function normalizeClassName(name) {
+        if (!name) return name;
+        // If it's an Arabic numeral string, convert to Roman
+        if (arabicToRoman[name]) return arabicToRoman[name];
+        // If it's already Roman, return as-is
+        return name;
+      }
+      
       // Tab functionality
       const tabButtons = document.querySelectorAll('.tab-btn');
       
@@ -1711,14 +1731,14 @@
       });
       
       fetchTeacherTimetableBtn.addEventListener('click', function() {
-        const teacherId = teacherSelect.value;
+        const teacherName = teacherSelect.options[teacherSelect.selectedIndex]?.text || '';
         const dayOfWeek = document.getElementById('teacher-day-select').value;
         teacherTimetableData.innerHTML = '';
         teacherMessageArea.innerHTML = '';
         teacherLoadingSpinner.style.display = 'flex';
         setTimeout(() => {
           teacherLoadingSpinner.style.display = 'none';
-          displayTeacherTimetables([], []);
+          displayTeacherTimetables(teacherName, dayOfWeek);
         }, 500);
       });
       
@@ -1779,48 +1799,77 @@
         }, 300);
       });
       
-      function displayTeacherTimetables(_, __) {
-        const teacherSelect = document.getElementById('teacher-select');
-        const selectedTeacherName = teacherSelect.options[teacherSelect.selectedIndex].text;
+      function displayTeacherTimetables(teacherName, dayOfWeek) {
         const timetableData = window.timetableData;
-        const filtered = timetableData.classes.filter(c => c.teacher === selectedTeacherName);
+        
+        // Filter by teacher name (if All Teachers selected, show all)
+        let filtered = [];
+        if (teacherName && teacherName !== 'All Teachers' && teacherName !== '') {
+          filtered = timetableData.classes.filter(c => c.teacher === teacherName);
+        } else {
+          filtered = timetableData.classes.filter(c => !c.isBreak);
+        }
+        
+        // Filter by day if specified
+        const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        if (dayOfWeek && dayOfWeek !== '') {
+          const selectedDayName = dayNames[parseInt(dayOfWeek) - 1];
+          filtered = filtered.filter(c => c.day === selectedDayName);
+        }
+        
         const dayIndices = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
         const timetableByDay = {};
         filtered.forEach(classInfo => {
-              const dayIndex = dayIndices[classInfo.day];
+          const dayIndex = dayIndices[classInfo.day];
           if (!timetableByDay[dayIndex]) timetableByDay[dayIndex] = [];
           timetableByDay[dayIndex].push({
             period: classInfo.period,
             subject: classInfo.subject,
-                class: classInfo.class,
-                section: classInfo.section,
-                isBreak: classInfo.isBreak
-              });
-            });
+            class: classInfo.class,
+            section: classInfo.section,
+            isBreak: classInfo.isBreak
+          });
+        });
+        
         const periodTimes = timetableData.periods.map(p => p.time);
-        let html = `<h3>Timetable for ${selectedTeacherName}</h3>`;
-        html += `<table class="timetable-table"><thead><tr><th>PERIOD</th><th>TIME</th><th>MONDAY</th><th>TUESDAY</th><th>WEDNESDAY</th><th>THURSDAY</th><th>FRIDAY</th><th>SATURDAY</th></tr></thead><tbody>`;
-            for (let p = 1; p <= 12; p++) {
+        const displayName = teacherName && teacherName !== 'All Teachers' ? teacherName : 'All Teachers';
+        const dayLabel = dayOfWeek && dayOfWeek !== '' ? ` - ${dayNames[parseInt(dayOfWeek)-1]}` : '';
+        let html = `<h3>Timetable for ${displayName}${dayLabel}</h3>`;
+        
+        // Determine which days to show
+        let daysToShow;
+        if (dayOfWeek && dayOfWeek !== '') {
+          daysToShow = [parseInt(dayOfWeek)];
+        } else {
+          daysToShow = [1, 2, 3, 4, 5, 6];
+        }
+        
+        const dayHeaders = ['', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+        html += `<table class="timetable-table"><thead><tr><th>PERIOD</th><th>TIME</th>`;
+        daysToShow.forEach(d => { html += `<th>${dayHeaders[d]}</th>`; });
+        html += `</tr></thead><tbody>`;
+        
+        for (let p = 1; p <= 12; p++) {
           html += `<tr><td class="period-cell">Period ${p}</td><td class="time-cell">${periodTimes[p-1] || ''}</td>`;
-              for (let day = 1; day <= 6; day++) {
+          daysToShow.forEach(day => {
             const periodData = (timetableByDay[day] || []).find(period => period.period === p);
             if (periodData) {
               if (periodData.isBreak) {
                 html += `<td class="break-period">${periodData.subject}</td>`;
-                  } else {
+              } else {
                 html += `<td><div>${periodData.subject}</div><div class="class-info">${periodData.class}-${periodData.section}</div></td>`;
               }
             } else if ([3,6,9,12].includes(p)) {
-                  let breakName = '';
-                  if (p === 3) breakName = 'Interval';
-                  else if (p === 6) breakName = 'Lunch Break';
-                  else if (p === 9) breakName = 'Break';
-                  else if (p === 12) breakName = 'Diary Period';
-                  html += `<td class="break-period">${breakName}</td>`;
-                } else {
+              let breakName = '';
+              if (p === 3) breakName = 'Interval';
+              else if (p === 6) breakName = 'Lunch Break';
+              else if (p === 9) breakName = 'Break';
+              else if (p === 12) breakName = 'Diary Period';
+              html += `<td class="break-period">${breakName}</td>`;
+            } else {
               html += '<td class="no-class">No Class</td>';
             }
-          }
+          });
           html += '</tr>';
         }
         html += '</tbody></table>';
@@ -1829,43 +1878,63 @@
       
       function displayClassTimetable(_, className, section, dayFilter) {
         const timetableData = window.timetableData;
-        const filtered = timetableData.classes.filter(c => c.class === className && c.section === section);
+        // Normalize class name: convert Arabic numeral from API (e.g. '10') to Roman (e.g. 'X')
+        const normalizedClassName = normalizeClassName(className);
+        // Filter also try the original class name directly to handle both formats
+        const filtered = timetableData.classes.filter(c => 
+          (c.class === className || c.class === normalizedClassName) && c.section === section
+        );
         const dayIndices = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
-          const timetableByDay = {};
+        const timetableByDay = {};
         filtered.forEach(classInfo => {
-            const dayIndex = dayIndices[classInfo.day];
+          const dayIndex = dayIndices[classInfo.day];
           if (!timetableByDay[dayIndex]) timetableByDay[dayIndex] = [];
-            timetableByDay[dayIndex].push({
-              period: classInfo.period,
-              subject: classInfo.subject,
-              teacher: classInfo.teacher,
-              isBreak: classInfo.isBreak
-            });
+          timetableByDay[dayIndex].push({
+            period: classInfo.period,
+            subject: classInfo.subject,
+            teacher: classInfo.teacher,
+            isBreak: classInfo.isBreak
           });
+        });
         const periodTimes = timetableData.periods.map(p => p.time);
-        let html = `<h3>Timetable for Class ${className}-${section}</h3>`;
-        html += `<table class="timetable-table"><thead><tr><th>PERIOD</th><th>TIME</th><th>MONDAY</th><th>TUESDAY</th><th>WEDNESDAY</th><th>THURSDAY</th><th>FRIDAY</th><th>SATURDAY</th></tr></thead><tbody>`;
-            for (let p = 1; p <= 12; p++) {
+        const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayLabel = dayFilter && dayFilter !== '' ? ` - ${dayNames[parseInt(dayFilter)-1]}` : '';
+        let html = `<h3>Timetable for Class ${className}-${section}${dayLabel}</h3>`;
+        
+        // Determine which days to show based on dayFilter
+        let daysToShow;
+        if (dayFilter && dayFilter !== '') {
+          daysToShow = [parseInt(dayFilter)];
+        } else {
+          daysToShow = [1, 2, 3, 4, 5, 6];
+        }
+        
+        const dayHeaders = ['', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+        html += `<table class="timetable-table"><thead><tr><th>PERIOD</th><th>TIME</th>`;
+        daysToShow.forEach(d => { html += `<th>${dayHeaders[d]}</th>`; });
+        html += `</tr></thead><tbody>`;
+        
+        for (let p = 1; p <= 12; p++) {
           html += `<tr><td class="period-cell">Period ${p}</td><td class="time-cell">${periodTimes[p-1] || ''}</td>`;
-              for (let day = 1; day <= 6; day++) {
-                const periodData = (timetableByDay[day] || []).find(period => period.period === p);
-                if (periodData) {
-                  if (periodData.isBreak) {
-                    html += `<td class="break-period">${periodData.subject}</td>`;
-                  } else {
+          daysToShow.forEach(day => {
+            const periodData = (timetableByDay[day] || []).find(period => period.period === p);
+            if (periodData) {
+              if (periodData.isBreak) {
+                html += `<td class="break-period">${periodData.subject}</td>`;
+              } else {
                 html += `<td><div>${periodData.subject}</div>${periodData.teacher ? `<div class="teacher-name">${periodData.teacher}</div>` : ''}</td>`;
               }
             } else if ([3,6,9,12].includes(p)) {
-                  let breakName = '';
-                  if (p === 3) breakName = 'Interval';
-                  else if (p === 6) breakName = 'Lunch Break';
-                  else if (p === 9) breakName = 'Break';
-                  else if (p === 12) breakName = 'Diary Period';
-                  html += `<td class="break-period">${breakName}</td>`;
-                } else {
+              let breakName = '';
+              if (p === 3) breakName = 'Interval';
+              else if (p === 6) breakName = 'Lunch Break';
+              else if (p === 9) breakName = 'Break';
+              else if (p === 12) breakName = 'Diary Period';
+              html += `<td class="break-period">${breakName}</td>`;
+            } else {
               html += '<td class="no-class">No Class</td>';
             }
-          }
+          });
           html += '</tr>';
         }
         html += '</tbody></table>';

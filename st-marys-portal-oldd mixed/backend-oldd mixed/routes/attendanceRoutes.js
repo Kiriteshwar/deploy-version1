@@ -24,7 +24,6 @@ router.get("/teacher/classes", protect, teacherOnly, getTeacherClasses);
 router.post("/mark", protect, teacherOnly, markAttendance);
 router.get("/check", protect, teacherOnly, checkExistingAttendance);
 router.get("/class/:class/:section", protect, teacherOnly, getClassAttendance);
-router.get('/:studentId', protect, getAttendance);
 
 // Admin attendance status & auto-send settings
 router.get("/status", protect, teacherOnly, getAttendanceStatus);
@@ -40,5 +39,8 @@ router.post("/test-whatsapp-period2", protect, /*adminOnly*/ teacherOnly, testWh
 // Auto-send control routes (admin only)
 router.get("/auto-send-status", protect, /*adminOnly*/ teacherOnly, getAutoSendStatus);
 router.post("/auto-send-toggle", protect, /*adminOnly*/ teacherOnly, toggleAutoSend);
+
+router.get('/:studentId', protect, getAttendance);
+
 
 export default router;
