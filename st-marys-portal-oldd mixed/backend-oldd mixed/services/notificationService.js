@@ -61,25 +61,31 @@ export const sendEmailNotification = async ({ type, data, sentBy }) => {
 
     console.log('LOG DATA:', {
         type,
-        subject: data.subject,
-        message: data.message,
+        logSubject,
+        logMessage,
         studentName: data.studentName
     });
 
     // Log the communication
     try {
         await CommunicationLog.create({
-            recipientName: data.name || 'Unknown',
+            recipientName: data.name || data.parentName || 'Unknown',
             recipientEmail: data.email || data.parentEmail,
+
             notificationType: type,
-            subject: data.subject || '',
-            message: data.message || '',
+
+            subject: logSubject,
+            message: logMessage,
+
             channel: 'email',
             status: result.success ? 'sent' : 'failed',
+
             errorMessage: result.error || null,
+
             studentRef: data.studentRef || null,
             teacherRef: data.teacherRef || null,
             adminRef: data.adminRef || null,
+
             sentBy: sentBy || null,
             sentAt: new Date()
         });
