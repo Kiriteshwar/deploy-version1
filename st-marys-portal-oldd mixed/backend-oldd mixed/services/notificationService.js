@@ -59,6 +59,13 @@ export const sendEmailNotification = async ({ type, data, sentBy }) => {
         logMessage = logMessage || 'Announcement sent';
     }
 
+    console.log('LOG DATA:', {
+        type,
+        subject: data.subject,
+        message: data.message,
+        studentName: data.studentName
+    });
+
     // Log the communication
     try {
         await CommunicationLog.create({
