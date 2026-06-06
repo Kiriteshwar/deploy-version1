@@ -33,6 +33,32 @@ export const sendEmailNotification = async ({ type, data, sentBy }) => {
             break;
     }
 
+    let logSubject = data.subject;
+    let logMessage = data.message;
+
+    if (type === 'absence') {
+        logSubject = logSubject ||
+            `Student Absence Notification - ${data.studentName}`;
+
+        logMessage = logMessage ||
+            `${data.studentName} was absent on ${new Date().toLocaleDateString()}`;
+    }
+
+    if (type === 'fees') {
+        logSubject = logSubject || 'Fee Reminder';
+        logMessage = logMessage || 'Fee reminder sent';
+    }
+
+    if (type === 'birthday') {
+        logSubject = logSubject || 'Birthday Wishes';
+        logMessage = logMessage || 'Birthday greeting sent';
+    }
+
+    if (type === 'announcement') {
+        logSubject = logSubject || 'School Announcement';
+        logMessage = logMessage || 'Announcement sent';
+    }
+
     // Log the communication
     try {
         await CommunicationLog.create({
