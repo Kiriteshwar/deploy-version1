@@ -502,6 +502,12 @@ export const getAttendance = asyncHandler(async (req, res) => {
     res.set('Pragma', 'no-cache');
 
     const { studentId } = req.params;
+    
+    // Ownership check: students can only view their own attendance
+    if (req.user.role === 'student' && req.user._id.toString() !== studentId) {
+        return res.status(403).json({ message: 'Not authorized to view this attendance' });
+    }
+    
     try {
         const student = await User.findOne({ _id: studentId, role: 'student' });
         if (!student) return res.status(404).json({ message: 'Student not found', studentId });

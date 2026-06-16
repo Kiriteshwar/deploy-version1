@@ -18,10 +18,8 @@ document.getElementById("login-form").addEventListener("submit", async function(
         console.log('Response status:', response.status); // Debug log
 
         const data = await response.json();
-        console.log('Response data:', data); // Debug log
-
-        if (response.ok && data.token) {
-            localStorage.setItem("auth_token", data.token);
+        if (response.ok && data.success) {
+            localStorage.setItem("auth_token", "cookie");
             localStorage.setItem("user_role", data.role);
             localStorage.setItem("user_data", JSON.stringify(data));
             

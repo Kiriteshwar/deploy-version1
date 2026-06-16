@@ -4,6 +4,7 @@ import TeacherAvailability from '../models/teacherAvailabilityModel.js';
 import User from '../models/userModel.js';
 import { FeePayment, FeeStructure } from '../models/feesModel.js';
 import bcrypt from 'bcryptjs';
+import { escapeRegex } from '../utils/security.js';
 
 // @desc    Get all timetable entries
 // @route   GET /api/admin/timetable
@@ -171,9 +172,10 @@ export const searchStudents = asyncHandler(async (req, res) => {
     if (section) query['studentInfo.section'] = section;
 
     if (search) {
+        const safeSearch = escapeRegex(search).slice(0, 100);
         query.$or = [
-            { name: { $regex: search, $options: 'i' } },
-            { 'studentInfo.rollNumber': { $regex: search, $options: 'i' } }
+            { name: { $regex: safeSearch, $options: 'i' } },
+            { 'studentInfo.rollNumber': { $regex: safeSearch, $options: 'i' } }
         ];
     }
 
@@ -370,17 +372,18 @@ export const searchPayments = asyncHandler(async (req, res) => {
     }
 
     if (search) {
+        const safeSearch = escapeRegex(search).slice(0, 100);
         query.$or = [
-            { 'payments.transactionId': { $regex: search, $options: 'i' } },
-            { 'payments.receipt.number': { $regex: search, $options: 'i' } }
+            { 'payments.transactionId': { $regex: safeSearch, $options: 'i' } },
+            { 'payments.receipt.number': { $regex: safeSearch, $options: 'i' } }
         ];
 
         // Also search in student details
         const students = await User.find({
             role: 'student',
             $or: [
-                { name: { $regex: search, $options: 'i' } },
-                { 'studentInfo.rollNumber': { $regex: search, $options: 'i' } }
+                { name: { $regex: safeSearch, $options: 'i' } },
+                { 'studentInfo.rollNumber': { $regex: safeSearch, $options: 'i' } }
             ]
         }).select('_id');
 
@@ -475,19 +478,21 @@ export const getUsers = asyncHandler(async (req, res) => {
         if (className) query['studentInfo.class'] = className;
         if (section) query['studentInfo.section'] = section;
         if (search) {
+            const safeSearch = escapeRegex(search).slice(0, 100);
             query.$or = [
-                { name: { $regex: search, $options: 'i' } },
-                { email: { $regex: search, $options: 'i' } },
-                { 'studentInfo.rollNumber': { $regex: search, $options: 'i' } }
+                { name: { $regex: safeSearch, $options: 'i' } },
+                { email: { $regex: safeSearch, $options: 'i' } },
+                { 'studentInfo.rollNumber': { $regex: safeSearch, $options: 'i' } }
             ];
         }
     }
 
     // Add search for teachers and admins
     if ((role === 'teacher' || role === 'admin') && search) {
+        const safeSearch = escapeRegex(search).slice(0, 100);
         query.$or = [
-            { name: { $regex: search, $options: 'i' } },
-            { email: { $regex: search, $options: 'i' } }
+            { name: { $regex: safeSearch, $options: 'i' } },
+            { email: { $regex: safeSearch, $options: 'i' } }
         ];
     }
 
@@ -507,8 +512,7 @@ export const addUser = asyncHandler(async (req, res) => {
     if (existing) {
         return res.status(400).json({ success: false, message: 'Email already exists' });
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, phone, password: hashedPassword, role, gender, joinDate: joinDate || undefined });
+    const user = new User({ name, email, phone, password, role, gender, joinDate: joinDate || undefined });
 
     if (role === 'student' && studentInfo) {
         // Handle parentEmail explicitly
@@ -564,7 +568,7 @@ export const updateUser = asyncHandler(async (req, res) => {
 
     if (name) user.name = name;
     if (email) user.email = email;
-    if (password) user.password = await bcrypt.hash(password, 10);
+    if (password) user.password = password;  // Let User model pre-save hook hash it
     if (joinDate) user.joinDate = joinDate;
     if (gender) user.gender = gender;
 
@@ -725,14 +729,11 @@ export const bulkImportUsers = asyncHandler(async (req, res) => {
                 continue;
             }
 
-            // Hash password
-            const hashedPassword = await bcrypt.hash(row.password, 10);
-
             const userData = {
                 name: row.name,
                 email: row.email.toLowerCase(),
                 phone: row.phone,
-                password: hashedPassword,
+                password: row.password,  // Let User model pre-save hook hash it
                 role: row.role.toLowerCase(),
                 gender: row.gender || '',
                 joinDate: row.joinDate ? new Date(row.joinDate) : new Date()

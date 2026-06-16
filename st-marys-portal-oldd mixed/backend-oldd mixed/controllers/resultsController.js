@@ -112,6 +112,12 @@ export const getResultsByExam = async (req, res) => {
         const { class: className, section } = req.query;
 
         const filter = { exam: examId };
+        
+        // Students can only see their own results
+        if (req.user.role === 'student') {
+            filter.student = req.user._id;
+        }
+        
         if (className) filter.class = className;
         if (section) filter.section = section;
 

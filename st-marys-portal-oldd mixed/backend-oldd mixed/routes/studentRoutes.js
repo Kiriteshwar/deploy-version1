@@ -2,11 +2,11 @@
 import express from 'express';
 const router = express.Router();
 import { registerStudent } from "../controllers/studentController.js";
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, adminOnly } from '../middleware/authMiddleware.js';
 import Student from "../models/studentModel.js";
 import User from "../models/userModel.js";
 
-router.post('/register', registerStudent);
+router.post('/register', protect, adminOnly, registerStudent);
 
 router.get('/profile', protect, async (req, res) => {
     try {

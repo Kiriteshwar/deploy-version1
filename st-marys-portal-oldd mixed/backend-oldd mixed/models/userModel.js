@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const userSchema = new mongoose.Schema({
     // Common fields for all users
@@ -133,6 +134,23 @@ const userSchema = new mongoose.Schema({
     notificationPreferences: {
         type: Object,
         default: {}
+    },
+    loginAttempts: {
+        type: Number,
+        default: 0,
+        select: false
+    },
+    lockUntil: {
+        type: Date,
+        select: false
+    },
+    passwordResetToken: {
+        type: String,
+        select: false
+    },
+    passwordResetExpires: {
+        type: Date,
+        select: false
     }
 }, {
     timestamps: true

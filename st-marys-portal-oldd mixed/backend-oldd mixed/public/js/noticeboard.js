@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const categoryClass = noticeItem.querySelector('.notice-badge').classList[1];
             const date = noticeItem.querySelector('.notice-date').textContent;
             const author = noticeItem.querySelector('.notice-author').textContent;
-            const content = noticeItem.querySelector('.notice-content').innerHTML;
+            const content = noticeItem.querySelector('.notice-content').textContent;
             
             // Get attachment if it exists
             const attachmentEl = noticeItem.querySelector('.notice-attachment');
@@ -102,17 +102,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 const attachmentUrl = attachmentEl.getAttribute('href');
                 const attachmentText = attachmentEl.textContent.trim();
                 attachmentHTML = `<a href="${attachmentUrl}" class="notice-attachment" target="_blank">
-                    <i class="fas fa-paperclip"></i> ${attachmentText}
+                    <i class="fas fa-paperclip"></i> ${escapeHtml(attachmentText)}
                 </a>`;
             }
             
-            // Populate modal
+            // Populate modal using textContent to prevent XSS
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalCategory').textContent = category;
             document.getElementById('modalCategory').className = `notice-badge ${categoryClass}`;
-            document.getElementById('modalDate').innerHTML = date;
-            document.getElementById('modalAuthor').innerHTML = author;
-            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('modalDate').textContent = date;
+            document.getElementById('modalAuthor').textContent = author;
+            document.getElementById('modalContent').textContent = content;
             document.getElementById('modalAttachment').innerHTML = attachmentHTML;
             
             // Show modal
@@ -326,6 +326,62 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Helper to escape HTML strings
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // Function to create a safe DOM element for a notice
+    function createNoticeElement(notice, noticeDate) {
+        const template = document.getElementById('notice-template');
+        if (template) {
+            const clone = template.content.cloneNode(true);
+            const item = clone.querySelector('.notice-item');
+            if (item) {
+                if (notice.important) item.classList.add('notice-important');
+                item.setAttribute('data-category', notice.category || 'general');
+                item.setAttribute('data-id', notice._id);
+                
+                const titleEl = item.querySelector('.notice-header h3');
+                if (titleEl) titleEl.textContent = notice.title;
+                
+                const badge = item.querySelector('.notice-badge');
+                if (badge) {
+                    badge.textContent = notice.category ? notice.category.charAt(0).toUpperCase() + notice.category.slice(1) : 'General';
+                    if (notice.category) badge.classList.add(notice.category);
+                }
+                
+                const dateEl = item.querySelector('.notice-date');
+                if (dateEl) dateEl.innerHTML = '<i class="fas fa-calendar-alt"></i> ' + noticeDate;
+                
+                const authorEl = item.querySelector('.notice-author');
+                if (authorEl) authorEl.innerHTML = '<i class="fas fa-user"></i> ' + escapeHtml(notice.author || '');
+                
+                const contentEl = item.querySelector('.notice-content p');
+                if (contentEl) contentEl.textContent = notice.content || '';
+                
+                const footer = item.querySelector('.notice-footer');
+                if (footer) {
+                    const attachmentHTML = notice.attachment 
+                        ? `<a href="/api/notice/attachment/${notice.attachment.split('/').pop()}" class="notice-attachment" target="_blank">
+                             <i class="fas fa-paperclip"></i> ${escapeHtml(notice.attachment.split('/').pop())}
+                           </a>` 
+                        : '';
+                    const actionsHTML = `<span class="notice-actions admin-only">
+                        <button class="btn-icon btn-edit"><i class="fas fa-edit"></i></button>
+                        <button class="btn-icon btn-delete"><i class="fas fa-trash"></i></button>
+                    </span>`;
+                    footer.innerHTML = attachmentHTML + actionsHTML;
+                }
+                
+                return clone;
+            }
+        }
+        return null;
+    }
+
     // Function to fetch notices from database
     function fetchNotices() {
         const noticeList = document.getElementById('noticeList');
@@ -429,15 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('Filtering notices based on class and section...');
                     
                     filteredNotices = notices.filter(notice => {
-                        console.log('Checking notice:', notice.title, 
-                            'Target Class:', notice.targetClass, 
-                            'Target Section:', notice.targetSection,
-                            'Student Class:', userClass,
-                            'Student Section:', userSection);
-                        
-                        // Always show notices targeted to all classes and all sections
                         if (notice.targetClass === 'all' && notice.targetSection === 'all') {
-                            console.log('Notice visible: targeted to all classes and sections');
                             return true;
                         }
                         
@@ -451,13 +499,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (normalizedNoticeClass === normalizedStudentClass || normalizedNoticeClass === 'all') {
                             // Only if targeted to all sections of this class OR specifically to student's section
                             const sectionMatch = normalizedNoticeSection === 'all' || normalizedNoticeSection === normalizedStudentSection;
-                            console.log('Class match:', normalizedNoticeClass === normalizedStudentClass || normalizedNoticeClass === 'all',
-                                'Section match:', sectionMatch);
                             return sectionMatch;
                         }
-                        
-                        console.log('Notice hidden: not for student class/section');
-                        // Otherwise, don't show the notice
                         return false;
                     });
                     
@@ -478,52 +521,76 @@ document.addEventListener('DOMContentLoaded', function() {
                         day: 'numeric'
                     });
                     
-                    const attachmentHTML = notice.attachment 
-                        ? `<a href="/api/notice/attachment/${notice.attachment.split('/').pop()}" class="notice-attachment" target="_blank">
-                             <i class="fas fa-paperclip"></i> ${notice.attachment.split('/').pop()}
-                           </a>` 
-                        : '';
+                    // Build notice using safe DOM methods instead of insertAdjacentHTML
+                    const noticeDiv = document.createElement('div');
+                    noticeDiv.className = 'notice-item' + (notice.important ? ' notice-important' : '');
+                    noticeDiv.setAttribute('data-category', notice.category || 'general');
+                    noticeDiv.setAttribute('data-id', notice._id);
                     
-                    const importantClass = notice.important ? 'notice-important' : '';
+                    const header = document.createElement('div');
+                    header.className = 'notice-header';
                     
-                    const html = `
-                        <div class="notice-item ${importantClass}" data-category="${notice.category}" data-id="${notice._id}">
-                            <div class="notice-header">
-                                <h3>${notice.title}</h3>
-                                <span class="notice-badge ${notice.category}">${notice.category.charAt(0).toUpperCase() + notice.category.slice(1)}</span>
-                            </div>
-                            <div class="notice-meta">
-                                <span class="notice-date"><i class="fas fa-calendar-alt"></i> ${noticeDate}</span>
-                                <span class="notice-author"><i class="fas fa-user"></i> ${notice.author}</span>
-                            </div>
-                            <div class="notice-content">
-                                <p>${notice.content}</p>
-                            </div>
-                            <div class="notice-footer">
-                                ${attachmentHTML}
-                                <span class="notice-actions admin-only">
-                                    <button class="btn-icon btn-edit"><i class="fas fa-edit"></i></button>
-                                    <button class="btn-icon btn-delete"><i class="fas fa-trash"></i></button>
-                                </span>
-                            </div>
-                        </div>
-                    `;
+                    const titleH3 = document.createElement('h3');
+                    titleH3.textContent = notice.title || '';
+                    header.appendChild(titleH3);
                     
-                    noticeList.insertAdjacentHTML('beforeend', html);
+                    const badge = document.createElement('span');
+                    badge.className = 'notice-badge ' + (notice.category || 'general');
+                    badge.textContent = notice.category ? notice.category.charAt(0).toUpperCase() + notice.category.slice(1) : 'General';
+                    header.appendChild(badge);
+                    
+                    noticeDiv.appendChild(header);
+                    
+                    const meta = document.createElement('div');
+                    meta.className = 'notice-meta';
+                    
+                    const dateSpan = document.createElement('span');
+                    dateSpan.className = 'notice-date';
+                    dateSpan.innerHTML = '<i class="fas fa-calendar-alt"></i> ' + noticeDate;
+                    meta.appendChild(dateSpan);
+                    
+                    const authorSpan = document.createElement('span');
+                    authorSpan.className = 'notice-author';
+                    authorSpan.innerHTML = '<i class="fas fa-user"></i> ' + escapeHtml(notice.author || '');
+                    meta.appendChild(authorSpan);
+                    
+                    noticeDiv.appendChild(meta);
+                    
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'notice-content';
+                    const contentP = document.createElement('p');
+                    contentP.textContent = notice.content || '';
+                    contentDiv.appendChild(contentP);
+                    noticeDiv.appendChild(contentDiv);
+                    
+                    const footer = document.createElement('div');
+                    footer.className = 'notice-footer';
+                    
+                    if (notice.attachment) {
+                        const attachA = document.createElement('a');
+                        attachA.href = '/api/notice/attachment/' + notice.attachment.split('/').pop();
+                        attachA.className = 'notice-attachment';
+                        attachA.target = '_blank';
+                        attachA.innerHTML = '<i class="fas fa-paperclip"></i> ' + escapeHtml(notice.attachment.split('/').pop());
+                        footer.appendChild(attachA);
+                    }
+                    
+                    const actionsSpan = document.createElement('span');
+                    actionsSpan.className = 'notice-actions admin-only';
+                    actionsSpan.innerHTML = '<button class="btn-icon btn-edit"><i class="fas fa-edit"></i></button><button class="btn-icon btn-delete"><i class="fas fa-trash"></i></button>';
+                    footer.appendChild(actionsSpan);
+                    
+                    noticeDiv.appendChild(footer);
+                    noticeList.appendChild(noticeDiv);
                 });
 
-                // If student is viewing filtered notices, add a message about what they're seeing
                 if (userRole === 'student' && userClass && userSection) {
                     // Add a message at the top of the notices section
                     const noticesHeader = document.querySelector('.notices-section .section-header');
                     if (noticesHeader && !noticesHeader.querySelector('.student-filter-info')) {
                         const filterInfo = document.createElement('div');
                         filterInfo.className = 'student-filter-info';
-                        filterInfo.innerHTML = `
-                            <div class="filter-badge">
-                                <i class="fas fa-filter"></i> Showing notices for Class ${userClass}, Section ${userSection}
-                            </div>
-                        `;
+                        filterInfo.innerHTML = '<div class="filter-badge"><i class="fas fa-filter"></i> Showing notices for Class ' + escapeHtml(userClass) + ', Section ' + escapeHtml(userSection) + '</div>';
                         noticesHeader.appendChild(filterInfo);
                     }
                 }
@@ -551,40 +618,26 @@ document.addEventListener('DOMContentLoaded', function() {
                                 data.noticeSections.forEach(combo => {
                                     if (combo.includes('-')) {
                                         const [cls, section] = combo.split('-');
-                                        accessList.push(`<span style='display:inline-block;margin-bottom:4px;'>Class <b>${cls}</b>, Section <b>${section}</b></span>`);
+                                        accessList.push('<span style=\'display:inline-block;margin-bottom:4px;\'>Class <b>' + escapeHtml(cls) + '</b>, Section <b>' + escapeHtml(section) + '</b></span>');
                                     }
                                 });
                             }
-                            // Add class teacher section as a badge
                             if (data.classTeacherClass && data.classTeacherSection) {
-                                accessList.push(`<span style='display:inline-block;margin-bottom:4px;'><b>Class ${data.classTeacherClass}, Section ${data.classTeacherSection}</b> <span style='background:#1976d2;color:#fff;border-radius:6px;padding:2px 8px;font-size:0.85em;margin-left:6px;'>Class Teacher</span></span>`);
+                                accessList.push('<span style=\'display:inline-block;margin-bottom:4px;\'><b>Class ' + escapeHtml(data.classTeacherClass) + ', Section ' + escapeHtml(data.classTeacherSection) + '</b> <span style=\'background:#1976d2;color:#fff;border-radius:6px;padding:2px 8px;font-size:0.85em;margin-left:6px;\'>Class Teacher</span></span>');
                             }
-                            // If no access, show a fallback
                             if (accessList.length === 0) {
                                 accessList.push('<span style="color:#888;">No section access assigned.</span>');
                             }
                             const filterInfo = document.createElement('div');
                             filterInfo.className = 'teacher-filter-info';
-                            filterInfo.innerHTML = `
-                                <div class="filter-badge" style="background:#e3f0ff;padding:1em 1.5em 1em 1.5em;border-radius:1em;">
-                                    <i class="fas fa-filter"></i> <b>You have access to notices for:&nbsp&nbsp&nbsp</b><br>
-                                    <div style="margin-top:1em;display:flex;flex-direction:column;gap:0.5em;">
-                                        ${accessList.join('')}
-                                    </div>
-                                </div>
-                            `;
+                            filterInfo.innerHTML = '<div class="filter-badge" style="background:#e3f0ff;padding:1em 1.5em 1em 1.5em;border-radius:1em;"><i class="fas fa-filter"></i> <b>You have access to notices for:&nbsp&nbsp&nbsp</b><br><div style="margin-top:1em;display:flex;flex-direction:column;gap:0.5em;">' + accessList.join('') + '</div></div>';
                             noticesHeader.appendChild(filterInfo);
                         })
                         .catch(error => {
                             console.error('Error fetching teacher notice sections:', error);
-                            // Fallback to generic message
                             const filterInfo = document.createElement('div');
                             filterInfo.className = 'teacher-filter-info';
-                            filterInfo.innerHTML = `
-                                <div class="filter-badge">
-                                    <i class="fas fa-filter"></i> Showing notices based on your section access settings
-                                </div>
-                            `;
+                            filterInfo.innerHTML = '<div class="filter-badge"><i class="fas fa-filter"></i> Showing notices based on your section access settings</div>';
                             noticesHeader.appendChild(filterInfo);
                         });
                     }
@@ -592,7 +645,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error fetching notices:', error);
-                noticeList.innerHTML = `<div class="notice-error">Error loading notices: ${error.message}</div>`;
+                noticeList.innerHTML = '<div class="notice-error">Error loading notices: ' + escapeHtml(error.message) + '</div>';
             });
         }
     }
@@ -624,18 +677,6 @@ document.addEventListener('DOMContentLoaded', function() {
             toast.classList.remove('active');
         }, 3000);
     }
-
-    // ---- Link to Dashboard JS ----
-    // Update the dashboard.js file to include the link to noticeboard.html
-    // Add the following code to dashboard.js:
-    /*
-    const noticesCard = document.getElementById("notices-card");
-    if (noticesCard) {
-        noticesCard.addEventListener("click", () => {
-            window.location.href = "noticeboard.html";
-        });
-    }
-    */
 
     // Function to fetch class and section data
     function fetchClassAndSectionData() {
@@ -774,4 +815,4 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchAndFilterNotices();
         });
     }
-}); 
+});

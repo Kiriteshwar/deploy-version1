@@ -22,18 +22,35 @@ import asyncHandler from 'express-async-handler';
 import { JWT_SECRET } from '../config/auth.js';
 import User from '../models/userModel.js';
 
+const getCookieToken = (req) => {
+    const cookieHeader = req.headers.cookie || '';
+    const cookies = Object.fromEntries(cookieHeader.split(';').map((cookie) => {
+        const [key, ...value] = cookie.trim().split('=');
+        return [key, decodeURIComponent(value.join('='))];
+    }).filter(([key]) => key));
+    return cookies.auth_token;
+};
+
 // Protect routes
 export const protect = asyncHandler(async (req, res, next) => {
     // console.log('protect middleware called');
     // console.log('req.user at start of protect:', req.user);
     let token;
 
-    // Check for token in Authorization header
+    // Check for token in Authorization header or HttpOnly cookie
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        try {
-            // Get token from header
-            token = req.headers.authorization.split(' ')[1];
+        token = req.headers.authorization.split(' ')[1];
+        if (token === 'cookie' || token === 'null' || token === 'undefined') {
+            token = undefined;
+        }
+    }
 
+    if (!token) {
+        token = getCookieToken(req);
+    }
+
+    if (token) {
+        try {
             // Verify token
             const decoded = jwt.verify(token, JWT_SECRET);
 
@@ -59,9 +76,7 @@ export const protect = asyncHandler(async (req, res, next) => {
             }
             throw new Error('Not authorized');
         }
-    }
-
-    if (!token) {
+    } else {
         res.status(401);
         throw new Error('Not authorized, no token');
     }

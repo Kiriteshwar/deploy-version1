@@ -27,11 +27,11 @@ router.get("/sections/:class", protect, teacherOnly, getTeacherSections);
 // Get students for a class/section
 router.get("/students/:classId/:section", protect, teacherOnly, getClassStudents);
 
-// Get all teachers
-router.get("/all", protect, getAllTeachers);
+// Get all teachers (restricted to teachers and admins)
+router.get("/all", protect, teacherOnly, getAllTeachers);
 
-// Get all teachers for the dropdown
-router.get('/', protect, async (req, res) => {
+// Get all teachers for the dropdown (restricted to teachers and admins)
+router.get('/', protect, teacherOnly, async (req, res) => {
     try {
         const teachers = await User.find({ role: 'teacher', isActive: true })
             .select('name email')
@@ -43,8 +43,8 @@ router.get('/', protect, async (req, res) => {
     }
 });
 
-// Get all sections (for teacher visibility settings)
-router.get('/sections', protect, async (req, res) => {
+// Get all sections (for teacher visibility settings) - restricted to teachers and admins
+router.get('/sections', protect, teacherOnly, async (req, res) => {
     try {
         // Find all unique sections in the system by checking active student records
         const students = await User.find({ role: 'student', isActive: true });
@@ -147,8 +147,7 @@ router.get('/notice-sections/:teacherId', protect, async (req, res) => {
     }
 });
 
-// Public routes
-router.post('/register', registerTeacher);
+router.post('/register', protect, adminOnly, registerTeacher);
 
 // Teacher attendance routes
 router.post('/attendance', protect, teacherOnly, markAttendance);

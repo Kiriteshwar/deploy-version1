@@ -2,7 +2,9 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || "st-marys-portal-secret-key-2024";
-console.log('JWT_SECRET configured:', JWT_SECRET ? 'Yes' : 'No'); // Debug log
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+    throw new Error('JWT_SECRET must be set to a strong secret with at least 32 characters');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export { JWT_SECRET };

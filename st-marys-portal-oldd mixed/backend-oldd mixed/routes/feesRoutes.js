@@ -10,7 +10,7 @@ router.get('/test', (req, res) => {
 
 // Student fee routes
 router.get('/', protect, getFees);
-router.post('/pay', protect, payFees);
+router.post('/pay', protect, adminOnly, payFees);
 router.post('/receipt-log', protect, logReceiptAction);
 
 // Admin fee management routes
@@ -23,4 +23,3 @@ router.put('/admin/structure/:id', protect, adminOnly, updateFeeStructure);
 router.put('/admin/payment-balance/:paymentId', protect, adminOnly, updatePaymentBalance);
 
 export default router;
-

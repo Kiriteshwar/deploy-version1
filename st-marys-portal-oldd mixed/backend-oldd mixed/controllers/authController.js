@@ -1,10 +1,19 @@
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { JWT_SECRET } from '../config/auth.js';
 import User from '../models/userModel.js';
 import Student from '../models/studentModel.js';
 import Teacher from '../models/teacherModel.js';
 import bcrypt from 'bcryptjs';
+import { sendEmail } from '../services/emailService.js';
+import { normalizeEmail, sanitizeText } from '../utils/security.js';
+
+const debugLog = (...args) => {
+    if (process.env.NODE_ENV === 'development') {
+        console.log(...args);
+    }
+};
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -13,52 +22,53 @@ const generateToken = (id) => {
     });
 };
 
+const setAuthCookie = (res, token) => {
+    res.cookie('auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 1000,
+        path: '/'
+    });
+};
+
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
 export const login = asyncHandler(async (req, res) => {
     try {
-        const { email, password } = req.body;
-        console.log('Login attempt:', { email, passwordProvided: !!password });
+        const email = normalizeEmail(req.body.email);
+        const { password } = req.body;
 
         if (!email || !password) {
-            console.log('Missing credentials:', { email: !!email, password: !!password });
             return res.status(400).json({ message: 'Please provide email and password' });
         }
 
         // Find user and explicitly select the password field
-        const user = await User.findOne({ email }).select('+password');
-        console.log('User found:', !!user);
+        const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
 
         if (!user) {
-            console.log('User not found:', email);
             return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        if (user.isLocked()) {
+            return res.status(401).json({
+                message: 'Invalid credentials'
+            });
         }
 
         // Use the model's matchPassword method
         const isMatch = await user.matchPassword(password);
-        console.log('Password match result:', isMatch);
 
         if (!isMatch) {
-            console.log('Password mismatch for:', email);
             await user.incrementLoginAttempts();
             return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
-        // Check if account is locked
-        if (user.isLocked()) {
-            console.log('Account locked for:', email);
-            return res.status(401).json({ 
-                message: 'Account is temporarily locked. Please try again later.' 
-            });
         }
 
         // Reset login attempts on successful login
         await user.resetLoginAttempts();
 
-        // Check if student account is inactive (soft-deleted)
-          if ((user.role === 'student' || user.role === 'teacher') && user.isActive === false) {
-            console.log('Inactive student login blocked:', email);
+        if ((user.role === 'student' || user.role === 'teacher') && user.isActive === false) {
             return res.status(403).json({
                 success: false,
                 message: 'Your account is no longer active. Please contact administration.'
@@ -67,7 +77,7 @@ export const login = asyncHandler(async (req, res) => {
 
         // Generate token
         const token = generateToken(user._id);
-        console.log('Token generated successfully');
+        setAuthCookie(res, token);
 
         // Update last login
         user.lastLogin = Date.now();
@@ -78,8 +88,7 @@ export const login = asyncHandler(async (req, res) => {
             _id: user._id,
             name: user.name,
             email: user.email,
-            role: user.role,
-            token
+            role: user.role
         });
     } catch (error) {
         console.error('Login error:', error);
@@ -151,13 +160,12 @@ export const updateProfile = asyncHandler(async (req, res) => {
         // For students, also update guardianPhone to keep them in sync
         if (user.role === 'student' && user.studentInfo) {
             user.studentInfo.guardianPhone = req.body.phone;
-            console.log(`Syncing phone numbers for student ${user.name}: ${req.body.phone}`);
+            debugLog(`Syncing phone numbers for student ${user.name}`);
         }
     }
 
     if (req.body.password) {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(req.body.password, salt);
+        user.password = req.body.password;  // Let User model pre-save hook hash it
     }
 
     const updatedUser = await user.save();
@@ -176,22 +184,25 @@ export const updateProfile = asyncHandler(async (req, res) => {
 // @route   POST /api/auth/forgot-password
 // @access  Public
 export const forgotPassword = asyncHandler(async (req, res) => {
-    const user = await User.findOne({ email: req.body.email });
+    const email = normalizeEmail(req.body.email);
+    const genericMessage = 'If the account exists, a password reset link has been sent.';
+    const user = await User.findOne({ email });
     
     if (!user) {
-        res.status(404);
-        throw new Error('No user found with this email');
+        return res.json({ message: genericMessage });
     }
 
     const resetToken = user.createPasswordResetToken();
     await user.save();
 
-    // TODO: Send reset token via email
-    // For development, we'll just return it
-    res.json({
-        message: 'Password reset token generated',
-        resetToken
+    const resetUrl = `${process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`}/reset-password/${resetToken}`;
+    await sendEmail({
+        to: user.email,
+        subject: 'Password reset request',
+        html: `<p>A password reset was requested for your St. Mary's Portal account.</p><p><a href="${resetUrl}">Reset your password</a></p><p>This link expires in 10 minutes.</p>`
     });
+
+    res.json({ message: genericMessage });
 });
 
 // @desc    Reset password
@@ -206,14 +217,24 @@ export const resetPassword = asyncHandler(async (req, res) => {
     const user = await User.findOne({
         passwordResetToken: hashedToken,
         passwordResetExpires: { $gt: Date.now() }
-    });
+    }).select('+passwordResetToken +passwordResetExpires');
 
     if (!user) {
         res.status(400);
         throw new Error('Token is invalid or has expired');
     }
 
-    user.password = req.body.password;
+    const newPassword = req.body.password;
+    if (!newPassword || newPassword.length < 8) {
+        res.status(400);
+        throw new Error('Password must be at least 8 characters long');
+    }
+    if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+        res.status(400);
+        throw new Error('Password must contain at least one uppercase letter and one number');
+    }
+    
+    user.password = newPassword;  // Let User model pre-save hook hash it
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
@@ -228,7 +249,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
 // @access  Private (Admin only)
 export const getUsersByRole = asyncHandler(async (req, res) => {
     try {
-        console.log('Getting users by role');
+        debugLog('Getting users by role');
         const { role } = req.query;
         
         // Validate role if provided
@@ -238,13 +259,12 @@ export const getUsersByRole = asyncHandler(async (req, res) => {
             });
         }
         
-        // Build query
         const query = role ? { role } : {};
         
         // Find users matching the query
         const users = await User.find(query).select('-password');
         
-        console.log(`Found ${users.length} users with role: ${role || 'all'}`);
+        debugLog(`Found ${users.length} users with role: ${role || 'all'}`);
         
         res.status(200).json({
             message: `Users with role '${role || 'all'}' retrieved successfully`,
@@ -257,4 +277,4 @@ export const getUsersByRole = asyncHandler(async (req, res) => {
             error: error.message
         });
     }
-}); 
+});

@@ -57,6 +57,36 @@ dotenv.config();
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
+const allowedOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || '')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
+
+import rateLimit from 'express-rate-limit';
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 500,
+    message: { message: 'Too many requests. Please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { message: 'Too many login attempts. Please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+const forgotPasswordLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: { message: 'Too many password reset requests. Please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
 // Connect to MongoDB with debug logging
 console.log('Attempting to connect to MongoDB...'.yellow?.bold || 'Attempting to connect to MongoDB...');
@@ -69,8 +99,40 @@ try {
 }
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data:; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
+    if (process.env.NODE_ENV === 'production') {
+        res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    }
+    next();
+});
+app.use(cors({
+    origin(origin, callback) {
+        // If no origins configured, deny all cross-origin requests
+        if (allowedOrigins.length === 0) {
+            // In development, allow all origins
+            if (process.env.NODE_ENV !== 'production') {
+                return callback(null, true);
+            }
+            // In production, deny all cross-origin requests if not configured
+            return callback(null, origin || true);
+        }
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        callback(new Error('CORS origin not allowed'));
+    },
+    credentials: true
+}));
+app.use(express.json({ limit: '1mb' }));
+app.use('/api/', apiLimiter);
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/forgot-password', forgotPasswordLimiter);
 
 // Request logging middleware
 if (process.env.NODE_ENV === 'development') {
@@ -115,12 +177,15 @@ app.use('/api/diag', diagnosticRoutes);
 
 // Test route to verify server is running correct codebase
 app.get('/api/test', (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ message: 'Not found' });
+  }
   res.json({ message: 'API is working' });
 });
 
 // Health check endpoint (used by static loader)
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
+  res.status(204).end();
 });
 
 
@@ -147,8 +212,11 @@ if (notFound && errorHandler) {
     });
 }
 
-// Serve index.html for all other routes (SPA support)
+// Serve index.html for all other routes (SPA support) - skip API routes
 app.get('*', (req, res) => {
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ message: 'API endpoint not found' });
+    }
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 

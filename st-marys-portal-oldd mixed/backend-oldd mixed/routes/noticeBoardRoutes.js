@@ -5,43 +5,34 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { protect, teacherOnly } from '../middleware/authMiddleware.js';
+import { createSafeUploadFilename, isAllowedUploadExtension, hasValidMagicBytes } from '../utils/security.js';
 import Notice from '../models/noticeboardModel.js';
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Set up storage for attachments
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadDir = 'public/uploads/notices';
-        // Create directory if it doesn't exist
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
+// Store files in memory for magic-byte validation before writing to disk
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB file size limit
+    fileFilter: function (req, file, cb) {
+        if (!isAllowedUploadExtension(file.originalname)) {
+            return cb(new Error('Only PDF, Word documents, and image files are allowed!'));
         }
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
+        cb(null, true);
     }
 });
 
-const upload = multer({ 
-    storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB file size limit
-    fileFilter: function (req, file, cb) {
-        // Accept common file types
-        const filetypes = /pdf|doc|docx|jpg|jpeg|png|gif/;
-        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = filetypes.test(file.mimetype);
-        
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb(new Error('Only PDF, Word documents, and image files are allowed!'));
-        }
+function writeUploadToDisk(buffer, originalname) {
+    const uploadDir = 'public/uploads/notices';
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
     }
-});
+    const safeFilename = createSafeUploadFilename(originalname);
+    fs.writeFileSync(path.join(uploadDir, safeFilename), buffer);
+    return `uploads/notices/${safeFilename}`;
+}
 
 // Get all notices
 router.get('/', protect, async (req, res) => {
@@ -67,22 +58,11 @@ router.get('/', protect, async (req, res) => {
             
             // If no sections assigned, only show general notices or notices created by this teacher
             const filteredNotices = notices.filter(notice => {
-                // Always show notices created by this teacher
-                if (notice.author.includes(req.user.name)) {
-                    return true;
-                }
-                
-                // If teacher has no assigned sections and is not a class teacher, only show general notices
+                if (notice.author.includes(req.user.name)) return true;
                 if (teacherNoticeSections.length === 0) {
                     return notice.targetClass === 'all' && notice.targetSection === 'all';
                 }
-                
-                // Show general notices
-                if (notice.targetClass === 'all' && notice.targetSection === 'all') {
-                    return true;
-                }
-                
-                // Show notices for teacher's assigned class-section combinations
+                if (notice.targetClass === 'all' && notice.targetSection === 'all') return true;
                 return teacherNoticeSections.some(combo => {
                     // Split the combo into class and section
                     const [teacherClass, teacherSection] = combo.split('-');
@@ -92,12 +72,24 @@ router.get('/', protect, async (req, res) => {
                            (notice.targetSection === teacherSection || notice.targetSection === 'all');
                 });
             });
-            
             return res.json(filteredNotices);
         }
-        
-        // If the user is a student, filtering will be handled client-side
-        // Admin sees all notices
+
+        // Server-side filtering for students
+        if (req.user.role === 'student') {
+            const studentClass = req.user.studentInfo?.class;
+            const studentSection = req.user.studentInfo?.section;
+            if (studentClass && studentSection) {
+                const filteredNotices = notices.filter(notice => {
+                    if (notice.targetClass === 'all' && notice.targetSection === 'all') return true;
+                    if (notice.targetClass === studentClass || notice.targetClass === 'all') {
+                        return notice.targetSection === 'all' || notice.targetSection === studentSection;
+                    }
+                    return false;
+                });
+                return res.json(filteredNotices);
+            }
+        }
         res.json(notices);
     } catch (error) {
         console.error('Error fetching notices:', error);
@@ -134,6 +126,16 @@ router.post('/', protect, teacherOnly, upload.single('attachment'), async (req, 
             visibleToTeachers,
             teacherSections
         } = req.body;
+
+        // Validate magic bytes for uploaded file
+        if (req.file && !hasValidMagicBytes(req.file)) {
+            return res.status(400).json({ message: 'Uploaded file appears to be corrupted or has invalid content' });
+        }
+
+        let attachmentPath = null;
+        if (req.file) {
+            attachmentPath = writeUploadToDisk(req.file.buffer, req.file.originalname);
+        }
         
         const notice = new Notice({
             title,
@@ -142,7 +144,7 @@ router.post('/', protect, teacherOnly, upload.single('attachment'), async (req, 
             date: date || Date.now(),
             author: author || req.user.name || 'Admin',
             important: important === 'true',
-            attachment: req.file ? `uploads/notices/${req.file.filename}` : null,
+            attachment: attachmentPath,
             targetClass: targetClass || 'all',
             targetSection: targetSection || 'all',
             visibleToTeachers: visibleToTeachers === 'true',
@@ -180,7 +182,10 @@ router.put('/:id', protect, teacherOnly, upload.single('attachment'), async (req
             return res.status(404).json({ message: 'Notice not found' });
         }
 
-        // Update notice fields
+        if (req.file && !hasValidMagicBytes(req.file)) {
+            return res.status(400).json({ message: 'Uploaded file appears to be corrupted or has invalid content' });
+        }
+
         notice.title = title || notice.title;
         notice.content = content || notice.content;
         notice.category = category || notice.category;
@@ -207,8 +212,7 @@ router.put('/:id', protect, teacherOnly, upload.single('attachment'), async (req
                     fs.unlinkSync(oldFilePath);
                 }
             }
-            
-            notice.attachment = `uploads/notices/${req.file.filename}`;
+            notice.attachment = writeUploadToDisk(req.file.buffer, req.file.originalname);
         }
 
         await notice.save();
@@ -227,6 +231,11 @@ router.delete('/:id', protect, teacherOnly, async (req, res) => {
             return res.status(404).json({ message: 'Notice not found' });
         }
 
+        // Ownership check: only the author (teacher who created it) or admin can delete
+        if (req.user.role !== 'admin' && notice.author !== req.user.name) {
+            return res.status(403).json({ message: 'Not authorized to delete this notice' });
+        }
+
         // Delete attachment if it exists
         if (notice.attachment) {
             const filePath = path.join(__dirname, '..', 'public', notice.attachment);
@@ -243,18 +252,26 @@ router.delete('/:id', protect, teacherOnly, async (req, res) => {
     }
 });
 
-// Route to get an attachment
-router.get('/attachment/:filename', (req, res) => {
-    const filename = req.params.filename;
-    const filePath = path.join(__dirname, '..', 'public', 'uploads', 'notices', filename);
+// Protected attachment download route
+router.get('/attachment/:filename', protect, (req, res) => {
+    const filename = path.basename(req.params.filename);
     
-    console.log('Attachment requested:', filename);
-    console.log('Looking for file at:', filePath);
+    // Only allow filenames matching the pattern from createSafeUploadFilename (timestamp-hex.ext)
+    if (!/^[0-9]+-[a-f0-9]{32}\.[a-z]+$/.test(filename)) {
+        return res.status(400).json({ message: 'Invalid filename' });
+    }
+    
+    const uploadDir = path.resolve(__dirname, '..', 'public', 'uploads', 'notices');
+    const filePath = path.resolve(uploadDir, filename);
+    
+    // Verify resolved path is within the intended directory
+    if (!filePath.startsWith(uploadDir)) {
+        return res.status(403).json({ message: 'Access denied' });
+    }
     
     if (fs.existsSync(filePath)) {
         res.sendFile(filePath);
     } else {
-        console.error('Attachment not found at path:', filePath);
         res.status(404).json({ message: 'Attachment not found' });
     }
 });

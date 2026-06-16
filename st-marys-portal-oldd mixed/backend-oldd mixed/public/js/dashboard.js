@@ -109,15 +109,14 @@
 //   };
 /// more neww jss////
 
-// ===== Render Backend Keep Alive =====
+// ===== Backend Keep Alive =====
 let keepAliveInterval = null;
-const BACKEND = "https://stmarys-f2k3.onrender.com";
 
 function startKeepAlive() {
     if (keepAliveInterval) return;
 
     keepAliveInterval = setInterval(() => {
-        fetch(`${BACKEND}/api/health`, { cache: "no-store" })
+        fetch("/api/health", { cache: "no-store" })
             .catch(() => { });
     }, 9 * 60 * 1000); // every 9 minutes
 

@@ -898,9 +898,9 @@ window.onload = () => {
     // Download Excel template
     function downloadExcelTemplate() {
         // CSV format template
-        const studentHeaders = 'name,email,phone,password,role,gender,joinDate,class,section,admissionNumber,rollNumber,totalFee,guardianName,fatherGuardianPhone,motherName,motherPhone,address,dateOfBirth,religion,caste,subCaste,identificationMark1,identificationMark2';
+        const studentHeaders = 'name,email,phone,password,role,gender,joinDate,class,section,admissionNumber,rollNumber,totalFee,guardianName,fatherGuardianPhone,motherName,motherPhone,parentEmail,address,dateOfBirth,religion,caste,subCaste,identificationMark1,identificationMark2';
         const teacherHeaders = 'name,email,phone,password,role,gender,joinDate,subjects,salary,classTeacherClass,classTeacherSection';
-        const templateContent = `STUDENT TEMPLATE\n${studentHeaders}\nJohn Doe,john@example.com,9876543210,password123,student,Male,2024-01-01,X,A,ADM001,STU001,50000,Father Name,9876543210,Mother Name,9876543211,123 Main Street,2010-05-15,Hindu,General,,Mole on left arm,\n\nTEACHER TEMPLATE\n${teacherHeaders}\nJane Teacher,jane@example.com,9876543212,password123,teacher,Female,2024-01-01,"Math,Science",50000,X,A`;
+        const templateContent = `STUDENT TEMPLATE\n${studentHeaders}\nJohn Doe,john@example.com,9876543210,password123,student,Male,2024-01-01,X,A,ADM001,STU001,50000,Father Name,9876543210,Mother Name,9876543211,parent@example.com,123 Main Street,2010-05-15,Hindu,General,,Mole on left arm,\n\nTEACHER TEMPLATE\n${teacherHeaders}\nJane Teacher,jane@example.com,9876543212,password123,teacher,Female,2024-01-01,"Math,Science",50000,X,A`;
         const blob = new Blob([templateContent], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');

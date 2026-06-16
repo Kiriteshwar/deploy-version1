@@ -5,10 +5,8 @@ import asyncHandler from 'express-async-handler';
 
 // Get student's fee details
 export const getFees = asyncHandler(async (req, res) => {
-    console.log('req.user:', req.user);
     console.log('getFees called for user:', req.user._id);
     const studentInfo = req.user.studentInfo;
-    console.log('Student info from user:', studentInfo);
     if (!studentInfo) {
         return res.status(404).json({ error: 'Student info not found on user' });
     }
@@ -46,8 +44,13 @@ export const getFees = asyncHandler(async (req, res) => {
     }
 });
 
-// Make a fee payment
+// Make a fee payment (Admin only — enforced by route middleware AND controller check)
 export const payFees = asyncHandler(async (req, res) => {
+    // Defensive role check: only admins can record payments
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Only admins can record fee payments' });
+    }
+    
     const studentInfo = req.user.studentInfo;
     if (!studentInfo) {
         return res.status(404).json({ error: 'Student info not found on user' });
@@ -140,7 +143,11 @@ export const logReceiptAction = asyncHandler(async (req, res) => {
     if (!['view', 'download'].includes(action)) {
         return res.status(400).json({ error: 'Invalid action' });
     }
-    const paymentDoc = await FeePayment.findById(paymentId);
+    // Only allow students to log actions for their own payments
+    const paymentDoc = await FeePayment.findOne({
+        _id: paymentId,
+        student: req.user._id
+    });
     if (!paymentDoc) {
         return res.status(404).json({ error: 'Payment record not found' });
     }
