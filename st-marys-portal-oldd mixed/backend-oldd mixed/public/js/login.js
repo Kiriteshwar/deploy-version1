@@ -19,7 +19,7 @@ document.getElementById("login-form").addEventListener("submit", async function(
 
         const data = await response.json();
         if (response.ok && data.success) {
-            localStorage.setItem("auth_token", "cookie");
+            localStorage.setItem("auth_token", data.token);
             localStorage.setItem("user_role", data.role);
             localStorage.setItem("user_data", JSON.stringify(data));
             

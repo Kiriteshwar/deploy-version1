@@ -506,7 +506,7 @@ export const getUsers = asyncHandler(async (req, res) => {
 export const addUser = asyncHandler(async (req, res) => {
     const { name, email, phone, password, role, studentInfo, teacherInfo, adminInfo, totalFee, gender, joinDate } = req.body;
     if (!name || !email || !phone || !password || !role) {
-        return res.status(404).json({ success: false, message: 'Missing required fields: name, email, phone, password, role' });
+        return res.status(400).json({ success: false, message: 'Missing required fields: name, email, phone, password, role' });
     }
     const existing = await User.findOne({ email });
     if (existing) {

@@ -621,7 +621,7 @@ function displayResults(results) {
 // Load class performance for a specific exam
 function loadClassPerformance(examId) {
     // Get token from localStorage
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     
     // Validate token
     if (!token) {
@@ -738,7 +738,7 @@ function declareClassResults(classValue, section, examId) {
         return;
     }
     
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     
     fetch(`/api/results/declare/${examId}?class=${classValue}&section=${section}`, {
         method: 'POST',
@@ -760,7 +760,7 @@ function declareClassResults(classValue, section, examId) {
 
 // Export class results
 function exportClassResults(classValue, section, examId) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     const academicYear = document.getElementById('academic-year-select').value;
     
     let url = `/api/results/export?class=${classValue}&exam=${examId}`;
@@ -804,7 +804,7 @@ function handleDeclareAllResults() {
         return;
     }
     
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     
     fetch(`/api/results/declare/${examId}`, {
         method: 'POST',
@@ -836,7 +836,7 @@ function handleExportResults() {
         return;
     }
     
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     let url = '/api/results/export';
     
     // Build query parameters

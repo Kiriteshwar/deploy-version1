@@ -77,7 +77,6 @@ export const login = asyncHandler(async (req, res) => {
 
         // Generate token
         const token = generateToken(user._id);
-        setAuthCookie(res, token);
 
         // Update last login
         user.lastLogin = Date.now();
@@ -85,6 +84,7 @@ export const login = asyncHandler(async (req, res) => {
 
         return res.status(200).json({
             success: true,
+            token,
             _id: user._id,
             name: user.name,
             email: user.email,
