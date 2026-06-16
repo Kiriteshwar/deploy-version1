@@ -1,5 +1,69 @@
 /* SSC Public Results Page — extends stylesHomeEvents.css */
 
+.rankers-section{
+  padding:80px 20px;
+  background:#fff;
+}
+
+.rankers-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:30px;
+  margin-top:50px;
+}
+
+.ranker-card{
+  background:#fff;
+  border-radius:20px;
+  padding:25px;
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  transition:.3s;
+}
+
+.ranker-card:hover{
+  transform:translateY(-8px);
+}
+
+.ranker-card img{
+  width:140px;
+  height:140px;
+  border-radius:50%;
+  object-fit:cover;
+  border:5px solid #f0f4f8;
+  margin-bottom:15px;
+}
+
+.ranker-card h3{
+  margin-bottom:10px;
+  color:#0f2d52;
+}
+
+.marks{
+  font-size:1.3rem;
+  font-weight:800;
+  color:#f4b400;
+}
+
+.results-poster-section{
+  padding:60px 20px;
+  text-align:center;
+}
+
+.poster-grid{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.poster-image{
+  max-width:650px;
+  width:100%;
+  height:auto;
+  border-radius:20px;
+  box-shadow:0 15px 40px rgba(0,0,0,.15);
+}
+
 .results-hero {
   padding: 100px 20px 80px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
