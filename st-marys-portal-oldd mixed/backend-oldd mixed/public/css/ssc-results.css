@@ -155,6 +155,97 @@
   align-items: stretch;
 }
 
+.top-rankers-showcase {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 30px;
+  margin: 70px 0;
+  flex-wrap: wrap;
+}
+
+.ranker-card-top {
+  background: white;
+  border-radius: 28px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(15, 42, 68, .12);
+  border: 1px solid #e5e7eb;
+  transition: .3s ease;
+  position: relative;
+}
+
+.ranker-card-top:hover {
+  transform: translateY(-10px);
+}
+
+.ranker-card-top img {
+  display: block;
+  margin: auto;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 6px solid #f1f5f9;
+}
+
+.ranker-card-top.first {
+  width: 360px;
+  transform: translateY(-25px);
+  border-top: 8px solid #f4b400;
+}
+
+.ranker-card-top.first img {
+  width: 220px;
+  height: 220px;
+
+  /* Zoom OUT */
+  object-fit: contain;
+  background: #fff;
+}
+
+.ranker-card-top.first h3 {
+  font-size: 2rem;
+}
+
+.ranker-card-top.first .marks {
+  font-size: 2rem;
+  color: #f4b400;
+  font-weight: 800;
+}
+
+.ranker-card-top.second {
+  width: 300px;
+  border-top: 8px solid #94a3b8;
+}
+
+.ranker-card-top.second img {
+  width: 180px;
+  height: 180px;
+
+  object-fit: contain;
+  background: #fff;
+}
+
+.ranker-card-top.second h3 {
+  font-size: 1.6rem;
+}
+
+.ranker-card-top.third {
+  width: 280px;
+  border-top: 8px solid #cd7f32;
+}
+
+.ranker-card-top.third img {
+  width: 170px;
+  height: 170px;
+
+  object-fit: contain;
+  background: #fff;
+}
+
+.ranker-card-top.third h3 {
+  font-size: 1.5rem;
+}
+
 .ranker-card {
   background: white;
   border-radius: 22px;
