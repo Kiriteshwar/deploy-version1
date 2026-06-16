@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // Verify token validity
-    fetch('/api/auth/verify', {
+    // Verify token validity by fetching profile
+    fetch('/api/auth/profile', {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -26,10 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return response.json();
     })
     .then(data => {
-        if (!data.valid) {
-            throw new Error('Token validation failed');
-        }
-        
         // Check if user is admin
         if (data.role !== 'admin') {
             throw new Error('Unauthorized access');

@@ -212,22 +212,26 @@ window.onload = () => {
     }
 
     // Decode token expiration time and compare
-    const { exp } = JSON.parse(atob(token.split('.')[1]));
-    console.log("Token Expiration Time:", new Date(exp * 1000));
-    console.log("Current Time:", new Date());
+    try {
+        const { exp } = JSON.parse(atob(token.split('.')[1]));
+        console.log("Token Expiration Time:", new Date(exp * 1000));
+        console.log("Current Time:", new Date());
 
-    if (Date.now() / 1000 > exp) {
-        alert("Session expired! Please log in again.");
-        // Clear all user-related data
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user_role');
-        localStorage.removeItem('user_data');
-        localStorage.removeItem('user_id');
-        localStorage.removeItem('user_name');
-        localStorage.removeItem('studentClass');
-        localStorage.removeItem('studentSection');
-        // Note: username is no longer used, user_name is the standard key
-        window.location.href = "login.html";
+        if (Date.now() / 1000 > exp) {
+            alert("Session expired! Please log in again.");
+            // Clear all user-related data
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_role');
+            localStorage.removeItem('user_data');
+            localStorage.removeItem('user_id');
+            localStorage.removeItem('user_name');
+            localStorage.removeItem('studentClass');
+            localStorage.removeItem('studentSection');
+            // Note: username is no longer used, user_name is the standard key
+            window.location.href = "login.html";
+        }
+    } catch (e) {
+        console.warn('Could not parse token, proceeding without client-side expiry check');
     }
 
     // Update welcome message with user's name from login response
